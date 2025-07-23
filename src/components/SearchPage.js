@@ -43,7 +43,6 @@ export default function SearchPage({ onLogout }) {
     loading,
     error,
     codigoCount,
-    fechaReciente, // Puedes considerar usar esta fecha para algo específico de la búsqueda si la necesitas
     summaryData,
     executeSearch,
   } = useSearch();
