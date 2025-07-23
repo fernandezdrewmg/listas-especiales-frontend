@@ -17,7 +17,13 @@
 .env.development.local
 .env.test.local
 .env.production.local
+.env # Añadir si usas un archivo .env genérico
 
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Archivos de datos y credenciales sensibles
+data.csv # Tu archivo de datos principal
+usuarios.csv # Tu archivo de usuarios
+serviceAccountKey.json # Credenciales de servicio de Google/Firebase (¡muy sensibles!)
