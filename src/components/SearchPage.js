@@ -36,7 +36,8 @@ function SummaryTable({ summary, total }) {
 
 export default function SearchPage({ onLogout }) {
   const [term, setTerm] = useState("");
-  const [fechaActual, setFechaActual] = useState(""); // Ya estás calculando esto
+  const [fechaActual, setFechaActual] = useState("");
+  const [usuarioEmail, setUsuarioEmail] = useState("");
 
   const {
     results,
@@ -47,17 +48,54 @@ export default function SearchPage({ onLogout }) {
     executeSearch,
   } = useSearch();
 
-  const { globalSummary, globalTotal, globalLoading, globalError, globalLastUpdateDate } =
-    useGlobalSummary();
+  const {
+    globalSummary,
+    globalTotal,
+    globalLoading,
+    globalError,
+    globalLastUpdateDate,
+  } = useGlobalSummary();
 
   useEffect(() => {
-    // Calcula la fecha actual en el formato deseado
     const hoy = new Date().toLocaleDateString("es-BO", {
       year: "numeric",
       month: "long",
       day: "numeric",
     });
     setFechaActual(hoy);
+  }, []);
+
+  useEffect(() => {
+    const obtenerUsuario = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (data?.user?.email) {
+        setUsuarioEmail(data.user.email);
+      }
+    };
+    obtenerUsuario();
+  }, []);
+
+  useEffect(() => {
+    let timeoutId;
+
+    const resetTimer = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        console.log("⏳ Sesión cerrada por inactividad");
+        supabase.auth.signOut().then(() => {
+          onLogout();
+        });
+      }, 2 * 60 * 1000); // 2 minutos
+    };
+
+    const eventos = ["mousemove", "keydown", "scroll", "click"];
+    eventos.forEach((evento) => window.addEventListener(evento, resetTimer));
+    resetTimer();
+
+    return () => {
+      eventos.forEach((evento) => window.removeEventListener(evento, resetTimer));
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   const handleSearch = async (e) => {
@@ -73,17 +111,18 @@ export default function SearchPage({ onLogout }) {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <div className={styles.headerLeft}> {/* Contenedor para el título y la fecha de actualización global */}
+        <div className={styles.headerLeft}>
           <h2>Buscar en Listas Especiales</h2>
-          {/* ✅ Mostrar la fecha de actualización global aquí */}
           <p className={styles.updateDateText}>
             Base de datos actualizada al: <strong>{globalLastUpdateDate || "Cargando..."}</strong>
           </p>
         </div>
-        {/* Aquí va el nuevo div para la fecha actual */}
-        <div className={styles.headerRight}> {/* Nuevo contenedor para la fecha actual y el botón de logout */}
+        <div className={styles.headerRight}>
           <p className={styles.currentDateText}>
             Fecha actual: <strong>{fechaActual}</strong>
+          </p>
+          <p className={styles.userEmail}>
+            Usuario: <strong>{usuarioEmail}</strong>
           </p>
           <button onClick={handleLogout} className={styles.logoutButton}>
             Cerrar sesión
@@ -109,20 +148,17 @@ export default function SearchPage({ onLogout }) {
         </button>
       </form>
 
-      {/* Sección del Resumen Global */}
       <GlobalSummaryDisplay
         summary={globalSummary}
         total={globalTotal}
         loading={globalLoading}
         error={globalError}
-        // La fecha global ya no se pasa aquí como prop, se muestra en el header
       />
 
-      {/* Bloque de estadísticas y tabla de resumen de la BÚSQUEDA */}
       {results.length > 0 && (
-        <div className={styles.summaryTableWrapper}> {/* Usamos el div contenedor correctamente */}
-          <h3>Coincidencias encontradas</h3> {/* Título para la tabla de resumen de búsqueda */}
-          <SummaryTable summary={summaryData} total={codigoCount} /> {/* Usamos codigoCount como total de la tabla resumen */}
+        <div className={styles.summaryTableWrapper}>
+          <h3>Coincidencias encontradas</h3>
+          <SummaryTable summary={summaryData} total={codigoCount} />
         </div>
       )}
 
@@ -142,6 +178,7 @@ export default function SearchPage({ onLogout }) {
     </div>
   );
 }
+
 
 // Nota: El componente SummaryTable se ha movido fuera del export default
 // para que pueda ser utilizado internamente si está en el mismo archivo.
