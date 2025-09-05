@@ -38,6 +38,7 @@ export default function SearchPage({ onLogout }) {
   const [term, setTerm] = useState("");
   const [fechaActual, setFechaActual] = useState("");
   const [usuarioEmail, setUsuarioEmail] = useState("");
+  const [showInactivityWarning, setShowInactivityWarning] = useState(false);
 
   const {
     results,
@@ -76,11 +77,19 @@ export default function SearchPage({ onLogout }) {
   }, []);
 
   useEffect(() => {
-    let timeoutId;
+    let warningTimeoutId;
+    let logoutTimeoutId;
 
-    const resetTimer = () => {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => {
+    const resetTimers = () => {
+      clearTimeout(warningTimeoutId);
+      clearTimeout(logoutTimeoutId);
+      setShowInactivityWarning(false);
+
+      warningTimeoutId = setTimeout(() => {
+        setShowInactivityWarning(true);
+      }, 90 * 1000); // 1.5 minutos
+
+      logoutTimeoutId = setTimeout(() => {
         console.log("⏳ Sesión cerrada por inactividad");
         supabase.auth.signOut().then(() => {
           onLogout();
@@ -89,12 +98,14 @@ export default function SearchPage({ onLogout }) {
     };
 
     const eventos = ["mousemove", "keydown", "scroll", "click"];
-    eventos.forEach((evento) => window.addEventListener(evento, resetTimer));
-    resetTimer();
+    eventos.forEach((evento) => window.addEventListener(evento, resetTimers));
+
+    resetTimers();
 
     return () => {
-      eventos.forEach((evento) => window.removeEventListener(evento, resetTimer));
-      clearTimeout(timeoutId);
+      eventos.forEach((evento) => window.removeEventListener(evento, resetTimers));
+      clearTimeout(warningTimeoutId);
+      clearTimeout(logoutTimeoutId);
     };
   }, []);
 
@@ -110,6 +121,13 @@ export default function SearchPage({ onLogout }) {
 
   return (
     <div className={styles.container}>
+      {showInactivityWarning && (
+        <div className={styles.inactivityWarning}>
+          <p>Tu sesión se cerrará en 30 segundos por inactividad.</p>
+          <p>Mueve el mouse o presiona una tecla para continuar.</p>
+        </div>
+      )}
+
       <div className={styles.header}>
         <div className={styles.headerLeft}>
           <h2>Buscar en Listas Especiales</h2>
@@ -178,7 +196,6 @@ export default function SearchPage({ onLogout }) {
     </div>
   );
 }
-
 
 // Nota: El componente SummaryTable se ha movido fuera del export default
 // para que pueda ser utilizado internamente si está en el mismo archivo.
