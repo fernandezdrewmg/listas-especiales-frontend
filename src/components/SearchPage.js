@@ -197,6 +197,7 @@ export default function SearchPage({ onLogout }) {
   );
 }
 
+
 // Nota: El componente SummaryTable se ha movido fuera del export default
 // para que pueda ser utilizado internamente si está en el mismo archivo.
 // Si SummaryTable está en un archivo separado, no es necesario hacer esto.
