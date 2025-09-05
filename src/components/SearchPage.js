@@ -68,7 +68,7 @@ export default function SearchPage({ onLogout }) {
 
   useEffect(() => {
     const obtenerUsuario = async () => {
-      const { data, error } = await supabase.auth.getUser();
+      const { data, error: _ } = await supabase.auth.getUser(); // error renombrado para evitar warning
       if (data?.user?.email) {
         setUsuarioEmail(data.user.email);
       }
@@ -107,7 +107,7 @@ export default function SearchPage({ onLogout }) {
       clearTimeout(warningTimeoutId);
       clearTimeout(logoutTimeoutId);
     };
-  }, []);
+  }, [onLogout]); // ← dependencia agregada
 
   const handleSearch = async (e) => {
     e.preventDefault();
