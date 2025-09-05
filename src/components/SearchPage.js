@@ -68,7 +68,7 @@ export default function SearchPage({ onLogout }) {
 
   useEffect(() => {
     const obtenerUsuario = async () => {
-      const { data, error: _ } = await supabase.auth.getUser(); // error renombrado para evitar warning
+      const { data } = await supabase.auth.getUser(); // error renombrado para evitar warning
       if (data?.user?.email) {
         setUsuarioEmail(data.user.email);
       }
