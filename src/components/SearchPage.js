@@ -68,7 +68,7 @@ export default function SearchPage({ onLogout }) {
 
   useEffect(() => {
     const obtenerUsuario = async () => {
-      const { data } = await supabase.auth.getUser(); // error renombrado para evitar warning
+      const { data } = await supabase.auth.getUser();
       if (data?.user?.email) {
         setUsuarioEmail(data.user.email);
       }
@@ -87,14 +87,14 @@ export default function SearchPage({ onLogout }) {
 
       warningTimeoutId = setTimeout(() => {
         setShowInactivityWarning(true);
-      }, 90 * 1000); // 1.5 minutos
+      }, 90 * 1000);
 
       logoutTimeoutId = setTimeout(() => {
         console.log("⏳ Sesión cerrada por inactividad");
         supabase.auth.signOut().then(() => {
           onLogout();
         });
-      }, 2 * 60 * 1000); // 2 minutos
+      }, 2 * 60 * 1000);
     };
 
     const eventos = ["mousemove", "keydown", "scroll", "click"];
@@ -107,7 +107,7 @@ export default function SearchPage({ onLogout }) {
       clearTimeout(warningTimeoutId);
       clearTimeout(logoutTimeoutId);
     };
-  }, [onLogout]); // ← dependencia agregada
+  }, [onLogout]);
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -166,6 +166,13 @@ export default function SearchPage({ onLogout }) {
         </button>
       </form>
 
+      {/* NUEVO BLOQUE: Mostrar criterio de búsqueda */}
+      {term.trim() !== "" && (
+        <p className={styles.searchTermDisplay}>
+          <strong>Criterio de búsqueda:</strong> {term}
+        </p>
+      )}
+
       <GlobalSummaryDisplay
         summary={globalSummary}
         total={globalTotal}
@@ -196,6 +203,7 @@ export default function SearchPage({ onLogout }) {
     </div>
   );
 }
+
 
 
 // Nota: El componente SummaryTable se ha movido fuera del export default
