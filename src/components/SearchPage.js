@@ -76,7 +76,6 @@ export default function SearchPage({ onLogout }) {
         try {
           const { error: insertError } = await supabase.from("accesos").insert([
             {
-              uuid: crypto.randomUUID(),
               usuario_email: data.user.email,
             },
           ]);
@@ -84,7 +83,7 @@ export default function SearchPage({ onLogout }) {
           if (insertError) {
             console.error("❌ Error al registrar ingreso:", insertError.message);
           } else {
-            console.log("✅ Ingreso registrado en Supabase");
+            console.log("✅ Acceso registrado en Supabase");
           }
         } catch (err) {
           console.error("⚠️ Error inesperado al registrar ingreso:", err);
