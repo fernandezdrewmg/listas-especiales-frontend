@@ -72,6 +72,23 @@ export default function SearchPage({ onLogout }) {
       const { data } = await supabase.auth.getUser();
       if (data?.user?.email) {
         setUsuarioEmail(data.user.email);
+
+        // 📝 Registrar ingreso en Supabase
+        try {
+          const { error: insertError } = await supabase.from("ingresos").insert([
+            {
+              usuario_email: data.user.email,
+            },
+          ]);
+
+          if (insertError) {
+            console.error("❌ Error al registrar ingreso:", insertError.message);
+          } else {
+            console.log("✅ Ingreso registrado en Supabase");
+          }
+        } catch (err) {
+          console.error("⚠️ Error inesperado al registrar ingreso:", err);
+        }
       }
     };
     obtenerUsuario();
