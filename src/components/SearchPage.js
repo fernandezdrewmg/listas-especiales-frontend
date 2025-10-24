@@ -68,15 +68,15 @@ export default function SearchPage({ onLogout }) {
   }, []);
 
   useEffect(() => {
-    const obtenerUsuario = async () => {
+    const registrarIngreso = async () => {
       const { data } = await supabase.auth.getUser();
       if (data?.user?.email) {
         setUsuarioEmail(data.user.email);
 
-        // 📝 Registrar ingreso en Supabase
         try {
-          const { error: insertError } = await supabase.from("ingresos").insert([
+          const { error: insertError } = await supabase.from("accesos").insert([
             {
+              uuid: crypto.randomUUID(),
               usuario_email: data.user.email,
             },
           ]);
@@ -91,7 +91,7 @@ export default function SearchPage({ onLogout }) {
         }
       }
     };
-    obtenerUsuario();
+    registrarIngreso();
   }, []);
 
   useEffect(() => {
@@ -129,7 +129,7 @@ export default function SearchPage({ onLogout }) {
 
   const handleSearch = async (e) => {
     e.preventDefault();
-    setBusquedaRegistrada(false); // Reinicia el marcador
+    setBusquedaRegistrada(false);
     await executeSearch(term.trim());
   };
 
