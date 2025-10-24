@@ -146,7 +146,7 @@ export default function SearchPage({ onLogout }) {
     };
 
     registrarBusqueda();
-  }, [codigoCount, busquedaRegistrada]);
+  }, [codigoCount, busquedaRegistrada, term, usuarioEmail, results.length]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
