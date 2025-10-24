@@ -38,6 +38,7 @@ export default function SearchPage({ onLogout }) {
   const [term, setTerm] = useState("");
   const [fechaActual, setFechaActual] = useState("");
   const [usuarioEmail, setUsuarioEmail] = useState("");
+  const [busquedaRegistrada, setBusquedaRegistrada] = useState(false);
   const [showInactivityWarning, setShowInactivityWarning] = useState(false);
 
   const {
@@ -111,8 +112,41 @@ export default function SearchPage({ onLogout }) {
 
   const handleSearch = async (e) => {
     e.preventDefault();
+    setBusquedaRegistrada(false); // Reinicia el marcador
     await executeSearch(term.trim());
   };
+
+  useEffect(() => {
+    const registrarBusqueda = async () => {
+      if (
+        term.trim() !== "" &&
+        usuarioEmail &&
+        !busquedaRegistrada &&
+        (codigoCount > 0 || results.length > 0)
+      ) {
+        try {
+          const { error: insertError } = await supabase.from("busquedas").insert([
+            {
+              usuario_email: usuarioEmail,
+              criterio: term.trim(),
+              cantidad_resultados: codigoCount,
+            },
+          ]);
+
+          if (insertError) {
+            console.error("❌ Error al registrar búsqueda:", insertError.message);
+          } else {
+            console.log("✅ Búsqueda registrada en Supabase");
+            setBusquedaRegistrada(true);
+          }
+        } catch (err) {
+          console.error("⚠️ Error inesperado al registrar búsqueda:", err);
+        }
+      }
+    };
+
+    registrarBusqueda();
+  }, [codigoCount, busquedaRegistrada]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -166,7 +200,6 @@ export default function SearchPage({ onLogout }) {
         </button>
       </form>
 
-      {/* NUEVO BLOQUE: Mostrar criterio de búsqueda */}
       {term.trim() !== "" && (
         <p className={styles.searchTermDisplay}>
           <strong>Criterio de búsqueda:</strong> {term}
@@ -203,10 +236,3 @@ export default function SearchPage({ onLogout }) {
     </div>
   );
 }
-
-
-
-// Nota: El componente SummaryTable se ha movido fuera del export default
-// para que pueda ser utilizado internamente si está en el mismo archivo.
-// Si SummaryTable está en un archivo separado, no es necesario hacer esto.
-// Tu código original ya lo tiene bien separado si está en otro archivo.
