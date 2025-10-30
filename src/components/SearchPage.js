@@ -38,14 +38,13 @@ export default function SearchPage({ onLogout }) {
   const [term, setTerm] = useState("");
   const [fechaActual, setFechaActual] = useState("");
   const [usuarioEmail, setUsuarioEmail] = useState("");
-  const [busquedaRegistrada, setBusquedaRegistrada] = useState(false);
   const [showInactivityWarning, setShowInactivityWarning] = useState(false);
+  const [pendingRegister, setPendingRegister] = useState(false); // Nueva bandera
 
   const {
     results,
     loading,
     error,
-    codigoCount,
     summaryData,
     executeSearch,
   } = useSearch();
@@ -67,7 +66,6 @@ export default function SearchPage({ onLogout }) {
     setFechaActual(hoy);
   }, []);
 
-  // ✅ Solo obtenemos el email del usuario, sin registrar acceso
   useEffect(() => {
     const obtenerUsuario = async () => {
       const { data } = await supabase.auth.getUser();
@@ -92,7 +90,6 @@ export default function SearchPage({ onLogout }) {
       }, 90 * 1000);
 
       logoutTimeoutId = setTimeout(() => {
-        console.log("⏳ Sesión cerrada por inactividad");
         supabase.auth.signOut().then(() => {
           onLogout();
         });
@@ -111,37 +108,45 @@ export default function SearchPage({ onLogout }) {
     };
   }, [onLogout]);
 
+  // NUEVA FUNCIÓN PARA BUSCAR Y ACTIVAR REGISTRO
   const handleSearch = async (e) => {
     e.preventDefault();
-    setBusquedaRegistrada(false);
-
     const criterio = term.trim();
     if (criterio === "" || !usuarioEmail) return;
-
     await executeSearch(criterio);
-
-    const fechaBolivia = new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString();
-
-    try {
-      const { error: insertError } = await supabase.from("busquedas").insert([
-        {
-          usuario_email: usuarioEmail,
-          criterio,
-          cantidad_resultados: codigoCount,
-          fecha: fechaBolivia,
-        },
-      ]);
-
-      if (insertError) {
-        console.error("❌ Error al registrar búsqueda:", insertError.message);
-      } else {
-        console.log("✅ Búsqueda registrada en Supabase");
-        setBusquedaRegistrada(true);
-      }
-    } catch (err) {
-      console.error("⚠️ Error inesperado al registrar búsqueda:", err);
-    }
+    setPendingRegister(true); // activa registro en useEffect
   };
+
+  // EFECTO PARA REGISTRAR LA BÚSQUEDA CUANDO summaryData SE ACTUALIZA
+  useEffect(() => {
+    if (pendingRegister && summaryData && usuarioEmail) {
+      const totalCoincidencias = Object.values(summaryData).reduce((acc, val) => acc + val, 0);
+      const fechaBolivia = new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString();
+
+      const registrarBusqueda = async () => {
+        try {
+          const { error: insertError } = await supabase.from("busquedas").insert([
+            {
+              usuario_email: usuarioEmail,
+              criterio: term.trim(),
+              cantidad_resultados: totalCoincidencias,
+              fecha: fechaBolivia,
+            },
+          ]);
+          if (insertError) {
+            console.error("❌ Error al registrar búsqueda:", insertError.message);
+          } else {
+            console.log("✅ Búsqueda registrada en Supabase");
+          }
+        } catch (err) {
+          console.error("⚠️ Error inesperado al registrar búsqueda:", err);
+        }
+        setPendingRegister(false); // Resetea bandera
+      };
+
+      registrarBusqueda();
+    }
+  }, [summaryData, pendingRegister, usuarioEmail, term]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -211,7 +216,7 @@ export default function SearchPage({ onLogout }) {
       {results.length > 0 && (
         <div className={styles.summaryTableWrapper}>
           <h3>Coincidencias encontradas</h3>
-          <SummaryTable summary={summaryData} total={codigoCount} />
+          <SummaryTable summary={summaryData} total={Object.values(summaryData).reduce((acc, val) => acc + val, 0)} />
         </div>
       )}
 
@@ -231,3 +236,5 @@ export default function SearchPage({ onLogout }) {
     </div>
   );
 }
+
+
