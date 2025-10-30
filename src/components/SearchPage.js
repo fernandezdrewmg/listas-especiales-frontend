@@ -67,30 +67,15 @@ export default function SearchPage({ onLogout }) {
     setFechaActual(hoy);
   }, []);
 
+  // ✅ Solo obtenemos el email del usuario, sin registrar acceso
   useEffect(() => {
-    const registrarIngreso = async () => {
+    const obtenerUsuario = async () => {
       const { data } = await supabase.auth.getUser();
       if (data?.user?.email) {
         setUsuarioEmail(data.user.email);
-
-        try {
-          const { error: insertError } = await supabase.from("accesos").insert([
-            {
-              usuario_email: data.user.email,
-            },
-          ]);
-
-          if (insertError) {
-            console.error("❌ Error al registrar ingreso:", insertError.message);
-          } else {
-            console.log("✅ Acceso registrado en Supabase");
-          }
-        } catch (err) {
-          console.error("⚠️ Error inesperado al registrar ingreso:", err);
-        }
       }
     };
-    registrarIngreso();
+    obtenerUsuario();
   }, []);
 
   useEffect(() => {
@@ -129,42 +114,34 @@ export default function SearchPage({ onLogout }) {
   const handleSearch = async (e) => {
     e.preventDefault();
     setBusquedaRegistrada(false);
-    await executeSearch(term.trim());
-  };
 
-  useEffect(() => {
-    const registrarBusqueda = async () => {
-      if (
-        term.trim() !== "" &&
-        usuarioEmail &&
-        !busquedaRegistrada
-      ) {
-        const fechaBolivia = new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString();
+    const criterio = term.trim();
+    if (criterio === "" || !usuarioEmail) return;
 
-        try {
-          const { error: insertError } = await supabase.from("busquedas").insert([
-            {
-              usuario_email: usuarioEmail,
-              criterio: term.trim(),
-              cantidad_resultados: codigoCount,
-              fecha: fechaBolivia,
-            },
-          ]);
+    await executeSearch(criterio);
 
-          if (insertError) {
-            console.error("❌ Error al registrar búsqueda:", insertError.message);
-          } else {
-            console.log("✅ Búsqueda registrada en Supabase");
-            setBusquedaRegistrada(true);
-          }
-        } catch (err) {
-          console.error("⚠️ Error inesperado al registrar búsqueda:", err);
-        }
+    const fechaBolivia = new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString();
+
+    try {
+      const { error: insertError } = await supabase.from("busquedas").insert([
+        {
+          usuario_email: usuarioEmail,
+          criterio,
+          cantidad_resultados: codigoCount,
+          fecha: fechaBolivia,
+        },
+      ]);
+
+      if (insertError) {
+        console.error("❌ Error al registrar búsqueda:", insertError.message);
+      } else {
+        console.log("✅ Búsqueda registrada en Supabase");
+        setBusquedaRegistrada(true);
       }
-    };
-
-    registrarBusqueda();
-  }, [codigoCount, busquedaRegistrada, term, usuarioEmail, results.length]);
+    } catch (err) {
+      console.error("⚠️ Error inesperado al registrar búsqueda:", err);
+    }
+  };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();

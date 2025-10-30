@@ -22,11 +22,10 @@ export default function LoginPage({ onLogin }) {
       return;
     }
 
-    // 📝 Registrar acceso con hora ajustada a UTC-4
     try {
       const fechaBolivia = new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString();
 
-      const { error: insertError, data: insertData } = await supabase
+      const { error: insertError } = await supabase
         .from("accesos")
         .insert([
           {
@@ -38,64 +37,32 @@ export default function LoginPage({ onLogin }) {
       if (insertError) {
         console.error("❌ Error al insertar acceso:", insertError);
       } else {
-        console.log("✅ Acceso registrado en Supabase:", insertData);
+        console.log("✅ Acceso registrado en Supabase");
       }
     } catch (err) {
       console.error("⚠️ Error inesperado al registrar acceso:", err);
     }
 
-    onLogin(); // Avanza a SearchPage
+    onLogin();
   };
 
   return (
-    <div
-      style={{
-        maxWidth: 400,
-        margin: "auto",
-        padding: 30,
-        textAlign: "center",
-        backgroundColor: "#fff",
-        borderRadius: 8,
-        boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)",
-      }}
-    >
-      <h1
-        style={{
-          color: "#2c5282",
-          marginBottom: "10px",
-          fontSize: "2em",
-          fontWeight: "bold",
-        }}
-      >
+    <div style={{ maxWidth: 400, margin: "auto", padding: 30, textAlign: "center", backgroundColor: "#fff", borderRadius: 8, boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)" }}>
+      <h1 style={{ color: "#2c5282", marginBottom: "10px", fontSize: "2em", fontWeight: "bold" }}>
         Consulta a listas especiales
       </h1>
-      <p
-        style={{
-          color: "#555",
-          marginBottom: "20px",
-          fontSize: "1.1em",
-        }}
-      >
+      <p style={{ color: "#555", marginBottom: "20px", fontSize: "1.1em" }}>
         Bienvenido
       </p>
 
-      <form
-        onSubmit={handleLogin}
-        style={{ display: "flex", flexDirection: "column", gap: "10px" }}
-      >
+      <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
         <input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Correo electrónico"
           required
-          style={{
-            width: "100%",
-            padding: 10,
-            border: "1px solid #ddd",
-            borderRadius: 4,
-            fontSize: "1em",
-          }}
+          style={{ width: "100%", padding: 10, border: "1px solid #ddd", borderRadius: 4, fontSize: "1em" }}
         />
         <input
           type="password"
@@ -103,25 +70,11 @@ export default function LoginPage({ onLogin }) {
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Contraseña"
           required
-          style={{
-            width: "100%",
-            padding: 10,
-            border: "1px solid #ddd",
-            borderRadius: 4,
-            fontSize: "1em",
-          }}
+          style={{ width: "100%", padding: 10, border: "1px solid #ddd", borderRadius: 4, fontSize: "1em" }}
         />
         <button
           type="submit"
-          style={{
-            padding: "10px 15px",
-            background: "#2c5282",
-            color: "white",
-            border: "none",
-            borderRadius: 4,
-            cursor: "pointer",
-            fontSize: "1em",
-          }}
+          style={{ padding: "10px 15px", background: "#2c5282", color: "white", border: "none", borderRadius: 4, cursor: "pointer", fontSize: "1em" }}
         >
           Entrar
         </button>
@@ -130,4 +83,3 @@ export default function LoginPage({ onLogin }) {
     </div>
   );
 }
-
