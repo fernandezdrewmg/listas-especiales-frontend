@@ -137,15 +137,17 @@ export default function SearchPage({ onLogout }) {
       if (
         term.trim() !== "" &&
         usuarioEmail &&
-        !busquedaRegistrada &&
-        (codigoCount > 0 || results.length > 0)
+        !busquedaRegistrada
       ) {
+        const fechaBolivia = new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString();
+
         try {
           const { error: insertError } = await supabase.from("busquedas").insert([
             {
               usuario_email: usuarioEmail,
               criterio: term.trim(),
               cantidad_resultados: codigoCount,
+              fecha: fechaBolivia,
             },
           ]);
 

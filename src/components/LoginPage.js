@@ -22,13 +22,16 @@ export default function LoginPage({ onLogin }) {
       return;
     }
 
-    // 📝 Registrar acceso en Supabase con diagnóstico
+    // 📝 Registrar acceso con hora ajustada a UTC-4
     try {
+      const fechaBolivia = new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString();
+
       const { error: insertError, data: insertData } = await supabase
         .from("accesos")
         .insert([
           {
-            usuario_email: email,            
+            usuario_email: email,
+            fecha: fechaBolivia,
           },
         ]);
 
@@ -127,3 +130,4 @@ export default function LoginPage({ onLogin }) {
     </div>
   );
 }
+
