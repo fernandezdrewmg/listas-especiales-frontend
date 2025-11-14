@@ -43,12 +43,15 @@
 
 .currentDateText,
 .userEmail {
-  /* Asegurar que estos párrafos no tengan un margen inferior excesivo */
-  margin: 0; 
-  /* Puede que quieras que el texto se "rompa" si es muy largo,
-     aunque para emails no suele ser deseable */
-  /* word-break: break-all; */
+  margin-top: 6px;
+  font-size: 0.70em;
+  color: #333;
+  max-width: 300px; /* ✅ Limita el ancho del email */
+  word-break: break-word; /* ✅ Permite que se corte en varias líneas */
+  overflow-wrap: break-word; /* ✅ Compatibilidad adicional */
 }
+
+
 
 .logoutButton {
   /* Podrías querer que el botón tenga un ancho máximo si es demasiado grande,

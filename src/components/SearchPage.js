@@ -195,44 +195,45 @@ export default function SearchPage({ onLogout }) {
         </div>
       )}
 
-      <div className={styles.header}>
-        <div className={styles.headerLeft}>
-          <div className={styles.logoTitleWrapper}>
-            <div className={styles.logoBox}>
-              {logoUrl && (
-                <img
-                  src={logoUrl}
-                  alt={`Logo de ${clienteNombre}`}
-                  className={styles.logoCliente}
-                  onError={(e) => {
-                    // ✅ MEJORA: Oculta el tag <img> si falla la carga
-                    // para evitar el ícono roto.
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
-              )}
-            </div>
-            <div>
-              <h2>Buscar en Listas Especiales</h2>
-              <p className={styles.updateDateText}>
-                Base de datos actualizada al:{" "}
-                <strong>{globalLastUpdateDate || "Cargando..."}</strong>
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className={styles.headerRight}>
-          <p className={styles.currentDateText}>
-            Fecha actual: <strong>{fechaActual}</strong>
-          </p>
-          <p className={styles.userEmail}>
-            Usuario: <strong>{usuarioEmail}</strong>
-          </p>
-          <button onClick={handleLogout} className={styles.logoutButton}>
-            Cerrar sesión
-          </button>
-        </div>
+<div className={styles.header}>
+  <div className={styles.headerLeft}>
+    <div className={styles.logoTitleWrapper}>
+      <div className={styles.logoBox}>
+        {logoUrl && (
+          <img
+            src={logoUrl}
+            alt={`Logo de ${clienteNombre}`}
+            className={styles.logoCliente}
+            onError={(e) => {
+              e.currentTarget.style.display = "none";
+            }}
+          />
+        )}
       </div>
+      <div>
+        <h2>Buscar en Listas Especiales</h2>
+        <p className={styles.updateDateText}>
+          Base de datos actualizada al: <strong>{globalLastUpdateDate || "Cargando..."}</strong>
+        </p>
+        {/* ✅ Email debajo del título, sin afectar el layout derecho */}
+        <p className={styles.userEmail}>
+          Usuario: <strong>{usuarioEmail}</strong>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div className={styles.headerRight}>
+    <p className={styles.currentDateText}>
+      Fecha actual: <strong>{fechaActual}</strong>
+    </p>
+    <button onClick={handleLogout} className={styles.logoutButton}>
+      Cerrar sesión
+    </button>
+  </div>
+</div>
+
+
 
       <form onSubmit={handleSearch} className={styles.form}>
         <label htmlFor="searchTerm" style={{ display: "none" }}>
