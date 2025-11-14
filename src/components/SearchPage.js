@@ -38,17 +38,12 @@ export default function SearchPage({ onLogout }) {
   const [term, setTerm] = useState("");
   const [fechaActual, setFechaActual] = useState("");
   const [usuarioEmail, setUsuarioEmail] = useState("");
+  const [clienteNombre, setClienteNombre] = useState("");
+  const [logoUrl, setLogoUrl] = useState("");
   const [showInactivityWarning, setShowInactivityWarning] = useState(false);
-  const [pendingRegister, setPendingRegister] = useState(false); // Nueva bandera
+  const [pendingRegister, setPendingRegister] = useState(false);
 
-  const {
-    results,
-    loading,
-    error,
-    summaryData,
-    executeSearch,
-  } = useSearch();
-
+  const { results, loading, error, summaryData, executeSearch } = useSearch();
   const {
     globalSummary,
     globalTotal,
@@ -57,6 +52,7 @@ export default function SearchPage({ onLogout }) {
     globalLastUpdateDate,
   } = useGlobalSummary();
 
+  // Fecha actual
   useEffect(() => {
     const hoy = new Date().toLocaleDateString("es-BO", {
       year: "numeric",
@@ -66,16 +62,46 @@ export default function SearchPage({ onLogout }) {
     setFechaActual(hoy);
   }, []);
 
+  // Obtener usuario y logo
   useEffect(() => {
     const obtenerUsuario = async () => {
-      const { data } = await supabase.auth.getUser();
-      if (data?.user?.email) {
-        setUsuarioEmail(data.user.email);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user?.email) return;
+
+      setUsuarioEmail(user.email);
+
+      const { data, error } = await supabase
+        .from("usuarios")
+        .select("cliente, logo_cliente")
+        // ✅ CORRECCIÓN: Usar .ilike() para que la búsqueda de email
+        // sea insensible a mayúsculas y minúsculas.
+        .ilike("email", user.email)
+        .single();
+
+      if (error || !data) {
+        if (error) {
+          console.error("Error al buscar usuario:", error.message);
+        }
+        return; // No se encontró usuario o hubo un error
+      }
+
+      setClienteNombre(data.cliente || "");
+
+      const nombreLogo = (data.logo_cliente || "").trim();
+      if (nombreLogo) {
+        const { data: urlData } = supabase
+          .storage
+          .from("logos_clientes")
+          .getPublicUrl(nombreLogo);
+        setLogoUrl(urlData?.publicUrl || "");
+      } else {
+        setLogoUrl("");
       }
     };
     obtenerUsuario();
   }, []);
 
+  // Control de inactividad
   useEffect(() => {
     let warningTimeoutId;
     let logoutTimeoutId;
@@ -87,13 +113,13 @@ export default function SearchPage({ onLogout }) {
 
       warningTimeoutId = setTimeout(() => {
         setShowInactivityWarning(true);
-      }, 90 * 1000);
+      }, 90 * 1000); // 1.5 minutos para advertencia
 
       logoutTimeoutId = setTimeout(() => {
         supabase.auth.signOut().then(() => {
           onLogout();
         });
-      }, 2 * 60 * 1000);
+      }, 2 * 60 * 1000); // 2 minutos para logout
     };
 
     const eventos = ["mousemove", "keydown", "scroll", "click"];
@@ -108,31 +134,38 @@ export default function SearchPage({ onLogout }) {
     };
   }, [onLogout]);
 
-  // NUEVA FUNCIÓN PARA BUSCAR Y ACTIVAR REGISTRO
+  // Buscar
   const handleSearch = async (e) => {
     e.preventDefault();
     const criterio = term.trim();
     if (criterio === "" || !usuarioEmail) return;
     await executeSearch(criterio);
-    setPendingRegister(true); // activa registro en useEffect
+    setPendingRegister(true);
   };
 
-  // EFECTO PARA REGISTRAR LA BÚSQUEDA CUANDO summaryData SE ACTUALIZA
+  // Registrar búsqueda
   useEffect(() => {
     if (pendingRegister && summaryData && usuarioEmail) {
-      const totalCoincidencias = Object.values(summaryData).reduce((acc, val) => acc + val, 0);
-      const fechaBolivia = new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString();
+      const totalCoincidencias = Object.values(summaryData).reduce(
+        (acc, val) => acc + val,
+        0
+      );
+      const fechaBolivia = new Date(
+        Date.now() - 4 * 60 * 60 * 1000
+      ).toISOString();
 
       const registrarBusqueda = async () => {
         try {
-          const { error: insertError } = await supabase.from("busquedas").insert([
-            {
-              usuario_email: usuarioEmail,
-              criterio: term.trim(),
-              cantidad_resultados: totalCoincidencias,
-              fecha: fechaBolivia,
-            },
-          ]);
+          const { error: insertError } = await supabase
+            .from("busquedas")
+            .insert([
+              {
+                usuario_email: usuarioEmail,
+                criterio: term.trim(),
+                cantidad_resultados: totalCoincidencias,
+                fecha: fechaBolivia,
+              },
+            ]);
           if (insertError) {
             console.error("❌ Error al registrar búsqueda:", insertError.message);
           } else {
@@ -141,7 +174,7 @@ export default function SearchPage({ onLogout }) {
         } catch (err) {
           console.error("⚠️ Error inesperado al registrar búsqueda:", err);
         }
-        setPendingRegister(false); // Resetea bandera
+        setPendingRegister(false);
       };
 
       registrarBusqueda();
@@ -164,10 +197,29 @@ export default function SearchPage({ onLogout }) {
 
       <div className={styles.header}>
         <div className={styles.headerLeft}>
-          <h2>Buscar en Listas Especiales</h2>
-          <p className={styles.updateDateText}>
-            Base de datos actualizada al: <strong>{globalLastUpdateDate || "Cargando..."}</strong>
-          </p>
+          <div className={styles.logoTitleWrapper}>
+            <div className={styles.logoBox}>
+              {logoUrl && (
+                <img
+                  src={logoUrl}
+                  alt={`Logo de ${clienteNombre}`}
+                  className={styles.logoCliente}
+                  onError={(e) => {
+                    // ✅ MEJORA: Oculta el tag <img> si falla la carga
+                    // para evitar el ícono roto.
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              )}
+            </div>
+            <div>
+              <h2>Buscar en Listas Especiales</h2>
+              <p className={styles.updateDateText}>
+                Base de datos actualizada al:{" "}
+                <strong>{globalLastUpdateDate || "Cargando..."}</strong>
+              </p>
+            </div>
+          </div>
         </div>
         <div className={styles.headerRight}>
           <p className={styles.currentDateText}>
@@ -216,7 +268,13 @@ export default function SearchPage({ onLogout }) {
       {results.length > 0 && (
         <div className={styles.summaryTableWrapper}>
           <h3>Coincidencias encontradas</h3>
-          <SummaryTable summary={summaryData} total={Object.values(summaryData).reduce((acc, val) => acc + val, 0)} />
+          <SummaryTable
+            summary={summaryData}
+            total={Object.values(summaryData).reduce(
+              (acc, val) => acc + val,
+              0
+            )}
+          />
         </div>
       )}
 
@@ -228,6 +286,7 @@ export default function SearchPage({ onLogout }) {
       {results.length === 0 && term.trim() !== "" && !loading && (
         <p className={styles.noResults}>No se encontraron coincidencias.</p>
       )}
+
       {results.length === 0 && term.trim() === "" && !loading && !error && (
         <p className={styles.noResults}>
           Ingresa un término de búsqueda para comenzar.
@@ -236,5 +295,3 @@ export default function SearchPage({ onLogout }) {
     </div>
   );
 }
-
-

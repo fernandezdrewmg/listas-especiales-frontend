@@ -27,10 +27,12 @@
 }
 
 .headerRight {
-  display: flex;
-  flex-direction: column; /* Apila la fecha y el botón verticalmente */
-  align-items: flex-end; /* Alinea la fecha y el botón a la derecha */
-  gap: 5px; /* Pequeño espacio entre la fecha y el botón */
+  display: flex; /* Habilitar Flexbox */
+  flex-direction: column; /* Apilar elementos verticalmente */
+  align-items: flex-end; /* Alinear elementos a la derecha horizontalmente */
+  justify-content: center; /* Centrar verticalmente en el espacio disponible */
+  gap: 5px; /* Pequeño espacio entre los elementos apilados */
+  text-align: right; /* Asegura que el texto dentro se alinee a la derecha */
 }
 
 .updateDateText {
@@ -39,20 +41,21 @@
   margin-top: 5px; /* Espacio entre el título h2 y esta fecha */
 }
 
-.currentDateText {
-  font-size: 0.9em;
-  color: #555;
-  margin-bottom: 5px; /* Espacio entre la fecha actual y el botón de logout */
+.currentDateText,
+.userEmail {
+  /* Asegurar que estos párrafos no tengan un margen inferior excesivo */
+  margin: 0; 
+  /* Puede que quieras que el texto se "rompa" si es muy largo,
+     aunque para emails no suele ser deseable */
+  /* word-break: break-all; */
 }
 
 .logoutButton {
-  padding: 8px 16px; /* Ajustado el padding para que sea más consistente */
-  background: #ccc;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  color: #333;
-  font-size: 0.9em;
+  /* Podrías querer que el botón tenga un ancho máximo si es demasiado grande,
+     o simplemente dejarlo con su ancho automático */
+  /* max-width: 150px; */
+  /* Asegurar que no tenga márgenes que lo empujen */
+  margin-top: 5px; /* Un pequeño margen para separarlo del email */
 }
 
 /* --- Estilos del Formulario de Búsqueda --- */
@@ -555,3 +558,52 @@
   }
 }
 
+.logoBox {
+  width: 80px;
+  height: 80px;
+  border: 1px solid #ccc;
+  background-color: #f9f9f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 1rem;
+  flex-shrink: 0;
+}
+
+.logoCliente {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.logoTitleWrapper {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+
+.logoTitleWrapper {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.logoBox {
+  width: 80px;
+  height: 80px;
+  min-width: 80px;
+  min-height: 80px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.logoCliente {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
