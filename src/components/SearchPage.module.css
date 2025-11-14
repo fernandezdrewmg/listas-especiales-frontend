@@ -558,17 +558,6 @@
   }
 }
 
-.logoBox {
-  width: 80px;
-  height: 80px;
-  border: 1px solid #ccc;
-  background-color: #f9f9f9;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 1rem;
-  flex-shrink: 0;
-}
 
 .logoCliente {
   max-width: 100%;
@@ -594,13 +583,17 @@
   height: 80px;
   min-width: 80px;
   min-height: 80px;
-  border: 1px solid #ccc;
-  background-color: #fff;
+  /* Sin borde ni fondo */
+  border: none;
+  background-color: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  margin-right: 1rem;
+  flex-shrink: 0;
 }
+
 
 .logoCliente {
   width: 100%;
