@@ -1,605 +1,854 @@
-/* src/components/SearchPage.module.css */
+  /* src/components/SearchPage.module.css */
 
-/* --- Estilos Generales del Contenedor de la Página de Búsqueda --- */
-.container {
-  max-width: 700px;
-  margin: auto;
-  padding: 30px;
-}
+  /* --- Estilos Generales del Contenedor de la Página de Búsqueda --- */
+  .container {
+    max-width: 700px;
+    margin: auto;
+    padding: 30px;
+  }
 
-/* src/components/SearchPage.module.css */
+  /* src/components/SearchPage.module.css */
 
-/* ... (tus estilos existentes) ... */
+  /* ... (tus estilos existentes) ... */
 
-/* --- Estilos del Encabezado y Botón de Cerrar Sesión (ajustados) --- */
-.header {
-  display: flex;
-  justify-content: space-between; /* Espacia los elementos a los extremos */
-  align-items: flex-start; /* Alinea los elementos en la parte superior del header */
-  margin-bottom: 20px;
-  flex-wrap: wrap; /* Permite que los elementos se envuelvan en pantallas pequeñas */
-}
+  /* --- Estilos del Encabezado y Botón de Cerrar Sesión (ajustados) --- */
+  .header {
+    display: flex;
+    justify-content: space-between; /* Espacia los elementos a los extremos */
+    align-items: flex-start; /* Alinea los elementos en la parte superior del header */
+    margin-bottom: 20px;
+    flex-wrap: wrap; /* Permite que los elementos se envuelvan en pantallas pequeñas */
+  }
 
-.headerLeft {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start; /* Alinea a la izquierda el título y la fecha de actualización */
-}
+  .headerLeft {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Alinea a la izquierda el título y la fecha de actualización */
+  }
 
-.headerRight {
-  display: flex; /* Habilitar Flexbox */
-  flex-direction: column; /* Apilar elementos verticalmente */
-  align-items: flex-end; /* Alinear elementos a la derecha horizontalmente */
-  justify-content: center; /* Centrar verticalmente en el espacio disponible */
-  gap: 5px; /* Pequeño espacio entre los elementos apilados */
-  text-align: right; /* Asegura que el texto dentro se alinee a la derecha */
-}
+  .headerRight {
+    display: flex; /* Habilitar Flexbox */
+    flex-direction: column; /* Apilar elementos verticalmente */
+    align-items: flex-end; /* Alinear elementos a la derecha horizontalmente */
+    justify-content: center; /* Centrar verticalmente en el espacio disponible */
+    gap: 5px; /* Pequeño espacio entre los elementos apilados */
+    text-align: right; /* Asegura que el texto dentro se alinee a la derecha */
+  }
 
-.updateDateText {
-  font-size: 0.9em;
-  color: #666;
-  margin-top: 5px; /* Espacio entre el título h2 y esta fecha */
-}
-
-.currentDateText,
-.userEmail {
-  margin-top: 6px;
-  font-size: 0.70em;
-  color: #333;
-  max-width: 300px; /* ✅ Limita el ancho del email */
-  word-break: break-word; /* ✅ Permite que se corte en varias líneas */
-  overflow-wrap: break-word; /* ✅ Compatibilidad adicional */
-}
-
-
-
-.logoutButton {
-  /* Podrías querer que el botón tenga un ancho máximo si es demasiado grande,
-     o simplemente dejarlo con su ancho automático */
-  /* max-width: 150px; */
-  /* Asegurar que no tenga márgenes que lo empujen */
-  margin-top: 5px; /* Un pequeño margen para separarlo del email */
-}
-
-/* --- Estilos del Formulario de Búsqueda --- */
-.form {
-  margin-bottom: 20px;
-  display: flex; /* Usar flexbox para alinear input y botón */
-  gap: 8px; /* Espacio entre los elementos del formulario */
-}
-
-.searchInput {
-  flex-grow: 1; /* Permite que el input crezca para ocupar el espacio disponible */
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1em; /* Asegura un tamaño de fuente legible */
-}
-
-.searchButton {
-  padding: 8px 16px;
-  background: #2c5282;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1em; /* Asegura un tamaño de fuente legible */
-}
-
-/* --- Estilos de las Tablas de Resumen (Común para SummaryTable y GlobalSummaryDisplay) --- */
-.summaryTable {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 10px; /* Tamaño de fuente por defecto para las tablas de resumen */
-  margin-bottom: 15px; /* Espacio después de la tabla */
-}
-
-.summaryTableTh {
-  background: #2c5282;
-  color: white;
-  padding: 8px 12px;
-  text-align: left;
-  border: 1px solid #2c5282; /* Borde del mismo color que el fondo */
-}
-
-.summaryTableTd {
-  border: 1px solid #ddd;
-  padding: 8px 12px;
-  text-align: left;
-}
-
-.summaryTable .totalRow {
-  font-weight: bold;
-  background: #f7fafc;
-}
-
-/* --- Estilos del Contenedor de Estadísticas de Búsqueda --- */
-.summaryTableWrapper {
-  width: 100%;
-  margin-bottom: 20px;
-  background: #f8f8f8;
-  padding: 10px;
-  border-radius: 4px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05); /* Sombra ligera */
-}
-
-/* --- Estilos para Mensajes de Estado --- */
-.error {
-  color: red;
-  padding: 10px;
-  background-color: #ffebeb;
-  border: 1px solid #ffcccc;
-  border-radius: 4px;
-  margin-top: 15px;
-}
-
-.loading {
-  color: #555;
-  text-align: center;
-  margin-top: 15px;
-}
-
-.noResults {
-  color: #777;
-  text-align: center;
-  margin-top: 15px;
-}
-
-/* --- Estilos para la Tabla de Resultados Detallados (SearchResultsTable) --- */
-
-.searchResultsContainer {
-  /* Elimina el padding/margen excesivo a la izquierda */
-  margin-left: -55%; /* Mueve el contenedor a la izquierda (ajusta si es necesario) */
-  left: 50%; /* Ayuda a posicionar en relación al centro de la página */
-  position: relative; /* Necesario para que left/margin-left funcionen */
-  width: 100vw; /* ✅ Ocupa el 100% del ancho del viewport */
-  max-width: none; /* ✅ Anula cualquier max-width de padres */
-  padding: 0 30px; /* Mantén el padding lateral del contenedor para el contenido, si no quieres que el contenido toque los bordes */
-  box-sizing: border-box;
-
-  /* Resto de tus estilos para searchResultsContainer */
-  margin-top: 30px; /* Espacio superior para separarlo de la sección anterior */
-  margin-bottom: 30px; /* Espacio inferior */
-}
-
-/* Ajustes para el título dentro del contenedor de resultados */
-.searchResultsContainer h3 {
-    text-align: left; /* Asegura que el título se alinee a la izquierda dentro de este contenedor */
-    margin-left: 0;
-    padding-left: 0;
-    margin-bottom: 15px;
-    color: #2c5282;
-}
-
-/* Añade el contenedor para scroll horizontal */
-.tableResponsive {
-    overflow-x: auto; /* Permite el scroll horizontal si la tabla es demasiado ancha */
-    margin-bottom: 20px; /* Espacio debajo de la tabla */
-}
-
-.resultsTable {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 10px; /* Un poco más pequeño para más información */
-  margin-bottom: 20px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05); /* Sutil sombra */
-  table-layout: fixed; /* IMPORTANTE: Esto hace que el ancho de las columnas sea fijo y respete max-width */
-}
-
-.resultsTableTh {
-  background: #4a719d; /* Un tono diferente para diferenciar */
-  color: white;
-  padding: 10px 12px;
-  text-align: left;
-  border: 1px solid #3c618c;
-  white-space: normal; /* Permite que los encabezados largos se ajusten a varias líneas */
-  word-wrap: break-word; /* Asegura que el texto se rompa dentro de la celda */
-  max-width: 150px; /* ANCHO MÁXIMO PARA CADA COLUMNA (ajústalo según necesites) */
-  box-sizing: border-box; /* Incluye padding en el ancho */
-}
-
-.resultsTableTd {
-  border: 1px solid #ddd;
-  padding: 8px 12px;
-  vertical-align: top; /* Alinea el contenido en la parte superior */
-  background-color: #ffffff;
-  max-width: 150px; /* ANCHO MÁXIMO PARA CADA COLUMNA (igual que el th) */
-  word-wrap: break-word; /* Asegura que el texto se rompa dentro de la celda */
-  box-sizing: border-box; /* Incluye padding en el ancho */
-}
-
-/* Zebra striping para filas alternas */
-.resultsTable tbody tr:nth-child(even) {
-  background-color: #f9f9f9;
-}
-
-.resultsTable tbody tr:hover {
-  background-color: #eef7ff; /* Resaltar fila al pasar el mouse */
-}
-
-/* --- Estilos para el Resumen Global y el Gráfico (GlobalSummaryDisplay) --- */
-.globalSummaryContainer {
-  margin-top: 20px;
-  margin-bottom: 40px;
-  padding: 20px;
-  background: #fdfdfd;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  display: flex; /* ✅ Cambiamos a flex para organizar el contenido */
-  flex-direction: column; /* ✅ Organiza en columna (título, total, fecha, gráfico) */
-  align-items: center; /* ✅ Centra los elementos horizontalmente */
-}
-
-.globalSummaryContainer h3 {
-  color: #2c5282;
-  margin-bottom: 10px; /* ✅ Reducimos el margen inferior */
-  font-size: 1.8em; /* ✅ Hacemos el título un poco más grande */
-  text-align: center;
-}
-
-/* Estilos para el total de registros y la fecha de actualización */
-.globalTotalAndDate {
-  display: flex;
-  flex-direction: column; /* Para que la fecha quede debajo del total */
-  align-items: center;
-  margin-bottom: 20px; /* Espacio debajo de esta sección */
-  color: #333;
-}
-
-.globalTotal {
-  font-size: 2.2em; /* ✅ Tamaño grande para el total */
-  font-weight: bold;
-  color: #2c5282;
-  margin-bottom: 5px; /* Espacio entre el total y la etiqueta */
-}
-
-.globalTotalLabel {
+  .updateDateText {
     font-size: 0.9em;
+    color: #666;
+    margin-top: 5px; /* Espacio entre el título h2 y esta fecha */
+  }
+
+  .currentDateText,
+  .userEmail {
+    margin-top: 6px;
+    font-size: 0.70em;
+    color: #333;
+    max-width: 300px; /* ✅ Limita el ancho del email */
+    word-break: break-word; /* ✅ Permite que se corte en varias líneas */
+    overflow-wrap: break-word; /* ✅ Compatibilidad adicional */
+  }
+
+
+
+  .logoutButton {
+    /* Podrías querer que el botón tenga un ancho máximo si es demasiado grande,
+      o simplemente dejarlo con su ancho automático */
+    /* max-width: 150px; */
+    /* Asegurar que no tenga márgenes que lo empujen */
+    margin-top: 5px; /* Un pequeño margen para separarlo del email */
+  }
+
+  /* --- Estilos del Formulario de Búsqueda --- */
+  .form {
+    margin-bottom: 20px;
+    display: flex; /* Usar flexbox para alinear input y botón */
+    gap: 8px; /* Espacio entre los elementos del formulario */
+  }
+
+  .searchInput {
+    flex-grow: 1; /* Permite que el input crezca para ocupar el espacio disponible */
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1em; /* Asegura un tamaño de fuente legible */
+  }
+
+  .searchButton {
+    padding: 8px 16px;
+    background: #2c5282;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1em; /* Asegura un tamaño de fuente legible */
+  }
+
+  /* --- Estilos de las Tablas de Resumen (Común para SummaryTable y GlobalSummaryDisplay) --- */
+  .summaryTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10px; /* Tamaño de fuente por defecto para las tablas de resumen */
+    margin-bottom: 15px; /* Espacio después de la tabla */
+  }
+
+  .summaryTableTh {
+    background: #2c5282;
+    color: white;
+    padding: 8px 12px;
+    text-align: left;
+    border: 1px solid #2c5282; /* Borde del mismo color que el fondo */
+  }
+
+  .summaryTableTd {
+    border: 1px solid #ddd;
+    padding: 8px 12px;
+    text-align: left;
+  }
+
+  .summaryTable .totalRow {
+    font-weight: bold;
+    background: #f7fafc;
+  }
+
+  /* --- Estilos del Contenedor de Estadísticas de Búsqueda --- */
+  .summaryTableWrapper {
+    width: 100%;
+    margin-bottom: 20px;
+    background: #f8f8f8;
+    padding: 10px;
+    border-radius: 4px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05); /* Sombra ligera */
+  }
+
+  /* --- Estilos para Mensajes de Estado --- */
+  .error {
+    color: red;
+    padding: 10px;
+    background-color: #ffebeb;
+    border: 1px solid #ffcccc;
+    border-radius: 4px;
+    margin-top: 15px;
+  }
+
+  .loading {
     color: #555;
-    margin-bottom: 5px;
-}
+    text-align: center;
+    margin-top: 15px;
+  }
 
-.globalUpdateDate {
-  font-size: 0.9em;
-  color: #777;
-}
+  .noResults {
+    color: #777;
+    text-align: center;
+    margin-top: 15px;
+  }
 
+  /* --- Estilos para la Tabla de Resultados Detallados (SearchResultsTable) --- */
 
-/* Contenedor Flexbox para el gráfico (eliminamos la tabla de aquí) */
-.globalSummaryContent {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  justify-content: center;
-  align-items: flex-start;
-  width: 100%; /* Asegura que el contenido flex ocupe todo el ancho disponible */
-}
+  .searchResultsContainer {
+    /* Elimina el padding/margen excesivo a la izquierda */
+    margin-left: -55%; /* Mueve el contenedor a la izquierda (ajusta si es necesario) */
+    left: 50%; /* Ayuda a posicionar en relación al centro de la página */
+    position: relative; /* Necesario para que left/margin-left funcionen */
+    width: 100vw; /* ✅ Ocupa el 100% del ancho del viewport */
+    max-width: none; /* ✅ Anula cualquier max-width de padres */
+    padding: 0 30px; /* Mantén el padding lateral del contenedor para el contenido, si no quieres que el contenido toque los bordes */
+    box-sizing: border-box;
 
-.chartWrapper {
-  flex: none; /* ✅ Ya no queremos que crezca flexiblemente si no hay otra columna */
-  width: 80%; /* ✅ Ocupa más ancho ahora que no hay tabla. Ajusta este porcentaje. */
-  max-width: 600px; /* ✅ Un ancho máximo para el gráfico en pantallas grandes */
-  position: relative;
-  /* margin: auto; */ /* ✅ Centra el gráfico dentro de su contenedor si no usa todo el width */
-}
+    /* Resto de tus estilos para searchResultsContainer */
+    margin-top: 30px; /* Espacio superior para separarlo de la sección anterior */
+    margin-bottom: 30px; /* Espacio inferior */
+  }
 
-.chartContainer {
-  position: relative;
-  height: 350px; /* ✅ Aumentamos la altura para mejor visualización de las barras y etiquetas */
-  width: 100%;
-}
+  /* Ajustes para el título dentro del contenedor de resultados */
+  .searchResultsContainer h3 {
+      text-align: left; /* Asegura que el título se alinee a la izquierda dentro de este contenedor */
+      margin-left: 0;
+      padding-left: 0;
+      margin-bottom: 15px;
+      color: #2c5282;
+  }
 
-/* ✅ Eliminamos los estilos para .globalSummaryTableWrapper y .globalSummaryTableTitle
-   porque ya no tendremos la tabla al lado */
+  /* Añade el contenedor para scroll horizontal */
+  .tableResponsive {
+      overflow-x: auto; /* Permite el scroll horizontal si la tabla es demasiado ancha */
+      margin-bottom: 20px; /* Espacio debajo de la tabla */
+  }
 
+  .resultsTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10px; /* Un poco más pequeño para más información */
+    margin-bottom: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05); /* Sutil sombra */
+    table-layout: fixed; /* IMPORTANTE: Esto hace que el ancho de las columnas sea fijo y respete max-width */
+  }
 
-/* --- Ajustes específicos para el tamaño de fuente de la tabla de resumen GLOBAL --- */
-/* Ya no son necesarios, ya que eliminaremos la tabla del GlobalSummaryDisplay */
-/* .globalSummaryTableWrapper .summaryTable {
-  font-size: 8px;
-}
+  .resultsTableTh {
+    background: #4a719d; /* Un tono diferente para diferenciar */
+    color: white;
+    padding: 10px 12px;
+    text-align: left;
+    border: 1px solid #3c618c;
+    white-space: normal; /* Permite que los encabezados largos se ajusten a varias líneas */
+    word-wrap: break-word; /* Asegura que el texto se rompa dentro de la celda */
+    max-width: 150px; /* ANCHO MÁXIMO PARA CADA COLUMNA (ajústalo según necesites) */
+    box-sizing: border-box; /* Incluye padding en el ancho */
+  }
 
-.globalSummaryTableWrapper .summaryTableTh {
-  padding: 6px 8px;
-}
+  .resultsTableTd {
+    border: 1px solid #ddd;
+    padding: 8px 12px;
+    vertical-align: top; /* Alinea el contenido en la parte superior */
+    background-color: #ffffff;
+    max-width: 150px; /* ANCHO MÁXIMO PARA CADA COLUMNA (igual que el th) */
+    word-wrap: break-word; /* Asegura que el texto se rompa dentro de la celda */
+    box-sizing: border-box; /* Incluye padding en el ancho */
+  }
 
-.globalSummaryTableWrapper .summaryTableTd {
-  padding: 5px 8px;
-}
+  /* Zebra striping para filas alternas */
+  .resultsTable tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
 
-.globalSummaryTableWrapper .totalRow .summaryTableTd {
-    font-weight: bold;
-} */
+  .resultsTable tbody tr:hover {
+    background-color: #eef7ff; /* Resaltar fila al pasar el mouse */
+  }
 
-
-/* --- Estilos para impresión --- */
-@media print {
-  /* ... (Tus estilos de impresión existentes) ... */
-
-  /* Nuevos estilos para impresión para el resumen global */
+  /* --- Estilos para el Resumen Global y el Gráfico (GlobalSummaryDisplay) --- */
   .globalSummaryContainer {
+    margin-top: 20px;
+    margin-bottom: 40px;
+    padding: 20px;
+    background: #fdfdfd;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    display: flex; /* ✅ Cambiamos a flex para organizar el contenido */
+    flex-direction: column; /* ✅ Organiza en columna (título, total, fecha, gráfico) */
+    align-items: center; /* ✅ Centra los elementos horizontalmente */
+  }
+
+  .globalSummaryContainer h3 {
+    color: #2c5282;
+    margin-bottom: 10px; /* ✅ Reducimos el margen inferior */
+    font-size: 1.8em; /* ✅ Hacemos el título un poco más grande */
+    text-align: center;
+  }
+
+  /* Estilos para el total de registros y la fecha de actualización */
+  .globalTotalAndDate {
+    display: flex;
+    flex-direction: column; /* Para que la fecha quede debajo del total */
+    align-items: center;
+    margin-bottom: 20px; /* Espacio debajo de esta sección */
+    color: #333;
+  }
+
+  .globalTotal {
+    font-size: 2.2em; /* ✅ Tamaño grande para el total */
+    font-weight: bold;
+    color: #2c5282;
+    margin-bottom: 5px; /* Espacio entre el total y la etiqueta */
+  }
+
+  .globalTotalLabel {
+      font-size: 0.9em;
+      color: #555;
+      margin-bottom: 5px;
+  }
+
+  .globalUpdateDate {
+    font-size: 0.9em;
+    color: #777;
+  }
+
+
+  /* Contenedor Flexbox para el gráfico (eliminamos la tabla de aquí) */
+  .globalSummaryContent {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    align-items: flex-start;
+    width: 100%; /* Asegura que el contenido flex ocupe todo el ancho disponible */
+  }
+
+  .chartWrapper {
+    flex: none; /* ✅ Ya no queremos que crezca flexiblemente si no hay otra columna */
+    width: 80%; /* ✅ Ocupa más ancho ahora que no hay tabla. Ajusta este porcentaje. */
+    max-width: 600px; /* ✅ Un ancho máximo para el gráfico en pantallas grandes */
+    position: relative;
+    /* margin: auto; */ /* ✅ Centra el gráfico dentro de su contenedor si no usa todo el width */
+  }
+
+  .chartContainer {
+    position: relative;
+    height: 350px; /* ✅ Aumentamos la altura para mejor visualización de las barras y etiquetas */
+    width: 100%;
+  }
+
+  /* ✅ Eliminamos los estilos para .globalSummaryTableWrapper y .globalSummaryTableTitle
+    porque ya no tendremos la tabla al lado */
+
+
+  /* --- Ajustes específicos para el tamaño de fuente de la tabla de resumen GLOBAL --- */
+  /* Ya no son necesarios, ya que eliminaremos la tabla del GlobalSummaryDisplay */
+  /* .globalSummaryTableWrapper .summaryTable {
+    font-size: 8px;
+  }
+
+  .globalSummaryTableWrapper .summaryTableTh {
+    padding: 6px 8px;
+  }
+
+  .globalSummaryTableWrapper .summaryTableTd {
+    padding: 5px 8px;
+  }
+
+  .globalSummaryTableWrapper .totalRow .summaryTableTd {
+      font-weight: bold;
+  } */
+
+
+   /* src/components/SearchPage.module.css */
+
+  /* ... (Todos tus estilos existentes para la vista en pantalla quedan IGUAL arriba de este bloque) ... */
+
+
+  
+  .inactivityWarning {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #fff3cd;
+    color: #856404;
+    padding: 12px 16px;
+    border: 1px solid #ffeeba;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    z-index: 1000;
+    font-size: 0.95em;
+  }
+  .searchTermDisplay {
+    margin-top: 1rem;
+    font-size: 1rem;
+    color: #333;
+  }
+
+  /* Asegura que el criterio se imprima */
+  @media print {
+    .searchTermDisplay {
+      display: block;
+      font-size: 1rem;  
+      color: #000;
+      margin-bottom: 1rem;
+    }
+  }
+
+
+  .logoCliente {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+
+  .logoTitleWrapper {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+
+  .logoTitleWrapper {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .logoBox {
+    width: 80px;
+    height: 80px;
+    min-width: 80px;
+    min-height: 80px;
+    /* Sin borde ni fondo */
+    border: none;
+    background-color: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    margin-right: 1rem;
+    flex-shrink: 0;
+  }
+
+
+  .logoCliente {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  /* ============================================
+    TABLA DE OTROS CÓDIGOS - COMPACTA
+    ============================================ */
+
+  .othersTableWrapper {
+    flex: 0 0 auto;
+    width: 180px;
+    padding: 12px;
+    background: #f9f9f9;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    height: fit-content;
+    align-self: flex-start;
+  }
+
+  .othersTableWrapper h4 {
+    color: #2c5282;
+    font-size: 0.8em;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+    padding-bottom: 6px;
+    border-bottom: 1.5px solid #2c5282;
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  .othersTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10px;
+    color: #333;
+    line-height: 1.3;
+  }
+
+  .othersTable thead tr {
+    background: #4a719d;
+  }
+
+  .othersTable th {
+    color: white;
+    padding: 4px 3px;
+    font-weight: 600;
+    text-align: left;
+    border: 0.5px solid #2c5282;
+    font-size: 9px;
+  }
+
+  .othersTable td {
+    padding: 3px 2px;
+    border: 0.5px solid #ddd;
+    background: white;
+    font-size: 9px;
+    word-break: break-word;
+  }
+
+  .othersTable tbody tr:hover {
+    background: #f5f5f5;
+  }
+
+  .othersTable tbody tr:nth-child(even) {
+    background: #fafafa;
+  }
+
+  .othersTable td.numeric {
+    text-align: right;
+    font-weight: 500;
+  }
+
+  .othersTable th:nth-child(2),
+  .othersTable th:nth-child(3) {
+    text-align: right;
+    width: 50%;
+  }
+
+  .othersTable th:nth-child(1) {
+    width: 60px;
+  }
+
+  /* ============================================
+    LAYOUT: GRÁFICO IZQUIERDA + TABLA DERECHA
+    ============================================ */
+
+  .globalSummaryContent {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 15px;
+    justify-content: flex-start;
+    align-items: flex-start;
+    width: 100%;
+    margin-top: 20px;
+    padding: 0;
+  }
+
+  .chartWrapper {
+    flex: 1 1 auto;
+    min-width: 400px;
+    max-width: calc(100% - 200px);
+    position: relative;
+  }
+
+  .chartContainer {
+    padding: 0;
+  }
+
+  /* ============================================
+    RESPONSIVE - TABLET (1024px)
+    ============================================ */
+
+  @media (max-width: 1024px) {
+    .globalSummaryContent {
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .chartWrapper {
+      flex: 0 1 100%;
+      width: 100%;
+      min-width: auto;
+      max-width: 100%;
+    }
+
+    .othersTableWrapper {
+      flex: 0 1 100%;
+      width: 100%;
+      min-width: auto;
+      height: auto;
+      align-self: auto;
+    }
+  }
+
+  /* ============================================
+    RESPONSIVE - MÓVIL (768px)
+    ============================================ */
+
+  @media (max-width: 768px) {
+    .globalSummaryContent {
+      flex-direction: column;
+      gap: 15px;
+      padding: 0 5px;
+    }
+
+    .othersTableWrapper {
+      width: 100%;
+      padding: 10px;
+    }
+
+    .othersTableWrapper h4 {
+      font-size: 0.75em;
+      margin-bottom: 6px;
+    }
+
+    .othersTable {
+      font-size: 9px;
+    }
+
+    .othersTable th,
+    .othersTable td {
+      padding: 3px 2px;
+      font-size: 8px;
+    }
+
+    .chartWrapper {
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .chartContainer {
+      height: 250px !important;
+    }
+  }
+
+  /* ============================================
+    RESPONSIVO - MÓVIL PEQUEÑO (480px)
+    ============================================ */
+
+  @media (max-width: 480px) {
+    .globalSummaryContent {
+      gap: 10px;
+      padding: 0;
+    }
+
+    .othersTableWrapper {
+      padding: 8px;
+    }
+
+    .othersTableWrapper h4 {
+      font-size: 0.7em;
+      margin-bottom: 5px;
+    }
+
+    .othersTable {
+      font-size: 8px;
+    }
+
+    .othersTable th,
+    .othersTable td {
+      padding: 2px 1px;
+      font-size: 7px;
+    }
+
+    .chartContainer {
+      height: 200px !important;
+    }
+  }
+
+  @media print {
+  @page {
+    size: letter;
+    margin: 1cm;
+  }
+
+  * {
+    orphans: 1 !important;
+    widows: 1 !important;
+  }
+
+  html, body {
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    background-color: #fff !important;
+    color: #000 !important;
+  }
+
+  .header .logoutButton,
+  .form,
+  button,
+  input[type="text"],
+  input[type="submit"],
+  .inactivityWarning {
+    display: none !important;
+  }
+
+  .container {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .globalSummaryContainer {
+    page-break-inside: avoid !important;
+    page-break-before: avoid !important;
     padding: 10px !important;
     border: none !important;
     box-shadow: none !important;
-    display: block !important; /* Vuelve a block para el flujo normal */
-    text-align: center !important;
+    margin-bottom: 20px !important;
   }
 
   .globalSummaryContainer h3 {
     font-size: 1.2em !important;
     margin-bottom: 5px !important;
+    color: #000 !important;
+    page-break-after: avoid !important;
   }
 
   .globalTotalAndDate {
+    page-break-after: avoid !important;
     margin-bottom: 10px !important;
+    padding: 0 !important;
   }
 
   .globalTotal {
     font-size: 1.5em !important;
     color: #000 !important;
   }
+
   .globalTotalLabel {
-      font-size: 0.8em !important;
+    font-size: 0.8em !important;
+    color: #333 !important;
   }
+
   .globalUpdateDate {
-      font-size: 0.8em !important;
-  }
-
-  .chartWrapper {
-    width: 95% !important; /* Ocupa casi todo el ancho para impresión */
-    max-width: none !important;
-    height: 250px !important; /* Ajusta altura para impresión */
-    margin: 0 auto !important;
-  }
-
-  /* Ocultar elementos de la tabla si estaban ocultos */
-  .globalSummaryTableWrapper { /* Si por alguna razón sigue existiendo, lo ocultamos */
-    display: none !important;
-  }
-}
-/* src/components/SearchPage.module.css */
-
-/* ... (Todos tus estilos existentes para la vista en pantalla quedan IGUAL arriba de este bloque) ... */
-
-
-/* --- Estilos para impresión --- */
-@media print {
-  /* Establece los márgenes de la página de impresión y el tamaño del papel */
-  @page {
-    size: letter; /* Define el tamaño del papel como Carta (8.5in x 11in) */
-    margin: 1cm; /* Reduce los márgenes de la página al imprimir. Ajusta este valor si es necesario. */
-  }
-
-  /* Fuerza la impresión de colores de fondo y sombras si es necesario */
-  body {
-    -webkit-print-color-adjust: exact !important; /* Para navegadores basados en WebKit */
-    print-color-adjust: exact !important; /* Estándar */
-    /* Asegura que el color de fondo y el texto sean legibles sobre blanco si el fondo original es oscuro */
-    background-color: #fff !important;
-    color: #000 !important;
-  }
-
-  /* Ocultar elementos que no queremos imprimir (ej. botón de cerrar sesión, formulario de búsqueda, controles JS) */
-  .header .logoutButton, /* Botón de cerrar sesión */
-  .form, /* Formulario de búsqueda */
-  .globalSummaryTableWrapper, /* Si por alguna razón la tabla de resumen global sigue existiendo, la ocultamos */
-  /* Si tienes algún botón de "Buscar", "Cerrar sesión", "Imprimir", etc., que no quieres que aparezca */
-  button,
-  input[type="text"],
-  input[type="submit"],
-  /* Cualquier otro elemento que no quieras imprimir */
-  .some-js-control-element { /* Ejemplo: si tienes algún control JS que no quieres ver */
-    display: none !important;
-  }
-
-  /* Contenedor principal de la página */
-  .container {
-    max-width: 100% !important; /* Ocupa todo el ancho de la página de impresión */
-    padding: 0 !important; /* Elimina padding para aprovechar el espacio del @page margin */
-    margin: 0 !important; /* Elimina margen para aprovechar el espacio del @page margin */
-  }
-
-  /* --- Resumen Global de Registros (GlobalSummaryDisplay) --- */
-  .globalSummaryContainer {
-    padding: 10px !important;
-    border: none !important;
-    box-shadow: none !important;
-    display: block !important; /* Vuelve a block para el flujo normal en impresión */
-    text-align: center !important; /* Centra el contenido */
-    margin-bottom: 20px !important; /* Espacio después de este bloque */
-  }
-
-  .globalSummaryContainer h3 {
-    font-size: 1.2em !important; /* Reduce el tamaño del título para impresión */
-    margin-bottom: 5px !important;
-    color: #000 !important; /* Asegura color negro para legibilidad */
-  }
-
-  .globalTotalAndDate {
-    margin-bottom: 10px !important;
-  }
-
-  .globalTotal {
-    font-size: 1.5em !important; /* Tamaño del total para impresión */
-    color: #000 !important;
-  }
-  .globalTotalLabel {
-      font-size: 0.8em !important;
-      color: #333 !important;
-  }
-  .globalUpdateDate {
-      font-size: 0.8em !important;
-      color: #555 !important;
+    font-size: 0.8em !important;
+    color: #555 !important;
   }
 
   .globalSummaryContent {
-      /* Asegúrate de que el contenedor del gráfico se imprima bien */
-      display: block !important; /* Quita el flexbox para que no haya problemas de espacio */
-      width: 100% !important;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    gap: 10px !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    page-break-inside: avoid !important;
+    page-break-before: avoid !important;
   }
 
   .chartWrapper {
-    width: 95% !important; /* Ocupa casi todo el ancho disponible para el gráfico */
-    max-width: none !important; /* Anula cualquier max-width de pantalla */
-    height: 250px !important; /* Ajusta la altura del gráfico para impresión */
-    margin: 0 auto !important; /* Centra el gráfico horizontalmente */
+    flex: 1 1 70% !important;
+    min-width: 50% !important;
+    max-width: 70% !important;
+    width: 70% !important;
+    page-break-inside: avoid !important;
+    page-break-before: avoid !important;
   }
 
   .chartContainer {
-      height: 100% !important; /* El contenedor del gráfico toma la altura de chartWrapper */
-      width: 100% !important;
-  }
-
-  /* --- Tabla de Resultados Detallados (SearchResultsTable) --- */
-  .searchResultsContainer {
-    /* Reinicia propiedades de posicionamiento para impresión */
+    height: 280px !important;
+    page-break-inside: avoid !important;
     margin: 0 !important;
     padding: 0 !important;
-    width: 100% !important; /* Para impresión, ocupa 100% sin vw/posición compleja */
+    width: 100% !important;
+  }
+
+  .othersTableWrapper {
+    flex: 0 0 28% !important;
+    width: 28% !important;
+    min-width: 28% !important;
+    max-width: 28% !important;
+    padding: 10px !important;
+    height: fit-content !important;
+    align-self: flex-start !important;
+    page-break-inside: avoid !important;
+    page-break-before: avoid !important;
+    background: white !important;
+    border: 1px solid #999 !important;
+    margin: 0 !important;
+  }
+
+  .othersTableWrapper h4 {
+    font-size: 0.75em !important;
+    margin: 0 0 6px 0 !important;
+    padding: 0 0 4px 0 !important;
+    color: #000 !important;
+  }
+
+  .othersTable {
+    font-size: 9px !important;
+    width: 100% !important;
+    page-break-inside: avoid !important;
+  }
+
+  .othersTable thead,
+  .othersTable tbody {
+    page-break-inside: avoid !important;
+  }
+
+  .othersTable tr {
+    page-break-inside: avoid !important;
+  }
+
+  .othersTable th,
+  .othersTable td {
+    padding: 3px 2px !important;
+    font-size: 8px !important;
+    color: #000 !important;
+    background-color: #fff !important;
+    border: 0.5px solid #ccc !important;
+  }
+
+  .othersTable th {
+    background: #ddd !important;
+    color: #000 !important;
+  }
+
+  .searchResultsContainer {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
     left: auto !important;
     right: auto !important;
-    position: static !important; /* Quita el posicionamiento relativo para impresión */
+    position: static !important;
     max-width: none !important;
+    page-break-inside: avoid !important;
   }
 
   .searchResultsContainer h3 {
-      margin-left: 0 !important;
-      padding-left: 0 !important;
-      text-align: left !important;
-      font-size: 1.1em !important; /* Tamaño del título de la tabla */
-      color: #000 !important;
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+    text-align: left !important;
+    font-size: 1.1em !important;
+    color: #000 !important;
+    page-break-after: avoid !important;
   }
 
   .tableResponsive {
-      overflow-x: visible !important; /* Permite que el contenido sea completamente visible al imprimir, aunque pueda desbordar */
-      margin-bottom: 0 !important;
-      padding: 0 !important; /* Elimina padding para que la tabla use todo el espacio */
+    overflow-x: visible !important;
+    margin-bottom: 0 !important;
+    padding: 0 !important;
   }
 
   .resultsTable {
-      width: 100% !important; /* La tabla debe ocupar todo el ancho disponible */
-      font-size: 8px !important; /* ✅ TAMAÑO DE FUENTE BASE PARA LA TABLA DE RESULTADOS AL IMPRIMIR */
-      box-shadow: none !important; /* Elimina la sombra al imprimir */
-      table-layout: fixed !important; /* Mantiene el layout fijo para respetar anchos */
+    width: 100% !important;
+    font-size: 8px !important;
+    box-shadow: none !important;
+    table-layout: fixed !important;
+    page-break-inside: avoid !important;
   }
 
   .resultsTable th,
   .resultsTable td {
-    font-size: 7px !important; /* ✅ TAMAÑO DE FUENTE MÁS PEQUEÑO PARA LAS CELDAS INDIVIDUALES AL IMPRIMIR */
-    padding: 2px 3px !important; /* ✅ REDUCE EL PADDING PARA QUE QUEPA MÁS CONTENIDO */
-    white-space: normal !important; /* Permite que el texto se rompa */
-    word-wrap: break-word !important; /* Asegura que palabras largas se rompan */
-    max-width: 1.5cm !important; /* ✅ ANCHO MÁXIMO DE COLUMNA PARA IMPRESIÓN (Puedes ajustar a 2cm o menos) */
-    border: 1px solid #ccc !important; /* Bordes más ligeros para impresión */
-    background-color: #fff !important; /* Asegura fondo blanco */
-    color: #000 !important; /* Asegura texto negro */
+    font-size: 7px !important;
+    padding: 2px 3px !important;
+    white-space: normal !important;
+    word-wrap: break-word !important;
+    max-width: 1.5cm !important;
+    border: 1px solid #ccc !important;
+    background-color: #fff !important;
+    color: #000 !important;
   }
 
-  /* Quitar el hover y las franjas de cebra para impresión para simplificar */
+  .resultsTable th {
+    background: #eee !important;
+    color: #000 !important;
+  }
+
   .resultsTable tbody tr:nth-child(even) {
-      background-color: #fff !important;
+    background-color: #fff !important;
   }
+
   .resultsTable tbody tr:hover {
-      background-color: #fff !important;
+    background-color: #fff !important;
   }
 
-  /* Ajustes para las tablas de resumen de búsqueda (si se muestran al imprimir) */
   .summaryTable {
-      font-size: 8px !important;
-      margin-bottom: 10px !important;
+    font-size: 8px !important;
+    margin-bottom: 10px !important;
+    page-break-inside: avoid !important;
   }
+
   .summaryTableTh {
-      padding: 5px 8px !important;
-      background: #eee !important;
-      color: #000 !important;
-      border: 1px solid #ccc !important;
+    padding: 5px 8px !important;
+    background: #eee !important;
+    color: #000 !important;
+    border: 1px solid #ccc !important;
   }
+
   .summaryTableTd {
-      padding: 5px 8px !important;
-      border: 1px solid #ccc !important;
-      background-color: #fff !important;
-      color: #000 !important;
+    padding: 5px 8px !important;
+    border: 1px solid #ccc !important;
+    background-color: #fff !important;
+    color: #000 !important;
   }
+
   .summaryTable .totalRow {
-      background: #f0f0f0 !important;
-      font-weight: bold !important;
+    background: #f0f0f0 !important;
+    font-weight: bold !important;
   }
+
   .summaryTableWrapper {
-      padding: 10px !important;
-      box-shadow: none !important;
-      border: 1px solid #ccc !important;
-      margin-bottom: 15px !important;
+    padding: 10px !important;
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+    margin-bottom: 15px !important;
+    page-break-inside: avoid !important;
   }
-}
-.inactivityWarning {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  background-color: #fff3cd;
-  color: #856404;
-  padding: 12px 16px;
-  border: 1px solid #ffeeba;
-  border-radius: 6px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  z-index: 1000;
-  font-size: 0.95em;
-}
-.searchTermDisplay {
-  margin-top: 1rem;
-  font-size: 1rem;
-  color: #333;
-}
 
-/* Asegura que el criterio se imprima */
-@media print {
   .searchTermDisplay {
-    display: block;
-    font-size: 1rem;
-    color: #000;
-    margin-bottom: 1rem;
+    display: block !important;
+    font-size: 1rem !important;
+    color: #000 !important;
+    margin-bottom: 1rem !important;
   }
 }
 
-
-.logoCliente {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-}
-
-.logoTitleWrapper {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-
-.logoTitleWrapper {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.logoBox {
-  width: 80px;
-  height: 80px;
-  min-width: 80px;
-  min-height: 80px;
-  /* Sin borde ni fondo */
-  border: none;
-  background-color: transparent;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  margin-right: 1rem;
-  flex-shrink: 0;
-}
-
-
-.logoCliente {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}

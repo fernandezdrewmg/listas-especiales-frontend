@@ -11,9 +11,9 @@ import {
   Legend,
 } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
+import OthersTable from "./OthersTable";
 import styles from "./SearchPage.module.css";
 
-// ✅ Registrar componentes y plugin
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -24,7 +24,6 @@ ChartJS.register(
   ChartDataLabels
 );
 
-// ✅ Generar colores
 const getRandomColor = () => {
   const letters = "0123456789ABCDEF";
   let color = "#";
@@ -91,9 +90,9 @@ function GlobalSummaryDisplay({
         data: counts,
         backgroundColor: backgroundColors,
         borderWidth: 0,
-        barThickness: 14, // ✅ barras más delgadas
-        categoryPercentage: 0.7,
-        barPercentage: 0.8,
+        barThickness: 16,
+        categoryPercentage: 0.75,
+        barPercentage: 0.85,
       },
     ],
   };
@@ -112,16 +111,20 @@ function GlobalSummaryDisplay({
           label: (context) =>
             new Intl.NumberFormat("es-BO").format(context.parsed.x),
         },
+        backgroundColor: "rgba(0, 0, 0, 0.8)",
+        padding: 10,
+        titleFont: { size: 11, weight: "bold" },
+        bodyFont: { size: 10 },
       },
 
       datalabels: {
         anchor: "end",
         align: "right",
-        offset: 2,
+        offset: 6,
         color: "#555",
         font: {
           weight: "bold",
-          size: 8,
+          size: 10,
         },
         formatter: (value) =>
           new Intl.NumberFormat("es-BO").format(value),
@@ -131,22 +134,27 @@ function GlobalSummaryDisplay({
     scales: {
       x: {
         beginAtZero: true,
-        ticks: { font: { size: 9 } },
+        ticks: {
+          font: { size: 10 },
+          callback: (value) =>
+            new Intl.NumberFormat("es-BO").format(value),
+        },
+        max: Math.max(...counts) * 1.15,
       },
       y: {
         ticks: {
-          font: { size: 8 },
-          padding: 4,
+          font: { size: 10 },
+          padding: 6,
         },
       },
     },
 
     layout: {
       padding: {
-        left: 6,
-        right: 10,
-        top: 4,
-        bottom: 4,
+        left: 8,
+        right: 50,
+        top: 8,
+        bottom: 8,
       },
     },
   };
@@ -170,15 +178,17 @@ function GlobalSummaryDisplay({
       </div>
 
       <div className={styles.globalSummaryContent}>
+        {/* Gráfico de Barras (Top 8 + Otros) - A LA IZQUIERDA */}
         <div className={styles.chartWrapper}>
-          {/* ✅ Altura controlada sin tocar CSS */}
-          <div
-            className={styles.chartContainer}
-            style={{ height: 280 }}
-          >
+          <div className={styles.chartContainer} style={{ height: 320 }}>
             <Bar data={chartData} options={chartOptions} />
           </div>
         </div>
+
+        {/* Tabla de Otros - A LA DERECHA */}
+        {others.length > 0 && (
+          <OthersTable summary={summary} total={total} />
+        )}
       </div>
     </div>
   );
