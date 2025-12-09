@@ -30,23 +30,30 @@ export function useSearch() {
 
       if (error) throw error;
 
-      // ✅ Ahora data incluye CampoCoincidencia y Relevancia
-      // Ya viene ordenado por relevancia (ASC)
-
-      // Cálculo de resumen por Código
+      // ✅ MEJORADO: Agrupación correcta por código
       const counts = data.reduce((acc, item) => {
-        const code = item.Codigo || "Sin Código";
+        // Tomar el código tal como viene de la BD (sin transformación)
+        const code = (item.codigo && item.codigo.trim()) || "Sin Código";
         acc[code] = (acc[code] || 0) + 1;
         return acc;
       }, {});
-      setSummaryData(counts);
+      
+      // ✅ MEJORADO: Ordenar por código para mejor visualización
+      const countsSorted = Object.keys(counts)
+        .sort()
+        .reduce((obj, key) => {
+          obj[key] = counts[key];
+          return obj;
+        }, {});
+      
+      setSummaryData(countsSorted);
 
       // Cantidad total de registros encontrados
       setCodigoCount(data.length);
 
       // Fecha más reciente
       const fechas = data
-        .map((item) => item.FechaReporte)
+        .map((item) => item.fecha_reporte)
         .filter(Boolean)
         .map((fecha) => new Date(fecha));
 
@@ -61,6 +68,11 @@ export function useSearch() {
       }
 
       setResults(data);
+      
+      // ✅ DEBUGGER: Verifica qué estás recibiendo
+      console.log("📊 Resumen por código:", countsSorted);
+      console.log("📋 Resultados:", data);
+      
     } catch (err) {
       console.error("Error en la búsqueda:", err);
       setError("Error al buscar datos. Inténtelo de nuevo.");
