@@ -30,7 +30,10 @@ export function useSearch() {
 
       if (error) throw error;
 
-      // ✅ Cálculo de resumen por Código
+      // ✅ Ahora data incluye CampoCoincidencia y Relevancia
+      // Ya viene ordenado por relevancia (ASC)
+
+      // Cálculo de resumen por Código
       const counts = data.reduce((acc, item) => {
         const code = item.Codigo || "Sin Código";
         acc[code] = (acc[code] || 0) + 1;
@@ -38,10 +41,10 @@ export function useSearch() {
       }, {});
       setSummaryData(counts);
 
-      // ✅ Cantidad total de registros encontrados (no únicos)
+      // Cantidad total de registros encontrados
       setCodigoCount(data.length);
 
-      // ✅ Fecha más reciente
+      // Fecha más reciente
       const fechas = data
         .map((item) => item.FechaReporte)
         .filter(Boolean)
@@ -70,7 +73,7 @@ export function useSearch() {
     results,
     loading,
     error,
-    codigoCount,      // ← ahora muestra total de registros
+    codigoCount,
     fechaReciente,
     summaryData,
     executeSearch,

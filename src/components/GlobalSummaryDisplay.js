@@ -10,10 +10,10 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import ChartDataLabels from 'chartjs-plugin-datalabels'; // ✅ Importar correctamente desde el plugin
+import ChartDataLabels from "chartjs-plugin-datalabels";
 import styles from "./SearchPage.module.css";
 
-// ✅ Registrar el plugin ChartDataLabels junto con los componentes de Chart.js
+// ✅ Registrar componentes y plugin
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -21,9 +21,10 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  ChartDataLabels // ✅ Registrar aquí
+  ChartDataLabels
 );
 
+// ✅ Generar colores
 const getRandomColor = () => {
   const letters = "0123456789ABCDEF";
   let color = "#";
@@ -33,8 +34,13 @@ const getRandomColor = () => {
   return color;
 };
 
-// lastUpdateDate ahora se usará directamente para mostrar la fecha de actualización global
-function GlobalSummaryDisplay({ summary, total, loading, error, lastUpdateDate }) {
+function GlobalSummaryDisplay({
+  summary,
+  total,
+  loading,
+  error,
+  lastUpdateDate,
+}) {
   if (loading) {
     return (
       <div className={styles.globalSummaryContainer}>
@@ -54,24 +60,40 @@ function GlobalSummaryDisplay({ summary, total, loading, error, lastUpdateDate }
   if (!summary || summary.length === 0) {
     return (
       <div className={styles.globalSummaryContainer}>
-        <p className={styles.noResults}>No hay datos de resumen global disponibles.</p>
+        <p className={styles.noResults}>
+          No hay datos de resumen global disponibles.
+        </p>
       </div>
     );
   }
 
-  const labels = summary.map((item) => item.codigo);
-  const counts = summary.map((item) => item.count);
+  // ✅ Ordenar y limitar (Top 8 + Otros)
+  const sorted = [...summary].sort((a, b) => b.count - a.count);
+  const top = sorted.slice(0, 8);
+  const others = sorted.slice(8);
+
+  if (others.length > 0) {
+    top.push({
+      codigo: "OTROS",
+      count: others.reduce((acc, i) => acc + i.count, 0),
+    });
+  }
+
+  const labels = top.map((item) => item.codigo);
+  const counts = top.map((item) => item.count);
   const backgroundColors = labels.map(() => getRandomColor());
 
   const chartData = {
-    labels: labels,
+    labels,
     datasets: [
       {
         label: "Total de Registros",
         data: counts,
         backgroundColor: backgroundColors,
-        borderColor: backgroundColors.map((color) => color.replace(")", ", 0.8)")),
-        borderWidth: 1,
+        borderWidth: 0,
+        barThickness: 14, // ✅ barras más delgadas
+        categoryPercentage: 0.7,
+        barPercentage: 0.8,
       },
     ],
   };
@@ -80,70 +102,51 @@ function GlobalSummaryDisplay({ summary, total, loading, error, lastUpdateDate }
     indexAxis: "y",
     responsive: true,
     maintainAspectRatio: false,
+
     plugins: {
-      legend: {
-        display: false,
-      },
-      title: {
-        display: true,
-        text: "Distribución Global de Registros por Código",
-        font: {
-          size: 16,
-          weight: "bold",
-        },
-        color: "#333",
-      },
+      legend: { display: false },
+      title: { display: false },
+
       tooltip: {
         callbacks: {
-          label: function (context) {
-            let label = context.dataset.label || "";
-            if (label) {
-              label += ": ";
-            }
-            if (context.parsed.x !== null) {
-              label += new Intl.NumberFormat("es-BO").format(context.parsed.x);
-            }
-            return label;
-          },
+          label: (context) =>
+            new Intl.NumberFormat("es-BO").format(context.parsed.x),
         },
       },
-      datalabels: { // ✅ Configuración del plugin ChartDataLabels
-        anchor: 'end', // Posición de la etiqueta (start, end, center)
-        align: 'end', // Alineación de la etiqueta (start, end, center)
-        color: '#555', // Color del texto de la etiqueta
+
+      datalabels: {
+        anchor: "end",
+        align: "right",
+        offset: 2,
+        color: "#555",
         font: {
-          weight: 'bold',
-          size: 10, // Tamaño de la fuente para las etiquetas de datos
+          weight: "bold",
+          size: 8,
         },
-        formatter: function(value) {
-            return new Intl.NumberFormat("es-BO").format(value); // Formato numérico
-        }
-      }
+        formatter: (value) =>
+          new Intl.NumberFormat("es-BO").format(value),
+      },
     },
+
     scales: {
       x: {
         beginAtZero: true,
-        title: {
-          display: true,
-          text: "Número de Registros",
-          font: {
-            size: 14,
-          },
-        },
-        ticks: {
-          callback: function (value) {
-            return new Intl.NumberFormat("es-BO").format(value);
-          },
-        },
+        ticks: { font: { size: 9 } },
       },
       y: {
-        title: {
-          display: true,
-          text: "Código",
-          font: {
-            size: 14,
-          },
+        ticks: {
+          font: { size: 8 },
+          padding: 4,
         },
+      },
+    },
+
+    layout: {
+      padding: {
+        left: 6,
+        right: 10,
+        top: 4,
+        bottom: 4,
       },
     },
   };
@@ -152,9 +155,10 @@ function GlobalSummaryDisplay({ summary, total, loading, error, lastUpdateDate }
     <div className={styles.globalSummaryContainer}>
       <h3>Resumen Global de Registros</h3>
 
-      {/* Sección para mostrar el total de registros y la fecha de actualización */}
       <div className={styles.globalTotalAndDate}>
-        <span className={styles.globalTotalLabel}>Total de Registros en la Base:</span>
+        <span className={styles.globalTotalLabel}>
+          Total de Registros en la Base:
+        </span>
         <span className={styles.globalTotal}>
           {new Intl.NumberFormat("es-BO").format(total)}
         </span>
@@ -167,7 +171,11 @@ function GlobalSummaryDisplay({ summary, total, loading, error, lastUpdateDate }
 
       <div className={styles.globalSummaryContent}>
         <div className={styles.chartWrapper}>
-          <div className={styles.chartContainer}>
+          {/* ✅ Altura controlada sin tocar CSS */}
+          <div
+            className={styles.chartContainer}
+            style={{ height: 280 }}
+          >
             <Bar data={chartData} options={chartOptions} />
           </div>
         </div>
