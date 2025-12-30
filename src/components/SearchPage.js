@@ -161,7 +161,7 @@ export default function SearchPage({ onLogout }) {
       ).toISOString();
 
       // Construcción del resumen de fuente
-      let fuenteResumen = "Sin coincidencia";
+      let fuenteResumen = null ;
 
       if (totalCoincidencias > 0 && results.length > 0) {
         const codigosUnicos = [
