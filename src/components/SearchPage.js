@@ -65,7 +65,9 @@ export default function SearchPage({ onLogout }) {
   // Obtener usuario y logo
   useEffect(() => {
     const obtenerUsuario = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user?.email) return;
 
       setUsuarioEmail(user.email);
@@ -73,8 +75,6 @@ export default function SearchPage({ onLogout }) {
       const { data, error } = await supabase
         .from("usuarios")
         .select("cliente, logo_cliente")
-        // ✅ CORRECCIÓN: Usar .ilike() para que la búsqueda de email
-        // sea insensible a mayúsculas y minúsculas.
         .ilike("email", user.email)
         .single();
 
@@ -82,15 +82,14 @@ export default function SearchPage({ onLogout }) {
         if (error) {
           console.error("Error al buscar usuario:", error.message);
         }
-        return; // No se encontró usuario o hubo un error
+        return;
       }
 
       setClienteNombre(data.cliente || "");
 
       const nombreLogo = (data.logo_cliente || "").trim();
       if (nombreLogo) {
-        const { data: urlData } = supabase
-          .storage
+        const { data: urlData } = supabase.storage
           .from("logos_clientes")
           .getPublicUrl(nombreLogo);
         setLogoUrl(urlData?.publicUrl || "");
@@ -98,6 +97,7 @@ export default function SearchPage({ onLogout }) {
         setLogoUrl("");
       }
     };
+
     obtenerUsuario();
   }, []);
 
@@ -113,46 +113,69 @@ export default function SearchPage({ onLogout }) {
 
       warningTimeoutId = setTimeout(() => {
         setShowInactivityWarning(true);
-      }, 90 * 1000); // 1.5 minutos para advertencia
+      }, 90 * 1000);
 
       logoutTimeoutId = setTimeout(() => {
         supabase.auth.signOut().then(() => {
           onLogout();
         });
-      }, 2 * 60 * 1000); // 2 minutos para logout
+      }, 2 * 60 * 1000);
     };
 
     const eventos = ["mousemove", "keydown", "scroll", "click"];
-    eventos.forEach((evento) => window.addEventListener(evento, resetTimers));
+    eventos.forEach((evento) =>
+      window.addEventListener(evento, resetTimers)
+    );
 
     resetTimers();
 
     return () => {
-      eventos.forEach((evento) => window.removeEventListener(evento, resetTimers));
+      eventos.forEach((evento) =>
+        window.removeEventListener(evento, resetTimers)
+      );
       clearTimeout(warningTimeoutId);
       clearTimeout(logoutTimeoutId);
     };
   }, [onLogout]);
 
-  // Buscar
+  // Ejecutar búsqueda
   const handleSearch = async (e) => {
     e.preventDefault();
     const criterio = term.trim();
     if (criterio === "" || !usuarioEmail) return;
+
     await executeSearch(criterio);
     setPendingRegister(true);
   };
 
-  // Registrar búsqueda
+  // Registrar búsqueda (incluye columna FUENTE)
   useEffect(() => {
     if (pendingRegister && summaryData && usuarioEmail) {
       const totalCoincidencias = Object.values(summaryData).reduce(
         (acc, val) => acc + val,
         0
       );
+
       const fechaBolivia = new Date(
         Date.now() - 4 * 60 * 60 * 1000
       ).toISOString();
+
+      // Construcción del resumen de fuente
+      let fuenteResumen = "Sin coincidencia";
+
+      if (totalCoincidencias > 0 && results.length > 0) {
+        const codigosUnicos = [
+          ...new Set(
+            results
+              .map((r) => r.codigo)
+              .filter(Boolean)
+          ),
+        ];
+
+        if (codigosUnicos.length > 0) {
+          fuenteResumen = codigosUnicos.join(", ");
+        }
+      }
 
       const registrarBusqueda = async () => {
         try {
@@ -163,23 +186,32 @@ export default function SearchPage({ onLogout }) {
                 usuario_email: usuarioEmail,
                 criterio: term.trim(),
                 cantidad_resultados: totalCoincidencias,
+                fuente: fuenteResumen,
                 fecha: fechaBolivia,
               },
             ]);
+
           if (insertError) {
-            console.error("❌ Error al registrar búsqueda:", insertError.message);
+            console.error(
+              "❌ Error al registrar búsqueda:",
+              insertError.message
+            );
           } else {
             console.log("✅ Búsqueda registrada en Supabase");
           }
         } catch (err) {
-          console.error("⚠️ Error inesperado al registrar búsqueda:", err);
+          console.error(
+            "⚠️ Error inesperado al registrar búsqueda:",
+            err
+          );
         }
+
         setPendingRegister(false);
       };
 
       registrarBusqueda();
     }
-  }, [summaryData, pendingRegister, usuarioEmail, term]);
+  }, [summaryData, pendingRegister, usuarioEmail, term, results]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -195,50 +227,50 @@ export default function SearchPage({ onLogout }) {
         </div>
       )}
 
-<div className={styles.header}>
-  <div className={styles.headerLeft}>
-    <div className={styles.logoTitleWrapper}>
-      <div className={styles.logoBox}>
-        {logoUrl && (
-          <img
-            src={logoUrl}
-            alt={`Logo de ${clienteNombre}`}
-            className={styles.logoCliente}
-            onError={(e) => {
-              e.currentTarget.style.display = "none";
-            }}
-          />
-        )}
+      <div className={styles.header}>
+        <div className={styles.headerLeft}>
+          <div className={styles.logoTitleWrapper}>
+            <div className={styles.logoBox}>
+              {logoUrl && (
+                <img
+                  src={logoUrl}
+                  alt={`Logo de ${clienteNombre}`}
+                  className={styles.logoCliente}
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                  }}
+                />
+              )}
+            </div>
+            <div>
+              <h2>Buscar en Listas Especiales</h2>
+              <p className={styles.updateDateText}>
+                Base de datos actualizada al:{" "}
+                <strong>
+                  {globalLastUpdateDate || "Cargando..."}
+                </strong>
+              </p>
+              <p className={styles.userEmail}>
+                Usuario: <strong>{usuarioEmail}</strong>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className={styles.headerRight}>
+          <p className={styles.currentDateText}>
+            Fecha actual: <strong>{fechaActual}</strong>
+          </p>
+          <button
+            onClick={handleLogout}
+            className={styles.logoutButton}
+          >
+            Cerrar sesión
+          </button>
+        </div>
       </div>
-      <div>
-        <h2>Buscar en Listas Especiales</h2>
-        <p className={styles.updateDateText}>
-          Base de datos actualizada al: <strong>{globalLastUpdateDate || "Cargando..."}</strong>
-        </p>
-        {/* ✅ Email debajo del título, sin afectar el layout derecho */}
-        <p className={styles.userEmail}>
-          Usuario: <strong>{usuarioEmail}</strong>
-        </p>
-      </div>
-    </div>
-  </div>
-
-  <div className={styles.headerRight}>
-    <p className={styles.currentDateText}>
-      Fecha actual: <strong>{fechaActual}</strong>
-    </p>
-    <button onClick={handleLogout} className={styles.logoutButton}>
-      Cerrar sesión
-    </button>
-  </div>
-</div>
-
-
 
       <form onSubmit={handleSearch} className={styles.form}>
-        <label htmlFor="searchTerm" style={{ display: "none" }}>
-          Término de búsqueda
-        </label>
         <input
           id="searchTerm"
           type="text"
@@ -279,20 +311,33 @@ export default function SearchPage({ onLogout }) {
         </div>
       )}
 
-      {loading && <p className={styles.loading}>Buscando coincidencias…</p>}
-      {error && <p className={styles.error}>{error}</p>}
-
-      {results.length > 0 && <SearchResultsTable results={results} />}
-
-      {results.length === 0 && term.trim() !== "" && !loading && (
-        <p className={styles.noResults}>No se encontraron coincidencias.</p>
-      )}
-
-      {results.length === 0 && term.trim() === "" && !loading && !error && (
-        <p className={styles.noResults}>
-          Ingresa un término de búsqueda para comenzar.
+      {loading && (
+        <p className={styles.loading}>
+          Buscando coincidencias…
         </p>
       )}
+      {error && <p className={styles.error}>{error}</p>}
+
+      {results.length > 0 && (
+        <SearchResultsTable results={results} />
+      )}
+
+      {results.length === 0 &&
+        term.trim() !== "" &&
+        !loading && (
+          <p className={styles.noResults}>
+            No se encontraron coincidencias.
+          </p>
+        )}
+
+      {results.length === 0 &&
+        term.trim() === "" &&
+        !loading &&
+        !error && (
+          <p className={styles.noResults}>
+            Ingresa un término de búsqueda para comenzar.
+          </p>
+        )}
     </div>
   );
 }
