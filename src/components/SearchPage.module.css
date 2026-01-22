@@ -1,4 +1,4 @@
-  /* src/components/SearchPage.module.css */
+ /* src/components/SearchPage.module.css */
 
   /* --- Estilos Generales del Contenedor de la Página de Búsqueda --- */
   .container {
@@ -1045,4 +1045,3 @@
     string-set: printDate "Impreso: " attr(data-print-date);
   }
 }
-

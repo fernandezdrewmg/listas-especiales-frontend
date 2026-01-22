@@ -109,7 +109,16 @@ export default function ReportPage({ cliente, logoUrl, clienteNombre }) {
     }
   };
 
-  // 3) Generar CSV con separador "|"
+  // 3) Limpiar filtros
+  const handleClearFilters = () => {
+    setSelectedEmail("");
+    setFechaDesde("");
+    setFechaHasta("");
+    setReportData([]);
+    setError("");
+  };
+
+  // 4) Generar CSV con separador "|"
   const handleDownloadCsv = () => {
     if (!reportData || reportData.length === 0) return;
 
@@ -156,12 +165,12 @@ export default function ReportPage({ cliente, logoUrl, clienteNombre }) {
     URL.revokeObjectURL(url);
   };
 
-  // 4) Imprimir / guardar en PDF usando el navegador
+  // 5) Imprimir / guardar en PDF usando el navegador
   const handlePrintPdf = () => {
     window.print();
   };
 
-  // 5) Función auxiliar para obtener fecha y hora formateada
+  // 6) Función auxiliar para obtener fecha y hora formateada
   const getPrintDateTime = () => {
     const now = new Date();
     return now.toLocaleString("es-BO", {
@@ -174,11 +183,22 @@ export default function ReportPage({ cliente, logoUrl, clienteNombre }) {
     });
   };
 
+  // 7) Texto de resumen de filtros
+  const getFiltersSummary = () => {
+    const emailText = selectedEmail ? selectedEmail : "Todos";
+    const desdeText = fechaDesde || "Sin límite inferior";
+    const hastaText = fechaHasta || "Sin límite superior";
+    return `Usuario: ${emailText} | Rango de fechas: ${desdeText} - ${hastaText}`;
+  };
+
+  const totalRegistros = reportData ? reportData.length : 0;
+
   return (
     <div
       className={styles.reportContainer}
       data-print-date={getPrintDateTime()}
     >
+      {/* Encabezado compacto en dos columnas */}
       <div className={styles.header}>
         <div className={styles.headerLeft}>
           <div className={styles.logoTitleWrapper}>
@@ -194,6 +214,15 @@ export default function ReportPage({ cliente, logoUrl, clienteNombre }) {
               </p>
             </div>
           </div>
+        </div>
+
+        <div className={styles.headerRight}>
+          <p className={styles.userEmail}>
+            <strong>Filtros aplicados:</strong> {getFiltersSummary()}
+          </p>
+          <p className={styles.userEmail}>
+            <strong>Total registros:</strong> {totalRegistros}
+          </p>
         </div>
       </div>
 
@@ -240,8 +269,17 @@ export default function ReportPage({ cliente, logoUrl, clienteNombre }) {
             type="button"
             onClick={fetchReport}
             className={styles.searchButton}
+            disabled={loading}
           >
             Aplicar filtros
+          </button>
+          <button
+            type="button"
+            onClick={handleClearFilters}
+            className={styles.exportButton}
+            disabled={loading && !reportData.length}
+          >
+            Limpiar filtros
           </button>
           <button
             type="button"
@@ -303,5 +341,4 @@ export default function ReportPage({ cliente, logoUrl, clienteNombre }) {
     </div>
   );
 }
-
 
