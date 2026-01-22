@@ -13,8 +13,7 @@ export default function ReportPage({ cliente, logoUrl, clienteNombre }) {
   const [error, setError] = useState("");
   const tableRef = useRef(null);
 
-  // 1) Cargar TODOS los emails de la entidad (incluye Vigente y Baja)
-  //    y normalizarlos a minúsculas para que coincidan con busquedas.usuario_email
+  // 1) Cargar TODOS los emails de la entidad
   useEffect(() => {
     const fetchEmailsCliente = async () => {
       setError("");
@@ -22,7 +21,7 @@ export default function ReportPage({ cliente, logoUrl, clienteNombre }) {
         const { data, error: usersError } = await supabase
           .from("usuarios")
           .select("email")
-          .eq("cliente", cliente); // solo por cliente
+          .eq("cliente", cliente);
 
         if (usersError) {
           console.error(
@@ -49,7 +48,64 @@ export default function ReportPage({ cliente, logoUrl, clienteNombre }) {
     }
   }, [cliente]);
 
-  // 2) Construir y ejecutar la consulta a busquedas con filtros
+  // 2) Registrar uso del reporte (fecha_local en horario La Paz -4)
+  const registrarUsoReporte = async (totalRegistrosLocal, dataLocal) => {
+    try {
+      const filtrosUsuario = selectedEmail || "Todos";
+
+      const totalResultados =
+        dataLocal && dataLocal.length
+          ? dataLocal.reduce(
+              (acc, row) => acc + (row.cantidad_resultados || 0),
+              0
+            )
+          : 0;
+
+      const { data: userData, error: userError } = await supabase
+        .auth
+        .getUser();
+
+      if (userError) {
+        console.error("Error al obtener usuario autenticado:", userError.message);
+      }
+
+      const authEmail = userData?.user?.email || null;
+
+      // Hora local de La Paz (-04) como TEXTO legible
+      const fechaLocal = new Date().toLocaleString("es-BO", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
+        timeZone: "America/La_Paz",
+      });
+
+      const { error: insertError } = await supabase.from("reportes").insert([
+        {
+          usuario_email: authEmail,
+          cliente: cliente || null,
+          filtros_usuario: filtrosUsuario,
+          filtro_fecha_desde: fechaDesde || null,
+          filtro_fecha_hasta: fechaHasta || null,
+          total_registros: totalRegistrosLocal,
+          total_resultados: totalResultados,
+          fecha: new Date().toISOString(), // UTC (opcional)
+          fecha_local: fechaLocal,         // visible en horario La Paz
+        },
+      ]);
+
+      if (insertError) {
+        console.error("Error al registrar uso de reporte:", insertError.message);
+      }
+    } catch (err) {
+      console.error("Error inesperado al registrar uso de reporte:", err);
+    }
+  };
+
+  // 3) Construir y ejecutar la consulta a busquedas con filtros
   const fetchReport = async () => {
     setLoading(true);
     setError("");
@@ -72,14 +128,12 @@ export default function ReportPage({ cliente, logoUrl, clienteNombre }) {
           count: "exact",
         });
 
-      // Filtro por emails de la entidad (en minúsculas)
       if (selectedEmail) {
         query = query.eq("usuario_email", selectedEmail);
       } else {
         query = query.in("usuario_email", emailsCliente);
       }
 
-      // Filtros por fecha (asumiendo que 'fecha' es timestamp ISO en la BD)
       if (fechaDesde) {
         const desdeISO = new Date(fechaDesde + "T00:00:00").toISOString();
         query = query.gte("fecha", desdeISO);
@@ -100,7 +154,11 @@ export default function ReportPage({ cliente, logoUrl, clienteNombre }) {
         return;
       }
 
-      setReportData(data || []);
+      const safeData = data || [];
+      setReportData(safeData);
+
+      const totalRegistrosLocal = safeData.length;
+      await registrarUsoReporte(totalRegistrosLocal, safeData);
     } catch (err) {
       console.error("Error inesperado al obtener reporte:", err);
       setError("Ocurrió un error al obtener el reporte.");
@@ -109,7 +167,7 @@ export default function ReportPage({ cliente, logoUrl, clienteNombre }) {
     }
   };
 
-  // 3) Limpiar filtros
+  // 4) Limpiar filtros
   const handleClearFilters = () => {
     setSelectedEmail("");
     setFechaDesde("");
@@ -118,7 +176,7 @@ export default function ReportPage({ cliente, logoUrl, clienteNombre }) {
     setError("");
   };
 
-  // 4) Generar CSV con separador "|"
+  // 5) Generar CSV con separador "|"
   const handleDownloadCsv = () => {
     if (!reportData || reportData.length === 0) return;
 
@@ -165,12 +223,12 @@ export default function ReportPage({ cliente, logoUrl, clienteNombre }) {
     URL.revokeObjectURL(url);
   };
 
-  // 5) Imprimir / guardar en PDF usando el navegador
+  // 6) Imprimir / guardar en PDF usando el navegador
   const handlePrintPdf = () => {
     window.print();
   };
 
-  // 6) Función auxiliar para obtener fecha y hora formateada
+  // 7) Fecha/hora mostrada (también en hora La Paz)
   const getPrintDateTime = () => {
     const now = new Date();
     return now.toLocaleString("es-BO", {
@@ -180,10 +238,11 @@ export default function ReportPage({ cliente, logoUrl, clienteNombre }) {
       hour: "2-digit",
       minute: "2-digit",
       second: "2-digit",
+      timeZone: "America/La_Paz",
     });
   };
 
-  // 7) Texto de resumen de filtros
+  // 8) Resumen de filtros
   const getFiltersSummary = () => {
     const emailText = selectedEmail ? selectedEmail : "Todos";
     const desdeText = fechaDesde || "Sin límite inferior";
@@ -202,7 +261,6 @@ export default function ReportPage({ cliente, logoUrl, clienteNombre }) {
       <div className={styles.header}>
         <div className={styles.headerLeft}>
           <div className={styles.logoTitleWrapper}>
-            {/* Sin logo para no repetir visualmente */}
             <div>
               <h2>Reporte de Búsquedas</h2>
               <p className={styles.userEmail}>
@@ -341,4 +399,3 @@ export default function ReportPage({ cliente, logoUrl, clienteNombre }) {
     </div>
   );
 }
-
