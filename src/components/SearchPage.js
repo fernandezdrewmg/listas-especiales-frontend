@@ -6,6 +6,7 @@ import { useSearch } from "../hooks/useSearch";
 import { useGlobalSummary } from "../hooks/useGlobalSummary";
 import SearchResultsTable from "./SearchResultsTable";
 import GlobalSummaryDisplay from "./GlobalSummaryDisplay";
+import ReportPage from "./ReportPage";
 
 function SummaryTable({ summary, total }) {
   return (
@@ -43,6 +44,10 @@ export default function SearchPage({ onLogout }) {
   const [showInactivityWarning, setShowInactivityWarning] = useState(false);
   const [pendingRegister, setPendingRegister] = useState(false);
 
+  const [puedeVerReporte, setPuedeVerReporte] = useState(false);
+  const [clienteCodigo, setClienteCodigo] = useState("");
+  const [showReport, setShowReport] = useState(false);
+
   const { results, loading, error, summaryData, executeSearch } = useSearch();
   const {
     globalSummary,
@@ -62,7 +67,7 @@ export default function SearchPage({ onLogout }) {
     setFechaActual(hoy);
   }, []);
 
-  // Obtener usuario y logo
+  // Obtener usuario, logo y permiso de reporte
   useEffect(() => {
     const obtenerUsuario = async () => {
       const {
@@ -74,7 +79,7 @@ export default function SearchPage({ onLogout }) {
 
       const { data, error } = await supabase
         .from("usuarios")
-        .select("cliente, logo_cliente")
+        .select('cliente, logo_cliente, "Reporte"')
         .ilike("email", user.email)
         .single();
 
@@ -86,6 +91,7 @@ export default function SearchPage({ onLogout }) {
       }
 
       setClienteNombre(data.cliente || "");
+      setClienteCodigo(data.cliente || "");
 
       const nombreLogo = (data.logo_cliente || "").trim();
       if (nombreLogo) {
@@ -96,6 +102,10 @@ export default function SearchPage({ onLogout }) {
       } else {
         setLogoUrl("");
       }
+
+      const valorReporte = (data.Reporte || "").toLowerCase();
+      const puede = valorReporte === "si" || valorReporte === "sí";
+      setPuedeVerReporte(puede);
     };
 
     obtenerUsuario();
@@ -160,8 +170,7 @@ export default function SearchPage({ onLogout }) {
         Date.now() - 4 * 60 * 60 * 1000
       ).toISOString();
 
-      // Construcción del resumen de fuente
-      let fuenteResumen = null ;
+      let fuenteResumen = null;
 
       if (totalCoincidencias > 0 && results.length > 0) {
         const codigosUnicos = [
@@ -183,7 +192,7 @@ export default function SearchPage({ onLogout }) {
             .from("busquedas")
             .insert([
               {
-                usuario_email: usuarioEmail,
+                usuario_email: usuarioEmail.toLowerCase(),
                 criterio: term.trim(),
                 cantidad_resultados: totalCoincidencias,
                 fuente: fuenteResumen,
@@ -261,6 +270,17 @@ export default function SearchPage({ onLogout }) {
           <p className={styles.currentDateText}>
             Fecha actual: <strong>{fechaActual}</strong>
           </p>
+
+          {puedeVerReporte && (
+            <button
+              type="button"
+              onClick={() => setShowReport((prev) => !prev)}
+              className={styles.reportButton}
+            >
+              {showReport ? "Volver a búsqueda" : "Ver reporte"}
+            </button>
+          )}
+
           <button
             onClick={handleLogout}
             className={styles.logoutButton}
@@ -270,74 +290,85 @@ export default function SearchPage({ onLogout }) {
         </div>
       </div>
 
-      <form onSubmit={handleSearch} className={styles.form}>
-        <input
-          id="searchTerm"
-          type="text"
-          value={term}
-          onChange={(e) => setTerm(e.target.value)}
-          placeholder="Escribe un nombre o apellido..."
-          className={styles.searchInput}
-          aria-label="Introduce un nombre o apellido para buscar"
+      {showReport ? (
+        <ReportPage
+          cliente={clienteCodigo}
+          logoUrl={logoUrl}
+          clienteNombre={clienteNombre}
         />
-        <button type="submit" className={styles.searchButton}>
-          Buscar
-        </button>
-      </form>
+      ) : (
+        <>
+          <form onSubmit={handleSearch} className={styles.form}>
+            <input
+              id="searchTerm"
+              type="text"
+              value={term}
+              onChange={(e) => setTerm(e.target.value)}
+              placeholder="Escribe un nombre o apellido..."
+              className={styles.searchInput}
+              aria-label="Introduce un nombre o apellido para buscar"
+            />
+            <button type="submit" className={styles.searchButton}>
+              Buscar
+            </button>
+          </form>
 
-      {term.trim() !== "" && (
-        <p className={styles.searchTermDisplay}>
-          <strong>Criterio de búsqueda:</strong> {term}
-        </p>
-      )}
+          {term.trim() !== "" && (
+            <p className={styles.searchTermDisplay}>
+              <strong>Criterio de búsqueda:</strong> {term}
+            </p>
+          )}
 
-      <GlobalSummaryDisplay
-        summary={globalSummary}
-        total={globalTotal}
-        loading={globalLoading}
-        error={globalError}
-      />
-
-      {results.length > 0 && (
-        <div className={styles.summaryTableWrapper}>
-          <h3>Coincidencias encontradas</h3>
-          <SummaryTable
-            summary={summaryData}
-            total={Object.values(summaryData).reduce(
-              (acc, val) => acc + val,
-              0
-            )}
+          <GlobalSummaryDisplay
+            summary={globalSummary}
+            total={globalTotal}
+            loading={globalLoading}
+            error={globalError}
           />
-        </div>
+
+          {results.length > 0 && (
+            <div className={styles.summaryTableWrapper}>
+              <h3>Coincidencias encontradas</h3>
+              <SummaryTable
+                summary={summaryData}
+                total={Object.values(summaryData).reduce(
+                  (acc, val) => acc + val,
+                  0
+                )}
+              />
+            </div>
+          )}
+
+          {loading && (
+            <p className={styles.loading}>
+              Buscando coincidencias…
+            </p>
+          )}
+          {error && <p className={styles.error}>{error}</p>}
+
+          {results.length > 0 && (
+            <SearchResultsTable results={results} />
+          )}
+
+          {results.length === 0 &&
+            term.trim() !== "" &&
+            !loading && (
+              <p className={styles.noResults}>
+                No se encontraron coincidencias.
+              </p>
+            )}
+
+          {results.length === 0 &&
+            term.trim() === "" &&
+            !loading &&
+            !error && (
+              <p className={styles.noResults}>
+                Ingresa un término de búsqueda para comenzar.
+              </p>
+            )}
+        </>
       )}
-
-      {loading && (
-        <p className={styles.loading}>
-          Buscando coincidencias…
-        </p>
-      )}
-      {error && <p className={styles.error}>{error}</p>}
-
-      {results.length > 0 && (
-        <SearchResultsTable results={results} />
-      )}
-
-      {results.length === 0 &&
-        term.trim() !== "" &&
-        !loading && (
-          <p className={styles.noResults}>
-            No se encontraron coincidencias.
-          </p>
-        )}
-
-      {results.length === 0 &&
-        term.trim() === "" &&
-        !loading &&
-        !error && (
-          <p className={styles.noResults}>
-            Ingresa un término de búsqueda para comenzar.
-          </p>
-        )}
     </div>
   );
 }
+
