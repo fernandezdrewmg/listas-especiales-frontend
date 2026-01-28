@@ -14,6 +14,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import ChartDataLabels from "chartjs-plugin-datalabels";
 
 ChartJS.register(
   CategoryScale,
@@ -22,7 +23,8 @@ ChartJS.register(
   LineElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  ChartDataLabels
 );
 
 export default function ClientAnalyticsPage({
@@ -36,7 +38,6 @@ export default function ClientAnalyticsPage({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Cargar histórico completo: usuarios del cliente -> búsquedas de esos emails
   useEffect(() => {
     const fetchHistorico = async () => {
       if (!cliente) return;
@@ -103,7 +104,6 @@ export default function ClientAnalyticsPage({
     fetchHistorico();
   }, [cliente]);
 
-  // Serie mensual (total y con coincidencias) según filtro de usuario
   const getSerie = () => {
     if (!historico.length) return [];
 
@@ -143,7 +143,6 @@ export default function ClientAnalyticsPage({
       }));
   };
 
-  // Serie global de la entidad (sin filtro de usuario)
   const getSerieGlobal = () => {
     if (!historico.length) return [];
 
@@ -181,7 +180,6 @@ export default function ClientAnalyticsPage({
 
   const labels = serie.map((p) => p.periodo);
 
-  // % participación del usuario en el último mes (solo cuando hay filtro)
   let shareTexto = "No aplica (sin filtro de usuario)";
   if (selectedUser && labels.length > 0) {
     const ultimoPeriodo = labels[labels.length - 1];
@@ -191,10 +189,9 @@ export default function ClientAnalyticsPage({
     const totalEnt = filaGlobal ? filaGlobal.total : 0;
     const share =
       totalEnt > 0 ? ((totalUsr * 100) / totalEnt).toFixed(1) : "0.0";
-    shareTexto = `${share} % del total de consultas en ${ultimoPeriodo}`;
+    shareTexto = `${share} % del total de consultas de la entidad en ${ultimoPeriodo}`;
   }
 
-  // Tendencia últimos 3 meses vs 3 anteriores
   let tendenciaTexto = "Sin datos suficientes para tendencia";
   if (serie.length >= 4) {
     const valores = serie.map((p) => p.total);
@@ -261,7 +258,6 @@ export default function ClientAnalyticsPage({
     ],
   };
 
-  // Top 5 usuarios por consultas (histórico completo)
   const getTopUsuarios = () => {
     if (!historico.length) return [];
 
@@ -289,7 +285,6 @@ export default function ClientAnalyticsPage({
 
   const topUsuarios = getTopUsuarios();
 
-  // Fechas de primera y última actividad (según filtro de usuario)
   const getFechasActividad = () => {
     if (!historico.length) return { first: null, last: null };
 
@@ -350,7 +345,6 @@ export default function ClientAnalyticsPage({
 
       {!loading && !error && (
         <>
-          {/* Panel superior: solo filtro de usuario */}
           <div className={styles.reportFilters}>
             <div className={styles.filterGroup}>
               <label>Usuario (email):</label>
@@ -369,7 +363,6 @@ export default function ClientAnalyticsPage({
             </div>
           </div>
 
-          {/* Gráfico de líneas + métricas imprimibles y tarjeta de mes pico */}
           {serie.length > 0 ? (
             <div className={styles.historicoContent}>
               <div className={styles.metricsRow}>
@@ -476,7 +469,76 @@ export default function ClientAnalyticsPage({
                 </div>
               </div>
 
-              <Line data={dataLine} />
+            <Line
+  data={dataLine}
+  options={{
+    responsive: true,
+    plugins: {
+      legend: {
+        position: "top",
+      },
+      tooltip: {
+        mode: "index",
+        intersect: false,
+        callbacks: {
+          label: function (context) {
+            const label = context.dataset.label || "";
+            const value = context.parsed.y ?? 0;
+            return `${label}: ${value}`;
+          },
+        },
+      },
+      datalabels: {
+  anchor: (ctx) => {
+    if (ctx.datasetIndex === 1) return "start";   // coincidencias abajo
+    if (ctx.datasetIndex === 2) return "center";  // entidad: centrado vertical
+    return "end";                                 // total arriba
+  },
+  align: (ctx) => {
+    if (ctx.datasetIndex === 1) return "bottom";  // abajo del punto
+    if (ctx.datasetIndex === 2) return "right";   // entidad a la derecha
+    return "top";                                 // total arriba
+  },
+  offset: 4,          // si quieres más separación horizontal, puedes subirlo a 6–8
+  color: "#000",
+  font: {
+    size: 10,
+    weight: "bold",
+  },
+  formatter: (value) => value,
+}
+
+    },
+    interaction: {
+      mode: "nearest",
+      intersect: false,
+    },
+    elements: {
+      point: {
+        radius: 5,
+        hoverRadius: 7,
+        hitRadius: 7,
+        borderWidth: 2,
+        borderColor: "#ffffff",
+        backgroundColor: (ctx) => ctx.dataset.borderColor,
+      },
+      line: {
+        borderWidth: 2,
+      },
+    },
+    scales: {
+      x: {
+        ticks: {
+          autoSkip: true,
+          maxRotation: 0,
+        },
+      },
+      y: {
+        beginAtZero: true,
+      },
+    },
+  }}
+/>
             </div>
           ) : (
             <p className={styles.noResults}>
@@ -484,7 +546,6 @@ export default function ClientAnalyticsPage({
             </p>
           )}
 
-          {/* Top usuarios */}
           {topUsuarios.length > 0 && (
             <div className={styles.summaryTableWrapper}>
               <h3>Top 5 usuarios por número de consultas (histórico completo)</h3>

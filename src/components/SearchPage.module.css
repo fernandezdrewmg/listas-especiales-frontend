@@ -1041,9 +1041,7 @@
     }
   }
 
-  .reportContainer {
-    string-set: printDate "Impreso: " attr(data-print-date);
-  }
+
   /* Header compacto para la vista de reporte */
   .reportContainer .header {
     margin-top: 0 !important;
