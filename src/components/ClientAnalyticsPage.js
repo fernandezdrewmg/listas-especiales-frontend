@@ -300,7 +300,23 @@ export default function ClientAnalyticsPage({
           {/* Gráfico de líneas */}
           {serie.length > 0 ? (
             <div className={styles.historicoContent}>
-              <Line data={dataLine} />
+                {/* Gráfico de líneas */}
+{serie.length > 0 ? (
+  <div className={styles.historicoContent}>
+    <p className={styles.userEmail} style={{ marginBottom: "8px" }}>
+      Usuario seleccionado:{" "}
+      <strong>
+        {selectedUser ? selectedUser : `Todos (Entidad: ${clienteNombre})`}
+      </strong>
+    </p>
+    <Line data={dataLine} />
+  </div>
+) : (
+  <p className={styles.noResults}>
+    No hay datos históricos para este cliente.
+  </p>
+)}
+
             </div>
           ) : (
             <p className={styles.noResults}>
