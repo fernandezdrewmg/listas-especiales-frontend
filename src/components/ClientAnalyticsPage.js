@@ -145,14 +145,46 @@ export default function ClientAnalyticsPage({
       }));
   };
 
+  // Serie global de la entidad (sin filtro de usuario)
+  const getSerieGlobal = () => {
+    if (!historico.length) return [];
+
+    const grupos = {};
+    historico.forEach((row) => {
+      const fecha = new Date(row.fecha);
+      if (Number.isNaN(fecha.getTime())) return;
+
+      const key = `${fecha.getFullYear()}-${String(
+        fecha.getMonth() + 1
+      ).padStart(2, "0")}`;
+
+      if (!grupos[key]) {
+        grupos[key] = { total: 0 };
+      }
+
+      grupos[key].total += 1;
+    });
+
+    return Object.entries(grupos)
+      .sort(([a], [b]) => (a > b ? 1 : -1))
+      .map(([periodo, vals]) => ({
+        periodo,
+        total: vals.total,
+      }));
+  };
+
   const serie = getSerie();
+  const serieGlobal = getSerieGlobal();
+
   const totalActual = serie.reduce((acc, p) => acc + p.total, 0);
   const totalConMatch = serie.reduce((acc, p) => acc + p.conMatch, 0);
   const mesesConDatos = serie.length || 1;
   const promedioPorMes = totalActual / mesesConDatos;
 
+  const labels = serie.map((p) => p.periodo);
+
   const dataLine = {
-    labels: serie.map((p) => p.periodo),
+    labels,
     datasets: [
       {
         label: "Total de consultas",
@@ -168,10 +200,26 @@ export default function ClientAnalyticsPage({
         backgroundColor: "rgba(255, 0, 0, 0.2)",
         tension: 0.2,
       },
+      // Línea verde de total de la entidad (solo cuando hay usuario filtrado)
+      ...(selectedUser
+        ? [
+            {
+              label: "Total entidad (todas las consultas)",
+              data: labels.map((periodo) => {
+                const row = serieGlobal.find((g) => g.periodo === periodo);
+                return row ? row.total : 0;
+              }),
+              borderColor: "#28a745",
+              backgroundColor: "rgba(40, 167, 69, 0.2)",
+              borderDash: [6, 4],
+              tension: 0.2,
+            },
+          ]
+        : []),
     ],
   };
 
-  // Top 5 usuarios por consultas (sobre todo el histórico, sin filtro)
+  // Top 5 usuarios por consultas (histórico completo)
   const getTopUsuarios = () => {
     if (!historico.length) return [];
 
@@ -199,7 +247,7 @@ export default function ClientAnalyticsPage({
 
   const topUsuarios = getTopUsuarios();
 
-  // Fechas de primera y última actividad (global y por usuario seleccionado)
+  // Fechas de primera y última actividad (según filtro de usuario)
   const getFechasActividad = () => {
     if (!historico.length) return { first: null, last: null };
 
@@ -260,7 +308,7 @@ export default function ClientAnalyticsPage({
 
       {!loading && !error && (
         <>
-          {/* Panel superior de filtros y métricas */}
+          {/* Panel superior: solo filtro de usuario */}
           <div className={styles.reportFilters}>
             <div className={styles.filterGroup}>
               <label>Usuario (email):</label>
@@ -277,46 +325,40 @@ export default function ClientAnalyticsPage({
                 ))}
               </select>
             </div>
+          </div>
 
-            <div className={styles.filterGroup}>
-              <label>Consultas en la serie mostrada:</label>
-              <p>
-                Total: <strong>{totalActual}</strong> | Con coincidencias:{" "}
+          {/* Gráfico de líneas + métricas imprimibles */}
+          {serie.length > 0 ? (
+            <div className={styles.historicoContent}>
+              <p className={styles.userEmail} style={{ marginBottom: "4px" }}>
+                Usuario seleccionado:{" "}
+                <strong>
+                  {selectedUser
+                    ? selectedUser
+                    : `Todos (Entidad: ${clienteNombre})`}
+                </strong>
+              </p>
+
+              <p
+                className={styles.userEmail}
+                style={{ marginBottom: "4px", whiteSpace: "nowrap" }}
+              >
+                Consultas en la serie mostrada: Total:{" "}
+                <strong>{totalActual}</strong> | Con coincidencias:{" "}
                 <strong>{totalConMatch}</strong> | Promedio mensual:{" "}
                 <strong>{promedioPorMes.toFixed(1)}</strong>
               </p>
-            </div>
 
-            <div className={styles.filterGroup}>
-              <label>Actividad en el histórico:</label>
-              <p>
-                Primera:{" "}
+              <p
+                className={styles.userEmail}
+                style={{ marginBottom: "12px", whiteSpace: "nowrap" }}
+              >
+                Actividad en el histórico: Primera:{" "}
                 <strong>{fechasActividad.first || "N/D"}</strong> | Última:{" "}
                 <strong>{fechasActividad.last || "N/D"}</strong>
               </p>
-            </div>
-          </div>
 
-          {/* Gráfico de líneas */}
-          {serie.length > 0 ? (
-            <div className={styles.historicoContent}>
-                {/* Gráfico de líneas */}
-{serie.length > 0 ? (
-  <div className={styles.historicoContent}>
-    <p className={styles.userEmail} style={{ marginBottom: "8px" }}>
-      Usuario seleccionado:{" "}
-      <strong>
-        {selectedUser ? selectedUser : `Todos (Entidad: ${clienteNombre})`}
-      </strong>
-    </p>
-    <Line data={dataLine} />
-  </div>
-) : (
-  <p className={styles.noResults}>
-    No hay datos históricos para este cliente.
-  </p>
-)}
-
+              <Line data={dataLine} />
             </div>
           ) : (
             <p className={styles.noResults}>
