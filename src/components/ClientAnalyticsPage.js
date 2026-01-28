@@ -369,51 +369,112 @@ export default function ClientAnalyticsPage({
             </div>
           </div>
 
-          {/* Gráfico de líneas + métricas imprimibles */}
+          {/* Gráfico de líneas + métricas imprimibles y tarjeta de mes pico */}
           {serie.length > 0 ? (
             <div className={styles.historicoContent}>
-              <p className={styles.userEmail} style={{ marginBottom: "4px" }}>
-                Usuario seleccionado:{" "}
-                <strong>
-                  {selectedUser
-                    ? selectedUser
-                    : `Todos (Entidad: ${clienteNombre})`}
-                </strong>
-              </p>
+              <div className={styles.metricsRow}>
+                <div className={styles.metricsColumn}>
+                  <p
+                    className={styles.userEmail}
+                    style={{ marginBottom: "4px" }}
+                  >
+                    Usuario seleccionado:{" "}
+                    <strong>
+                      {selectedUser
+                        ? selectedUser
+                        : `Todos (Entidad: ${clienteNombre})`}
+                    </strong>
+                  </p>
 
-              <p
-                className={styles.userEmail}
-                style={{ marginBottom: "4px", whiteSpace: "nowrap" }}
-              >
-                Consultas en la serie mostrada: Total:{" "}
-                <strong>{totalActual}</strong> | Con coincidencias:{" "}
-                <strong>{totalConMatch}</strong> | Promedio mensual:{" "}
-                <strong>{promedioPorMes.toFixed(1)}</strong>
-              </p>
+                  <p
+                    className={styles.userEmail}
+                    style={{ marginBottom: "4px", whiteSpace: "nowrap" }}
+                  >
+                    Consultas en la serie mostrada: Total:{" "}
+                    <strong>{totalActual}</strong> | Con coincidencias:{" "}
+                    <strong>{totalConMatch}</strong> | Promedio mensual:{" "}
+                    <strong>{promedioPorMes.toFixed(1)}</strong>
+                  </p>
 
-              <p
-                className={styles.userEmail}
-                style={{ marginBottom: "4px", whiteSpace: "nowrap" }}
-              >
-                Actividad en el histórico: Primera:{" "}
-                <strong>{fechasActividad.first || "N/D"}</strong> | Última:{" "}
-                <strong>{fechasActividad.last || "N/D"}</strong>
-              </p>
+                  <p
+                    className={styles.userEmail}
+                    style={{ marginBottom: "4px", whiteSpace: "nowrap" }}
+                  >
+                    Actividad en el histórico: Primera:{" "}
+                    <strong>{fechasActividad.first || "N/D"}</strong> | Última:{" "}
+                    <strong>{fechasActividad.last || "N/D"}</strong>
+                  </p>
 
-              <p
-                className={styles.userEmail}
-                style={{ marginBottom: "12px", whiteSpace: "nowrap" }}
-              >
-                Participación del usuario en el último mes:{" "}
-                <strong>{shareTexto}</strong>
-              </p>
+                  <p
+                    className={styles.userEmail}
+                    style={{ marginBottom: "4px", whiteSpace: "nowrap" }}
+                  >
+                    Participación del usuario en el último mes:{" "}
+                    <strong>{shareTexto}</strong>
+                  </p>
 
-              <p
-                className={styles.userEmail}
-                style={{ marginBottom: "12px", whiteSpace: "nowrap" }}
-              >
-                {tendenciaTexto}
-              </p>
+                  <p
+                    className={styles.userEmail}
+                    style={{ marginBottom: "4px", whiteSpace: "nowrap" }}
+                  >
+                    {tendenciaTexto}
+                  </p>
+                </div>
+
+                <div className={styles.peakCard}>
+                  {(() => {
+                    if (!serieGlobal.length) {
+                      return <p>Mes de mayor actividad: N/D</p>;
+                    }
+                    const picoEntidad = serieGlobal.reduce(
+                      (best, curr) =>
+                        !best || curr.total > best.total ? curr : best,
+                      null
+                    );
+                    const picoUsuario =
+                      selectedUser && serie.length
+                        ? serie.reduce(
+                            (best, curr) =>
+                              !best || curr.total > best.total ? curr : best,
+                            null
+                          )
+                        : null;
+
+                    return (
+                      <>
+                        <p
+                          style={{
+                            fontWeight: "bold",
+                            marginBottom: "4px",
+                          }}
+                        >
+                          Mes de mayor actividad (entidad)
+                        </p>
+                        <p style={{ marginBottom: "4px" }}>
+                          {picoEntidad.periodo}:{" "}
+                          <strong>{picoEntidad.total}</strong> consultas
+                        </p>
+                        {picoUsuario && (
+                          <>
+                            <p
+                              style={{
+                                fontWeight: "bold",
+                                marginBottom: "4px",
+                              }}
+                            >
+                              Pico del usuario
+                            </p>
+                            <p>
+                              {picoUsuario.periodo}:{" "}
+                              <strong>{picoUsuario.total}</strong> consultas
+                            </p>
+                          </>
+                        )}
+                      </>
+                    );
+                  })()}
+                </div>
+              </div>
 
               <Line data={dataLine} />
             </div>

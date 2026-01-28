@@ -1072,3 +1072,32 @@
     margin-top: 0 !important;
   }
 }
+.metricsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.metricsColumn {
+  flex: 1 1 60%;
+  min-width: 260px;
+}
+
+.peakCard {
+  flex: 0 0 200px;
+  padding: 8px 10px;
+  border-radius: 4px;
+  background: #f7fafc;
+  border: 1px solid #cbd5e0;
+  font-size: 0.75rem;
+}
+
+/* Opcional: en impresión, hacer la tarjeta un poco más compacta */
+@media print {
+  .peakCard {
+    font-size: 9px !important;
+    padding: 6px 8px !important;
+  }
+}
