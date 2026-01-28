@@ -36,7 +36,7 @@ export default function ClientAnalyticsPage({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Cargar histórico completo: usuarios del cliente -> busquedas de esos emails
+  // Cargar histórico completo: usuarios del cliente -> búsquedas de esos emails
   useEffect(() => {
     const fetchHistorico = async () => {
       if (!cliente) return;
@@ -44,7 +44,6 @@ export default function ClientAnalyticsPage({
       setError("");
 
       try {
-        // 1) Obtener emails de usuarios de la entidad
         const { data: usersData, error: usersError } = await supabase
           .from("usuarios")
           .select("email")
@@ -70,7 +69,6 @@ export default function ClientAnalyticsPage({
           return;
         }
 
-        // 2) Obtener histórico desde "busquedas" filtrando por esos emails
         const { data, error: histError } = await supabase
           .from("busquedas")
           .select("usuario_email, fecha, cantidad_resultados")
@@ -183,6 +181,51 @@ export default function ClientAnalyticsPage({
 
   const labels = serie.map((p) => p.periodo);
 
+  // % participación del usuario en el último mes (solo cuando hay filtro)
+  let shareTexto = "No aplica (sin filtro de usuario)";
+  if (selectedUser && labels.length > 0) {
+    const ultimoPeriodo = labels[labels.length - 1];
+    const filaUsuario = serie.find((p) => p.periodo === ultimoPeriodo);
+    const filaGlobal = serieGlobal.find((g) => g.periodo === ultimoPeriodo);
+    const totalUsr = filaUsuario ? filaUsuario.total : 0;
+    const totalEnt = filaGlobal ? filaGlobal.total : 0;
+    const share =
+      totalEnt > 0 ? ((totalUsr * 100) / totalEnt).toFixed(1) : "0.0";
+    shareTexto = `${share} % del total de consultas de la entidad en ${ultimoPeriodo}`;
+  }
+
+  // Tendencia últimos 3 meses vs 3 anteriores
+  let tendenciaTexto = "Sin datos suficientes para tendencia";
+  if (serie.length >= 4) {
+    const valores = serie.map((p) => p.total);
+    const n = valores.length;
+    const ultimos3 = valores.slice(Math.max(n - 3, 0));
+    const previos3 = valores.slice(Math.max(n - 6, 0), n - 3);
+
+    const suma = (arr) => arr.reduce((a, b) => a + b, 0);
+    const sUlt = suma(ultimos3);
+    const sPrev = suma(previos3);
+
+    if (sPrev === 0 && sUlt === 0) {
+      tendenciaTexto = "Tendencia: sin movimiento en los últimos meses";
+    } else if (sPrev === 0 && sUlt > 0) {
+      tendenciaTexto = "Tendencia: en aumento fuerte (sin actividad previa)";
+    } else {
+      const cambio = ((sUlt - sPrev) * 100) / sPrev;
+      if (cambio > 10) {
+        tendenciaTexto = `Tendencia: en aumento (+${cambio.toFixed(
+          1
+        )} % vs 3 meses previos)`;
+      } else if (cambio < -10) {
+        tendenciaTexto = `Tendencia: en descenso (${cambio.toFixed(
+          1
+        )} % vs 3 meses previos)`;
+      } else {
+        tendenciaTexto = "Tendencia: relativamente estable (±10 %)";
+      }
+    }
+  }
+
   const dataLine = {
     labels,
     datasets: [
@@ -200,7 +243,6 @@ export default function ClientAnalyticsPage({
         backgroundColor: "rgba(255, 0, 0, 0.2)",
         tension: 0.2,
       },
-      // Línea verde de total de la entidad (solo cuando hay usuario filtrado)
       ...(selectedUser
         ? [
             {
@@ -351,11 +393,26 @@ export default function ClientAnalyticsPage({
 
               <p
                 className={styles.userEmail}
-                style={{ marginBottom: "12px", whiteSpace: "nowrap" }}
+                style={{ marginBottom: "4px", whiteSpace: "nowrap" }}
               >
                 Actividad en el histórico: Primera:{" "}
                 <strong>{fechasActividad.first || "N/D"}</strong> | Última:{" "}
                 <strong>{fechasActividad.last || "N/D"}</strong>
+              </p>
+
+              <p
+                className={styles.userEmail}
+                style={{ marginBottom: "12px", whiteSpace: "nowrap" }}
+              >
+                Participación del usuario en el último mes:{" "}
+                <strong>{shareTexto}</strong>
+              </p>
+
+              <p
+                className={styles.userEmail}
+                style={{ marginBottom: "12px", whiteSpace: "nowrap" }}
+              >
+                {tendenciaTexto}
               </p>
 
               <Line data={dataLine} />
