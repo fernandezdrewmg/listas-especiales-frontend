@@ -191,7 +191,7 @@ export default function ClientAnalyticsPage({
     const totalEnt = filaGlobal ? filaGlobal.total : 0;
     const share =
       totalEnt > 0 ? ((totalUsr * 100) / totalEnt).toFixed(1) : "0.0";
-    shareTexto = `${share} % del total de consultas de la entidad en ${ultimoPeriodo}`;
+    shareTexto = `${share} % del total de consultas en ${ultimoPeriodo}`;
   }
 
   // Tendencia últimos 3 meses vs 3 anteriores
@@ -409,7 +409,7 @@ export default function ClientAnalyticsPage({
                     className={styles.userEmail}
                     style={{ marginBottom: "4px", whiteSpace: "nowrap" }}
                   >
-                    Participación del usuario en el último mes:{" "}
+                    Participación en el último mes:{" "}
                     <strong>{shareTexto}</strong>
                   </p>
 
