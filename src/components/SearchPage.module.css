@@ -1044,4 +1044,31 @@
   .reportContainer {
     string-set: printDate "Impreso: " attr(data-print-date);
   }
+  /* Header compacto para la vista de reporte */
+  .reportContainer .header {
+    margin-top: 0 !important;
+    margin-bottom: 6px !important;
+    padding-top: 0 !important;
+    padding-bottom: 4px !important;
+    border-bottom: 1px solid #000 !important;
+  }
+
+  .reportContainer .headerLeft h2 {
+    font-size: 14px !important;
+    margin: 0 0 2px 0 !important;
+  }
+
+  .reportContainer .headerLeft .userEmail {
+    font-size: 9px !important;
+    margin: 0 !important;
+  }
+
+  .reportContainer .headerRight {
+    font-size: 9px !important;
+  }
+
+  /* Reducir margen superior general de la sección de reporte */
+  .reportContainer {
+    margin-top: 0 !important;
+  }
 }
