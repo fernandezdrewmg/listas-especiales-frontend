@@ -3,7 +3,13 @@ import { useState, useEffect, useRef } from "react";
 import { supabase } from "../supabaseClient";
 import styles from "./SearchPage.module.css";
 
-export default function ReportPage({ cliente, logoUrl, clienteNombre }) {
+export default function ReportPage({
+  cliente,
+  logoUrl,
+  clienteNombre,
+  puedeVerReporte,
+  onOpenAnalytics,
+}) {
   const [emailsCliente, setEmailsCliente] = useState([]);
   const [selectedEmail, setSelectedEmail] = useState("");
   const [fechaDesde, setFechaDesde] = useState("");
@@ -48,7 +54,7 @@ export default function ReportPage({ cliente, logoUrl, clienteNombre }) {
     }
   }, [cliente]);
 
-  // 2) Registrar uso del reporte (fecha_local en horario La Paz -4)
+  // 2) Registrar uso del reporte
   const registrarUsoReporte = async (totalRegistrosLocal, dataLocal) => {
     try {
       const filtrosUsuario = selectedEmail || "Todos";
@@ -61,17 +67,17 @@ export default function ReportPage({ cliente, logoUrl, clienteNombre }) {
             )
           : 0;
 
-      const { data: userData, error: userError } = await supabase
-        .auth
-        .getUser();
+      const { data: userData, error: userError } = await supabase.auth.getUser();
 
       if (userError) {
-        console.error("Error al obtener usuario autenticado:", userError.message);
+        console.error(
+          "Error al obtener usuario autenticado:",
+          userError.message
+        );
       }
 
       const authEmail = userData?.user?.email || null;
 
-      // Hora local de La Paz (-04) como TEXTO legible
       const fechaLocal = new Date().toLocaleString("es-BO", {
         year: "numeric",
         month: "2-digit",
@@ -92,13 +98,16 @@ export default function ReportPage({ cliente, logoUrl, clienteNombre }) {
           filtro_fecha_hasta: fechaHasta || null,
           total_registros: totalRegistrosLocal,
           total_resultados: totalResultados,
-          fecha: new Date().toISOString(), // UTC (opcional)
-          fecha_local: fechaLocal,         // visible en horario La Paz
+          fecha: new Date().toISOString(),
+          fecha_local: fechaLocal,
         },
       ]);
 
       if (insertError) {
-        console.error("Error al registrar uso de reporte:", insertError.message);
+        console.error(
+          "Error al registrar uso de reporte:",
+          insertError.message
+        );
       }
     } catch (err) {
       console.error("Error inesperado al registrar uso de reporte:", err);
@@ -124,9 +133,12 @@ export default function ReportPage({ cliente, logoUrl, clienteNombre }) {
 
       let query = supabase
         .from("busquedas")
-        .select("usuario_email, criterio, cantidad_resultados, fecha, fuente", {
-          count: "exact",
-        });
+        .select(
+          "usuario_email, criterio, cantidad_resultados, fecha, fuente",
+          {
+            count: "exact",
+          }
+        );
 
       if (selectedEmail) {
         query = query.eq("usuario_email", selectedEmail);
@@ -223,12 +235,12 @@ export default function ReportPage({ cliente, logoUrl, clienteNombre }) {
     URL.revokeObjectURL(url);
   };
 
-  // 6) Imprimir / guardar en PDF usando el navegador
+  // 6) Imprimir / guardar en PDF
   const handlePrintPdf = () => {
     window.print();
   };
 
-  // 7) Fecha/hora mostrada (también en hora La Paz)
+  // 7) Fecha/hora mostrada
   const getPrintDateTime = () => {
     const now = new Date();
     return now.toLocaleString("es-BO", {
@@ -257,10 +269,11 @@ export default function ReportPage({ cliente, logoUrl, clienteNombre }) {
       className={styles.reportContainer}
       data-print-date={getPrintDateTime()}
     >
-      {/* Encabezado compacto en dos columnas */}
+      {/* Encabezado */}
       <div className={styles.header}>
         <div className={styles.headerLeft}>
           <div className={styles.logoTitleWrapper}>
+            {/* el logo llega desde SearchPage en el layout general */}
             <div>
               <h2>Reporte de Búsquedas</h2>
               <p className={styles.userEmail}>
@@ -281,6 +294,16 @@ export default function ReportPage({ cliente, logoUrl, clienteNombre }) {
           <p className={styles.userEmail}>
             <strong>Total registros:</strong> {totalRegistros}
           </p>
+
+          {puedeVerReporte && typeof onOpenAnalytics === "function" && (
+            <button
+              type="button"
+              onClick={onOpenAnalytics}
+              className={styles.reportButton}
+            >
+              Ver análisis histórico de la Entidad
+            </button>
+          )}
         </div>
       </div>
 
@@ -358,11 +381,11 @@ export default function ReportPage({ cliente, logoUrl, clienteNombre }) {
         </div>
       </div>
 
-      {/* Mensajes de estado */}
+      {/* Mensajes */}
       {loading && <p className={styles.loading}>Cargando reporte…</p>}
       {error && <p className={styles.error}>{error}</p>}
 
-      {/* Tabla de resultados */}
+      {/* Tabla */}
       <div className={styles.searchResultsContainer} ref={tableRef}>
         {reportData && reportData.length > 0 ? (
           <table className={styles.resultsTable}>

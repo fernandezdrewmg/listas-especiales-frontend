@@ -7,6 +7,7 @@ import { useGlobalSummary } from "../hooks/useGlobalSummary";
 import SearchResultsTable from "./SearchResultsTable";
 import GlobalSummaryDisplay from "./GlobalSummaryDisplay";
 import ReportPage from "./ReportPage";
+import ClientAnalyticsPage from "./ClientAnalyticsPage";
 
 function SummaryTable({ summary, total }) {
   return (
@@ -46,7 +47,7 @@ export default function SearchPage({ onLogout }) {
 
   const [puedeVerReporte, setPuedeVerReporte] = useState(false);
   const [clienteCodigo, setClienteCodigo] = useState("");
-  const [showReport, setShowReport] = useState(false);
+  const [view, setView] = useState("search"); // "search" | "report" | "analytics"
 
   const { results, loading, error, summaryData, executeSearch } = useSearch();
   const {
@@ -158,7 +159,7 @@ export default function SearchPage({ onLogout }) {
     setPendingRegister(true);
   };
 
-  // Registrar búsqueda (incluye columna FUENTE)
+  // Registrar búsqueda
   useEffect(() => {
     if (pendingRegister && summaryData && usuarioEmail) {
       const totalCoincidencias = Object.values(summaryData).reduce(
@@ -274,10 +275,14 @@ export default function SearchPage({ onLogout }) {
           {puedeVerReporte && (
             <button
               type="button"
-              onClick={() => setShowReport((prev) => !prev)}
+              onClick={() =>
+                setView((prev) =>
+                  prev === "report" ? "search" : "report"
+                )
+              }
               className={styles.reportButton}
             >
-              {showReport ? "Volver a búsqueda" : "Ver reporte"}
+              {view === "report" ? "Volver a búsqueda" : "Ver reporte"}
             </button>
           )}
 
@@ -290,11 +295,19 @@ export default function SearchPage({ onLogout }) {
         </div>
       </div>
 
-      {showReport ? (
+      {view === "report" ? (
         <ReportPage
           cliente={clienteCodigo}
           logoUrl={logoUrl}
           clienteNombre={clienteNombre}
+          puedeVerReporte={puedeVerReporte}
+          onOpenAnalytics={() => setView("analytics")}
+        />
+      ) : view === "analytics" ? (
+        <ClientAnalyticsPage
+          cliente={clienteCodigo}
+          clienteNombre={clienteNombre}
+          onBackToReport={() => setView("report")}
         />
       ) : (
         <>
@@ -371,4 +384,3 @@ export default function SearchPage({ onLogout }) {
     </div>
   );
 }
-
