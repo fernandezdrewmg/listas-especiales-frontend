@@ -1020,7 +1020,6 @@
   /* Ocultar elementos innecesarios */
   .loading,
   .error,
-  .noResults,
   .logoutButton,
   .reportButton {
     display: none !important;
@@ -1040,7 +1039,6 @@
       font-size: 9pt;
     }
   }
-
 
   /* Header compacto para la vista de reporte */
   .reportContainer .header {
@@ -1097,5 +1095,10 @@
   .peakCard {
     font-size: 9px !important;
     padding: 6px 8px !important;
+  }
+}
+@media print {
+  .noPrint {
+    display: none !important;
   }
 }

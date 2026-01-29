@@ -49,6 +49,10 @@ export default function SearchPage({ onLogout }) {
   const [clienteCodigo, setClienteCodigo] = useState("");
   const [view, setView] = useState("search"); // "search" | "report" | "analytics"
 
+  // Métricas de uso del usuario
+  const [consultasMesActual, setConsultasMesActual] = useState(0);
+  const [ultimaConsulta, setUltimaConsulta] = useState(null);
+
   const { results, loading, error, summaryData, executeSearch } = useSearch();
   const {
     globalSummary,
@@ -111,6 +115,61 @@ export default function SearchPage({ onLogout }) {
 
     obtenerUsuario();
   }, []);
+
+  // Estadísticas de búsquedas del usuario (mes actual + última consulta)
+  useEffect(() => {
+    const fetchStatsBusqueda = async () => {
+      if (!usuarioEmail) return;
+
+      const ahora = new Date();
+      const inicioMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
+      const finMes = new Date(
+        ahora.getFullYear(),
+        ahora.getMonth() + 1,
+        0,
+        23,
+        59,
+        59
+      );
+
+      const inicioISO = inicioMes.toISOString();
+      const finISO = finMes.toISOString();
+
+      const { data, error } = await supabase
+        .from("busquedas")
+        .select("fecha")
+        .eq("usuario_email", usuarioEmail.toLowerCase())
+        .gte("fecha", inicioISO)
+        .lte("fecha", finISO)
+        .order("fecha", { ascending: false });
+
+      if (error) {
+        console.error("Error al obtener stats de búsquedas:", error.message);
+        return;
+      }
+
+      const registros = data || [];
+      setConsultasMesActual(registros.length);
+
+      if (registros.length > 0) {
+        const ultima = new Date(registros[0].fecha);
+        setUltimaConsulta(
+          ultima.toLocaleString("es-BO", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+          })
+        );
+      } else {
+        setUltimaConsulta(null);
+      }
+    };
+
+    fetchStatsBusqueda();
+  }, [usuarioEmail]);
 
   // Control de inactividad
   useEffect(() => {
@@ -175,11 +234,7 @@ export default function SearchPage({ onLogout }) {
 
       if (totalCoincidencias > 0 && results.length > 0) {
         const codigosUnicos = [
-          ...new Set(
-            results
-              .map((r) => r.codigo)
-              .filter(Boolean)
-          ),
+          ...new Set(results.map((r) => r.codigo).filter(Boolean)),
         ];
 
         if (codigosUnicos.length > 0) {
@@ -263,6 +318,17 @@ export default function SearchPage({ onLogout }) {
               <p className={styles.userEmail}>
                 Usuario: <strong>{usuarioEmail}</strong>
               </p>
+              {/* Métricas visibles solo en pantalla */}
+              <div className={styles.noPrint}>
+                <p className={styles.userEmail}>
+                  Consultas realizadas en el mes actual:{" "}
+                  <strong>{consultasMesActual}</strong>
+                </p>
+                <p className={styles.userEmail}>
+                  Última consulta registrada:{" "}
+                  <strong>{ultimaConsulta || "N/D"}</strong>
+                </p>
+              </div>
             </div>
           </div>
         </div>
