@@ -38,6 +38,10 @@ export default function ClientAnalyticsPage({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Rango de meses para el gráfico (YYYY-MM)
+  const [fechaDesdeGraf, setFechaDesdeGraf] = useState("");
+  const [fechaHastaGraf, setFechaHastaGraf] = useState("");
+
   useEffect(() => {
     const fetchHistorico = async () => {
       if (!cliente) return;
@@ -104,16 +108,32 @@ export default function ClientAnalyticsPage({
     fetchHistorico();
   }, [cliente]);
 
+  // helper de rango
+  const dentroDeRango = (fecha) => {
+    const ym = `${fecha.getFullYear()}-${String(
+      fecha.getMonth() + 1
+    ).padStart(2, "0")}`;
+    if (fechaDesdeGraf && ym < fechaDesdeGraf) return false;
+    if (fechaHastaGraf && ym > fechaHastaGraf) return false;
+    return true;
+  };
+
   const getSerie = () => {
     if (!historico.length) return [];
 
-    const filtrados = selectedUser
+    const base = selectedUser
       ? historico.filter(
           (r) =>
             (r.usuario_email || "").toLowerCase() ===
             selectedUser.toLowerCase()
         )
       : historico;
+
+    const filtrados = base.filter((row) => {
+      const fecha = new Date(row.fecha);
+      if (Number.isNaN(fecha.getTime())) return false;
+      return dentroDeRango(fecha);
+    });
 
     const grupos = {};
     filtrados.forEach((row) => {
@@ -146,8 +166,14 @@ export default function ClientAnalyticsPage({
   const getSerieGlobal = () => {
     if (!historico.length) return [];
 
+    const filtrados = historico.filter((row) => {
+      const fecha = new Date(row.fecha);
+      if (Number.isNaN(fecha.getTime())) return false;
+      return dentroDeRango(fecha);
+    });
+
     const grupos = {};
-    historico.forEach((row) => {
+    filtrados.forEach((row) => {
       const fecha = new Date(row.fecha);
       if (Number.isNaN(fecha.getTime())) return;
 
@@ -320,6 +346,33 @@ export default function ClientAnalyticsPage({
 
   const fechasActividad = getFechasActividad();
 
+  const getTextoRangoGrafico = () => {
+    if (!fechaDesdeGraf && !fechaHastaGraf) {
+      return "Rango de fechas del gráfico: todos los meses disponibles";
+    }
+
+    const formatYM = (ym) => {
+      const [year, month] = ym.split("-");
+      const d = new Date(Number(year), Number(month) - 1, 1);
+      return d.toLocaleDateString("es-BO", {
+        year: "numeric",
+        month: "2-digit",
+      });
+    };
+
+    if (fechaDesdeGraf && !fechaHastaGraf) {
+      return `Rango de fechas del gráfico: desde ${formatYM(fechaDesdeGraf)}`;
+    }
+
+    if (!fechaDesdeGraf && fechaHastaGraf) {
+      return `Rango de fechas del gráfico: hasta ${formatYM(fechaHastaGraf)}`;
+    }
+
+    return `Rango de fechas del gráfico: ${formatYM(
+      fechaDesdeGraf
+    )} a ${formatYM(fechaHastaGraf)}`;
+  };
+
   return (
     <div className={styles.reportContainer}>
       <div className={styles.header}>
@@ -360,6 +413,25 @@ export default function ClientAnalyticsPage({
                   </option>
                 ))}
               </select>
+            </div>
+
+            <div className={styles.filterGroup}>
+              <label>Rango para el gráfico (mes):</label>
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <input
+                  type="month"
+                  value={fechaDesdeGraf}
+                  onChange={(e) => setFechaDesdeGraf(e.target.value)}
+                  className={styles.filterInput}
+                />
+                <span style={{ margin: "0 4px" }}>a</span>
+                <input
+                  type="month"
+                  value={fechaHastaGraf}
+                  onChange={(e) => setFechaHastaGraf(e.target.value)}
+                  className={styles.filterInput}
+                />
+              </div>
             </div>
           </div>
 
@@ -411,6 +483,13 @@ export default function ClientAnalyticsPage({
                     style={{ marginBottom: "4px", whiteSpace: "nowrap" }}
                   >
                     {tendenciaTexto}
+                  </p>
+
+                  <p
+                    className={styles.userEmail}
+                    style={{ marginBottom: "4px", whiteSpace: "nowrap" }}
+                  >
+                    {getTextoRangoGrafico()}
                   </p>
                 </div>
 
@@ -469,76 +548,75 @@ export default function ClientAnalyticsPage({
                 </div>
               </div>
 
-            <Line
-  data={dataLine}
-  options={{
-    responsive: true,
-    plugins: {
-      legend: {
-        position: "top",
-      },
-      tooltip: {
-        mode: "index",
-        intersect: false,
-        callbacks: {
-          label: function (context) {
-            const label = context.dataset.label || "";
-            const value = context.parsed.y ?? 0;
-            return `${label}: ${value}`;
-          },
-        },
-      },
-      datalabels: {
-  anchor: (ctx) => {
-    if (ctx.datasetIndex === 1) return "start";   // coincidencias abajo
-    if (ctx.datasetIndex === 2) return "center";  // entidad: centrado vertical
-    return "end";                                 // total arriba
-  },
-  align: (ctx) => {
-    if (ctx.datasetIndex === 1) return "bottom";  // abajo del punto
-    if (ctx.datasetIndex === 2) return "right";   // entidad a la derecha
-    return "top";                                 // total arriba
-  },
-  offset: 4,          // si quieres más separación horizontal, puedes subirlo a 6–8
-  color: "#000",
-  font: {
-    size: 10,
-    weight: "bold",
-  },
-  formatter: (value) => value,
-}
-
-    },
-    interaction: {
-      mode: "nearest",
-      intersect: false,
-    },
-    elements: {
-      point: {
-        radius: 5,
-        hoverRadius: 7,
-        hitRadius: 7,
-        borderWidth: 2,
-        borderColor: "#ffffff",
-        backgroundColor: (ctx) => ctx.dataset.borderColor,
-      },
-      line: {
-        borderWidth: 2,
-      },
-    },
-    scales: {
-      x: {
-        ticks: {
-          autoSkip: true,
-          maxRotation: 0,
-        },
-      },
-      y: {
-        beginAtZero: true,
-      },
-    },
-  }}
-/>
+              <Line
+                data={dataLine}
+                options={{
+                  responsive: true,
+                  plugins: {
+                    legend: {
+                      position: "top",
+                    },
+                    tooltip: {
+                      mode: "index",
+                      intersect: false,
+                      callbacks: {
+                        label: function (context) {
+                          const label = context.dataset.label || "";
+                          const value = context.parsed.y ?? 0;
+                          return `${label}: ${value}`;
+                        },
+                      },
+                    },
+                    datalabels: {
+                      anchor: (ctx) => {
+                        if (ctx.datasetIndex === 1) return "start"; // coincidencias abajo
+                        if (ctx.datasetIndex === 2) return "center"; // entidad centrada
+                        return "end"; // total arriba
+                      },
+                      align: (ctx) => {
+                        if (ctx.datasetIndex === 1) return "bottom"; // abajo del punto
+                        if (ctx.datasetIndex === 2) return "right"; // entidad a la derecha
+                        return "top"; // total arriba
+                      },
+                      offset: 4,
+                      color: "#000",
+                      font: {
+                        size: 10,
+                        weight: "bold",
+                      },
+                      formatter: (value) => value,
+                    },
+                  },
+                  interaction: {
+                    mode: "nearest",
+                    intersect: false,
+                  },
+                  elements: {
+                    point: {
+                      radius: 5,
+                      hoverRadius: 7,
+                      hitRadius: 7,
+                      borderWidth: 2,
+                      borderColor: "#ffffff",
+                      backgroundColor: (ctx) => ctx.dataset.borderColor,
+                    },
+                    line: {
+                      borderWidth: 2,
+                    },
+                  },
+                  scales: {
+                    x: {
+                      ticks: {
+                        autoSkip: true,
+                        maxRotation: 0,
+                      },
+                    },
+                    y: {
+                      beginAtZero: true,
+                    },
+                  },
+                }}
+              />
             </div>
           ) : (
             <p className={styles.noResults}>
