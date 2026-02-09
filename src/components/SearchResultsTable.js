@@ -3,7 +3,6 @@ import React from "react";
 import styles from "./SearchPage.module.css";
 
 const formatHeader = (key) => {
-  // Mapeo de snake_case a nombres legibles
   const headerMap = {
     nombre_completo: "Nombre Completo",
     relevancia: "Relevancia",
@@ -20,7 +19,6 @@ const formatHeader = (key) => {
     alias: "Alias",
     fecha_reporte: "Fecha Reporte",
   };
-
   return headerMap[key] || key;
 };
 
@@ -36,7 +34,6 @@ function SearchResultsTable({ results }) {
     return null;
   }
 
-  // IMPORTANTE: Usa los nombres EXACTOS que retorna la RPC
   const fieldsToShow = [
     "nombre_completo",
     "relevancia",
@@ -56,42 +53,37 @@ function SearchResultsTable({ results }) {
   const headers = fieldsToShow.map(formatHeader);
 
   return (
-    <div className={styles.searchResultsContainer}>
-      <h3>Detalle de Coincidencias (Ordenadas por Relevancia)</h3>
+    <div className={styles.tableResponsive}>
       <table className={styles.resultsTable}>
         <thead>
           <tr>
-            {headers.map((header, index) => (
-              <th key={`header-${index}`} className={styles.resultsTableTh}>
+            {headers.map((header) => (
+              <th
+                key={header}
+                className={styles.resultsTableTh}
+              >
                 {header}
               </th>
             ))}
           </tr>
         </thead>
         <tbody>
-          {results.map((item, rowIndex) => (
-            <tr key={`row-${rowIndex}`}>
-              {fieldsToShow.map((field, cellIndex) => {
-                const value = item[field];
-                
+          {results.map((row, index) => (
+            <tr key={index}>
+              {fieldsToShow.map((field) => {
+                const value = row[field];
                 return (
                   <td
-                    key={`cell-${rowIndex}-${cellIndex}`}
+                    key={field}
                     className={styles.resultsTableTd}
                   >
-                    {field === "relevancia" ? (
-                      <span style={{ fontWeight: "bold", color: "#2c5282" }}>
-                        {mostrarRelevancia(value)}
-                      </span>
-                    ) : field === "campo_coincidencia" ? (
-                      <span style={{ fontSize: "0.85em", color: "#666" }}>
-                        {value || "-"}
-                      </span>
-                    ) : value !== null && value !== undefined ? (
-                      String(value)
-                    ) : (
-                      "-"
-                    )}
+                    {field === "relevancia"
+                      ? mostrarRelevancia(value)
+                      : field === "campo_coincidencia"
+                      ? value || "-"
+                      : value !== null && value !== undefined
+                      ? String(value)
+                      : "-"}
                   </td>
                 );
               })}

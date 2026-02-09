@@ -11,28 +11,39 @@ import ClientAnalyticsPage from "./ClientAnalyticsPage";
 
 function SummaryTable({ summary, total }) {
   return (
-    <table className={styles.summaryTable}>
-      <thead>
-        <tr>
-          <th className={styles.summaryTableTh}>Código</th>
-          <th className={styles.summaryTableTh}>Registros</th>
-        </tr>
-      </thead>
-      <tbody>
-        {Object.entries(summary).map(([codigo, count]) => (
-          <tr key={codigo}>
-            <td className={styles.summaryTableTd}>{codigo}</td>
-            <td className={styles.summaryTableTd}>{count}</td>
+    <div className={styles.summaryTableWrapper}>
+      <h3 className={styles.sectionTitle}>Coincidencias encontradas</h3>
+      <table className={styles.summaryTable}>
+        <thead>
+          <tr>
+            <th className={styles.summaryTableTh}>Código</th>
+            <th className={styles.summaryTableTh}>Registros</th>
           </tr>
-        ))}
-      </tbody>
-      <tfoot>
-        <tr className={styles.totalRow}>
-          <td className={styles.summaryTableTd}>Total</td>
-          <td className={styles.summaryTableTd}>{total}</td>
-        </tr>
-      </tfoot>
-    </table>
+        </thead>
+        <tbody>
+          {Object.entries(summary).map(([codigo, count]) => (
+            <tr key={codigo}>
+              <td className={styles.summaryTableTd}>{codigo}</td>
+              <td
+                className={`${styles.summaryTableTd} ${styles.numericCell}`}
+              >
+                {count}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+        <tfoot>
+          <tr className="totalRow">
+            <td className={styles.summaryTableTd}>Total</td>
+            <td
+              className={`${styles.summaryTableTd} ${styles.numericCell}`}
+            >
+              {total}
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
   );
 }
 
@@ -406,16 +417,13 @@ export default function SearchPage({ onLogout }) {
           />
 
           {results.length > 0 && (
-            <div className={styles.summaryTableWrapper}>
-              <h3>Coincidencias encontradas</h3>
-              <SummaryTable
-                summary={summaryData}
-                total={Object.values(summaryData).reduce(
-                  (acc, val) => acc + val,
-                  0
-                )}
-              />
-            </div>
+            <SummaryTable
+              summary={summaryData}
+              total={Object.values(summaryData).reduce(
+                (acc, val) => acc + val,
+                0
+              )}
+            />
           )}
 
           {loading && (
@@ -426,7 +434,12 @@ export default function SearchPage({ onLogout }) {
           {error && <p className={styles.error}>{error}</p>}
 
           {results.length > 0 && (
-            <SearchResultsTable results={results} />
+            <>
+              <h3 className={styles.sectionTitle}>
+                Detalle de Coincidencias (Ordenadas por Relevancia)
+              </h3>
+              <SearchResultsTable results={results} />
+            </>
           )}
 
           {results.length === 0 &&

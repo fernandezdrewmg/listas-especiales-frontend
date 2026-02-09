@@ -7,34 +7,44 @@
   padding: 30px;
 }
 
-/* --- Estilos del Encabezado y Botón de Cerrar Sesión (ajustados) --- */
+/* --- Encabezado y Botón de Cerrar Sesión --- */
 .header {
   display: flex;
-  justify-content: space-between; /* Espacia los elementos a los extremos */
-  align-items: flex-start; /* Alinea los elementos en la parte superior del header */
+  justify-content: space-between;
+  align-items: flex-start;
   margin-bottom: 20px;
-  flex-wrap: wrap; /* Permite que los elementos se envuelvan en pantallas pequeñas */
+  flex-wrap: wrap;
 }
 
 .headerLeft {
   display: flex;
   flex-direction: column;
-  align-items: flex-start; /* Alinea a la izquierda el título y la fecha de actualización */
+  align-items: flex-start;
+}
+
+.headerLeft h2 {
+  font-size: 1.3rem;
+  margin: 0 0 2px 0;
+}
+
+.headerLeft p {
+  margin: 0;
+  font-size: 0.8rem;
 }
 
 .headerRight {
-  display: flex; /* Habilitar Flexbox */
-  flex-direction: column; /* Apilar elementos verticalmente */
-  align-items: flex-end; /* Alinear elementos a la derecha horizontalmente */
-  justify-content: center; /* Centrar verticalmente en el espacio disponible */
-  gap: 5px; /* Pequeño espacio entre los elementos apilados */
-  text-align: right; /* Asegura que el texto dentro se alinee a la derecha */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 5px;
+  text-align: right;
 }
 
 .updateDateText {
   font-size: 0.9em;
   color: #666;
-  margin-top: 5px; /* Espacio entre el título h2 y esta fecha */
+  margin-top: 5px;
 }
 
 .currentDateText,
@@ -42,28 +52,28 @@
   margin-top: 6px;
   font-size: 0.70em;
   color: #333;
-  max-width: 300px; /* Limita el ancho del email */
-  word-break: break-word; /* Permite que se corte en varias líneas */
-  overflow-wrap: break-word; /* Compatibilidad adicional */
+  max-width: 300px;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .logoutButton {
-  margin-top: 5px; /* Un pequeño margen para separarlo del email */
+  margin-top: 5px;
 }
 
-/* --- Estilos del Formulario de Búsqueda --- */
+/* --- Formulario de Búsqueda --- */
 .form {
   margin-bottom: 20px;
-  display: flex; /* Usar flexbox para alinear input y botón */
-  gap: 8px; /* Espacio entre los elementos del formulario */
+  display: flex;
+  gap: 8px;
 }
 
 .searchInput {
-  flex-grow: 1; /* Permite que el input crezca para ocupar el espacio disponible */
+  flex-grow: 1;
   padding: 8px;
   border: 1px solid #ddd;
   border-radius: 4px;
-  font-size: 1em; /* Asegura un tamaño de fuente legible */
+  font-size: 1em;
 }
 
 .searchButton {
@@ -73,15 +83,25 @@
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 1em; /* Asegura un tamaño de fuente legible */
+  font-size: 1em;
 }
 
-/* --- Estilos de las Tablas de Resumen (Común para SummaryTable y GlobalSummaryDisplay) --- */
+/* --- Títulos de secciones --- */
+.sectionTitle {
+  font-weight: 600;
+  margin-top: 16px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 3px;
+  color: #2c5282;
+}
+
+/* --- Tablas de resumen (SummaryTable, etc.) --- */
 .summaryTable {
   width: 100%;
   border-collapse: collapse;
-  font-size: 10px; /* Tamaño de fuente por defecto para las tablas de resumen */
-  margin-bottom: 15px; /* Espacio después de la tabla */
+  font-size: 10px;
+  margin-bottom: 15px;
 }
 
 .summaryTableTh {
@@ -89,7 +109,7 @@
   color: white;
   padding: 8px 12px;
   text-align: left;
-  border: 1px solid #2c5282; /* Borde del mismo color que el fondo */
+  border: 1px solid #2c5282;
 }
 
 .summaryTableTd {
@@ -103,17 +123,24 @@
   background: #f7fafc;
 }
 
-/* --- Contenedor de tablas de resumen --- */
+/* celda numérica */
+.numericCell {
+  text-align: left;
+}
+
+/* Contenedor de tablas de resumen */
 .summaryTableWrapper {
   width: 100%;
   margin-bottom: 20px;
   background: #f8f8f8;
   padding: 10px;
   border-radius: 4px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05); /* Sombra ligera */
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    max-width: 300px;     /* ancho máximo de la caja */
+  margin-left: 0;       /* si la quieres a la izquierda */
 }
 
-/* --- Mensajes de estado --- */
+/* Mensajes de estado */
 .error {
   color: red;
   padding: 10px;
@@ -137,16 +164,17 @@
 
 /* --- Tabla de Resultados Detallados (SearchResultsTable) --- */
 .searchResultsContainer {
-  margin-left: -55%; /* Mueve el contenedor a la izquierda */
-  left: 50%; /* Centrado relativo */
-  position: relative;
-  width: 100vw;
-  max-width: none;
-  padding: 0 30px;
-  box-sizing: border-box;
   margin-top: 30px;
   margin-bottom: 30px;
+  width: 100%;
+  max-width: 100%;
+  padding: 0;
+  box-sizing: border-box;
+  position: static;
+  margin-left: 0;
+  left: auto;
 }
+
 
 .searchResultsContainer h3 {
   text-align: left;
@@ -157,17 +185,18 @@
 }
 
 .tableResponsive {
-  overflow-x: auto;
+  overflow-x: visible;
   margin-bottom: 20px;
 }
 
+/* PANTALLA: columnas más anchas y legibles */
 .resultsTable {
   width: 100%;
   border-collapse: collapse;
-  font-size: 10px;
+  font-size: 11px;
   margin-bottom: 20px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
-  table-layout: fixed; /* Respeta max-width */
+  table-layout: auto; /* antes: fixed */
 }
 
 .resultsTableTh {
@@ -176,9 +205,9 @@
   padding: 10px 12px;
   text-align: left;
   border: 1px solid #3c618c;
-  white-space: normal;
-  word-wrap: break-word;
-  max-width: 150px;
+  white-space: nowrap;     /* encabezado en una línea */
+  word-wrap: normal;
+  max-width: none;
   box-sizing: border-box;
 }
 
@@ -187,12 +216,11 @@
   padding: 8px 12px;
   vertical-align: top;
   background-color: #ffffff;
-  max-width: 150px;
+  max-width: none;        /* sin límite estrecho */
   word-wrap: break-word;
   box-sizing: border-box;
 }
 
-/* Zebra striping para filas alternas */
 .resultsTable tbody tr:nth-child(even) {
   background-color: #f9f9f9;
 }
@@ -221,6 +249,13 @@
   font-size: 1.1em;
   text-align: center;
 }
+.globalTotalBlock {
+  display: inline-flex !important;
+  flex-wrap: nowwrap;
+  align-items: baseline;
+  gap: 6px;
+}
+
 
 .globalTotalAndDate {
   display: flex;
@@ -248,7 +283,7 @@
   color: #777;
 }
 
-/* Contenedor Flexbox para gráfico + otros */
+/* contenedor gráfico + tabla otros */
 .globalSummaryContent {
   display: flex;
   flex-wrap: nowrap;
@@ -337,114 +372,7 @@
   background: #fafafa;
 }
 
-.othersTable td.numeric {
-  text-align: right;
-  font-weight: 500;
-}
-
-.othersTable th:nth-child(2),
-.othersTable th:nth-child(3) {
-  text-align: right;
-  width: 50%;
-}
-
-.othersTable th:nth-child(1) {
-  width: 60px;
-}
-
-/* RESPONSIVE - TABLET (1024px) */
-@media (max-width: 1024px) {
-  .globalSummaryContent {
-    flex-wrap: wrap;
-    gap: 15px;
-  }
-
-  .chartWrapper {
-    flex: 0 1 100%;
-    width: 100%;
-    min-width: auto;
-    max-width: 100%;
-  }
-
-  .othersTableWrapper {
-    flex: 0 1 100%;
-    width: 100%;
-    min-width: auto;
-    height: auto;
-    align-self: auto;
-  }
-}
-
-/* RESPONSIVE - MÓVIL (768px) */
-@media (max-width: 768px) {
-  .globalSummaryContent {
-    flex-direction: column;
-    gap: 15px;
-    padding: 0 5px;
-  }
-
-  .othersTableWrapper {
-    width: 100%;
-    padding: 10px;
-  }
-
-  .othersTableWrapper h4 {
-    font-size: 0.75em;
-    margin-bottom: 6px;
-  }
-
-  .othersTable {
-    font-size: 9px;
-  }
-
-  .othersTable th,
-  .othersTable td {
-    padding: 3px 2px;
-    font-size: 8px;
-  }
-
-  .chartWrapper {
-    width: 100%;
-    max-width: 100%;
-  }
-
-  .chartContainer {
-    height: 250px !important;
-  }
-}
-
-/* RESPONSIVO - MÓVIL PEQUEÑO (480px) */
-@media (max-width: 480px) {
-  .globalSummaryContent {
-    gap: 10px;
-    padding: 0;
-  }
-
-  .othersTableWrapper {
-    padding: 8px;
-  }
-
-  .othersTableWrapper h4 {
-    font-size: 0.7em;
-    margin-bottom: 5px;
-  }
-
-  .othersTable {
-    font-size: 8px;
-  }
-
-  .othersTable th,
-  .othersTable td {
-    padding: 2px 1px;
-    font-size: 7px;
-  }
-
-  .chartContainer {
-    height: 200px !important;
-  }
-}
-
-/* Inactividad */
+/* Inactividad y criterio */
 .inactivityWarning {
   position: fixed;
   top: 20px;
@@ -551,7 +479,7 @@
   font-size: 0.9rem;
 }
 
-/* Métricas adicionales */
+/* Métricas */
 .metricsRow {
   display: flex;
   flex-wrap: wrap;
@@ -574,7 +502,7 @@
   font-size: 0.75rem;
 }
 
-/* Visibilidad por modo (pantalla vs impresión) */
+/* Modo pantalla/impresión */
 .onlyScreen {
   display: block;
 }
@@ -583,21 +511,104 @@
   display: none;
 }
 
-/* Texto de resumen para impresión */
+/* Resumen texto impresión */
 .printSummaryText {
   font-size: 9px;
   line-height: 1.3;
 }
 
-/* Celda numérica genérica */
-.numericCell {
-  text-align: right;
+/* Responsive global summary */
+@media (max-width: 1024px) {
+  .globalSummaryContent {
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+
+  .chartWrapper {
+    flex: 0 1 100%;
+    width: 100%;
+    min-width: auto;
+    max-width: 100%;
+  }
+
+  .othersTableWrapper {
+    flex: 0 1 100%;
+    width: 100%;
+    min-width: auto;
+    height: auto;
+    align-self: auto;
+  }
 }
 
+@media (max-width: 768px) {
+  .globalSummaryContent {
+    flex-direction: column;
+    gap: 15px;
+    padding: 0 5px;
+  }
+
+  .othersTableWrapper {
+    width: 100%;
+    padding: 10px;
+  }
+
+  .othersTableWrapper h4 {
+    font-size: 0.75em;
+    margin-bottom: 6px;
+  }
+
+  .othersTable {
+    font-size: 9px;
+  }
+
+  .othersTable th,
+  .othersTable td {
+    padding: 3px 2px;
+    font-size: 8px;
+  }
+
+  .chartWrapper {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .chartContainer {
+    height: 250px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .globalSummaryContent {
+    gap: 10px;
+    padding: 0;
+  }
+
+  .othersTableWrapper {
+    padding: 8px;
+  }
+
+  .othersTableWrapper h4 {
+    font-size: 0.7em;
+    margin-bottom: 5px;
+  }
+
+  .othersTable {
+    font-size: 8px;
+  }
+
+  .othersTable th,
+  .othersTable td {
+    padding: 2px 1px;
+    font-size: 7px;
+  }
+
+  .chartContainer {
+    height: 200px !important;
+  }
+}
 
 /* --- ESTILOS DE IMPRESIÓN --- */
 @media print {
-  /* Criterio de búsqueda siempre visible */
   .searchTermDisplay {
     display: block;
     font-size: 1rem;
@@ -639,6 +650,14 @@
     margin: 10mm 10mm 15mm 10mm;
   }
 
+  .headerLeft h2 {
+    font-size: 1.2rem !important;
+  }
+
+  .headerLeft p {
+    font-size: 0.75rem !important;
+  }
+
   .header .logoutButton,
   .form,
   button,
@@ -654,7 +673,34 @@
     margin: 0 !important;
   }
 
-  /* Resumen global compacto */
+  /* Resumen global compacto en impresión */
+  .globalTotalAndDate {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 10px !important;
+    padding: 0 !important;
+  }
+
+  .globalTotal {
+    font-size: 1rem !important;
+    margin-bottom: 0 !important;
+    color: #000 !important;
+  }
+
+  .globalTotalLabel {
+    font-size: 0.75rem !important;
+    margin-bottom: 0 !important;
+    margin-left: 0;
+    color: #333 !important;
+  }
+
+  .globalUpdateDate {
+    font-size: 0.75rem !important;
+    color: #555 !important;
+  }
+
   .globalSummaryContainer {
     page-break-inside: auto !important;
     page-break-before: auto !important;
@@ -665,31 +711,10 @@
   }
 
   .globalSummaryContainer h3 {
-    font-size: 1.2em !important;
+    font-size: 1.1em !important;
     margin-bottom: 5px !important;
     color: #000 !important;
     page-break-after: avoid !important;
-  }
-
-  .globalTotalAndDate {
-    page-break-after: avoid !important;
-    margin-bottom: 10px !important;
-    padding: 0 !important;
-  }
-
-  .globalTotal {
-    font-size: 1.1em !important;
-    color: #000 !important;
-  }
-
-  .globalTotalLabel {
-    font-size: 0.8em !important;
-    color: #333 !important;
-  }
-
-  .globalUpdateDate {
-    font-size: 0.8em !important;
-    color: #555 !important;
   }
 
   .globalSummaryContent {
@@ -709,13 +734,12 @@
     min-width: 50% !important;
     max-width: 70% !important;
     width: 70% !important;
-    page-break-inside: avoid !important;
-    page-break-before: avoid !important;
+    page-break-inside: auto !important;
+    page-break-before: auto !important;
   }
 
   .chartContainer {
     height: 280px !important;
-    page-break-inside: avoid !important;
     margin: 0 !important;
     padding: 0 !important;
     width: 100% !important;
@@ -729,8 +753,6 @@
     padding: 10px !important;
     height: fit-content !important;
     align-self: flex-start !important;
-    page-break-inside: avoid !important;
-    page-break-before: avoid !important;
     background: white !important;
     border: 1px solid #999 !important;
     margin: 0 !important;
@@ -772,7 +794,7 @@
     color: #000 !important;
   }
 
-  /* Tabla de resultados compacta */
+  /* Tabla de resultados en impresión */
   .searchResultsContainer {
     margin: 0 !important;
     padding: 0 !important;
@@ -806,6 +828,8 @@
     box-shadow: none !important;
     table-layout: fixed !important;
     page-break-inside: auto !important;
+    border-radius: 3px;
+    overflow: hidden;
   }
 
   .resultsTable thead {
@@ -837,7 +861,7 @@
   }
 
   .resultsTable tbody tr {
-    page-break-inside: auto !important;
+    page-break-inside: avoid !important;
     page-break-after: auto;
   }
 
@@ -882,10 +906,7 @@
     page-break-inside: avoid !important;
   }
 
-  .reportFilters {
-    display: none !important;
-  }
-
+  .reportFilters,
   .loading,
   .error,
   .logoutButton,
