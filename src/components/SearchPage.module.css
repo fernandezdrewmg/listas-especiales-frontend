@@ -1,607 +1,621 @@
- /* src/components/SearchPage.module.css */
+/* src/components/SearchPage.module.css */
 
-  /* --- Estilos Generales del Contenedor de la Página de Búsqueda --- */
-  .container {
-    max-width: 700px;
-    margin: auto;
-    padding: 30px;
-  }
+/* --- Estilos Generales del Contenedor de la Página de Búsqueda --- */
+.container {
+  max-width: 700px;
+  margin: auto;
+  padding: 30px;
+}
 
-  /* src/components/SearchPage.module.css */
+/* --- Estilos del Encabezado y Botón de Cerrar Sesión (ajustados) --- */
+.header {
+  display: flex;
+  justify-content: space-between; /* Espacia los elementos a los extremos */
+  align-items: flex-start; /* Alinea los elementos en la parte superior del header */
+  margin-bottom: 20px;
+  flex-wrap: wrap; /* Permite que los elementos se envuelvan en pantallas pequeñas */
+}
 
-  /* ... (tus estilos existentes) ... */
+.headerLeft {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Alinea a la izquierda el título y la fecha de actualización */
+}
 
-  /* --- Estilos del Encabezado y Botón de Cerrar Sesión (ajustados) --- */
-  .header {
-    display: flex;
-    justify-content: space-between; /* Espacia los elementos a los extremos */
-    align-items: flex-start; /* Alinea los elementos en la parte superior del header */
-    margin-bottom: 20px;
-    flex-wrap: wrap; /* Permite que los elementos se envuelvan en pantallas pequeñas */
-  }
+.headerRight {
+  display: flex; /* Habilitar Flexbox */
+  flex-direction: column; /* Apilar elementos verticalmente */
+  align-items: flex-end; /* Alinear elementos a la derecha horizontalmente */
+  justify-content: center; /* Centrar verticalmente en el espacio disponible */
+  gap: 5px; /* Pequeño espacio entre los elementos apilados */
+  text-align: right; /* Asegura que el texto dentro se alinee a la derecha */
+}
 
-  .headerLeft {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start; /* Alinea a la izquierda el título y la fecha de actualización */
-  }
+.updateDateText {
+  font-size: 0.9em;
+  color: #666;
+  margin-top: 5px; /* Espacio entre el título h2 y esta fecha */
+}
 
-  .headerRight {
-    display: flex; /* Habilitar Flexbox */
-    flex-direction: column; /* Apilar elementos verticalmente */
-    align-items: flex-end; /* Alinear elementos a la derecha horizontalmente */
-    justify-content: center; /* Centrar verticalmente en el espacio disponible */
-    gap: 5px; /* Pequeño espacio entre los elementos apilados */
-    text-align: right; /* Asegura que el texto dentro se alinee a la derecha */
-  }
+.currentDateText,
+.userEmail {
+  margin-top: 6px;
+  font-size: 0.70em;
+  color: #333;
+  max-width: 300px; /* Limita el ancho del email */
+  word-break: break-word; /* Permite que se corte en varias líneas */
+  overflow-wrap: break-word; /* Compatibilidad adicional */
+}
 
-  .updateDateText {
-    font-size: 0.9em;
-    color: #666;
-    margin-top: 5px; /* Espacio entre el título h2 y esta fecha */
-  }
+.logoutButton {
+  margin-top: 5px; /* Un pequeño margen para separarlo del email */
+}
 
-  .currentDateText,
-  .userEmail {
-    margin-top: 6px;
-    font-size: 0.70em;
-    color: #333;
-    max-width: 300px; /* ✅ Limita el ancho del email */
-    word-break: break-word; /* ✅ Permite que se corte en varias líneas */
-    overflow-wrap: break-word; /* ✅ Compatibilidad adicional */
-  }
+/* --- Estilos del Formulario de Búsqueda --- */
+.form {
+  margin-bottom: 20px;
+  display: flex; /* Usar flexbox para alinear input y botón */
+  gap: 8px; /* Espacio entre los elementos del formulario */
+}
 
+.searchInput {
+  flex-grow: 1; /* Permite que el input crezca para ocupar el espacio disponible */
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1em; /* Asegura un tamaño de fuente legible */
+}
 
+.searchButton {
+  padding: 8px 16px;
+  background: #2c5282;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1em; /* Asegura un tamaño de fuente legible */
+}
 
-  .logoutButton {
-    /* Podrías querer que el botón tenga un ancho máximo si es demasiado grande,
-      o simplemente dejarlo con su ancho automático */
-    /* max-width: 150px; */
-    /* Asegurar que no tenga márgenes que lo empujen */
-    margin-top: 5px; /* Un pequeño margen para separarlo del email */
-  }
+/* --- Estilos de las Tablas de Resumen (Común para SummaryTable y GlobalSummaryDisplay) --- */
+.summaryTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10px; /* Tamaño de fuente por defecto para las tablas de resumen */
+  margin-bottom: 15px; /* Espacio después de la tabla */
+}
 
-  /* --- Estilos del Formulario de Búsqueda --- */
-  .form {
-    margin-bottom: 20px;
-    display: flex; /* Usar flexbox para alinear input y botón */
-    gap: 8px; /* Espacio entre los elementos del formulario */
-  }
+.summaryTableTh {
+  background: #2c5282;
+  color: white;
+  padding: 8px 12px;
+  text-align: left;
+  border: 1px solid #2c5282; /* Borde del mismo color que el fondo */
+}
 
-  .searchInput {
-    flex-grow: 1; /* Permite que el input crezca para ocupar el espacio disponible */
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 1em; /* Asegura un tamaño de fuente legible */
-  }
+.summaryTableTd {
+  border: 1px solid #ddd;
+  padding: 8px 12px;
+  text-align: left;
+}
 
-  .searchButton {
-    padding: 8px 16px;
-    background: #2c5282;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1em; /* Asegura un tamaño de fuente legible */
-  }
+.summaryTable .totalRow {
+  font-weight: bold;
+  background: #f7fafc;
+}
 
-  /* --- Estilos de las Tablas de Resumen (Común para SummaryTable y GlobalSummaryDisplay) --- */
-  .summaryTable {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 10px; /* Tamaño de fuente por defecto para las tablas de resumen */
-    margin-bottom: 15px; /* Espacio después de la tabla */
-  }
+/* --- Contenedor de tablas de resumen --- */
+.summaryTableWrapper {
+  width: 100%;
+  margin-bottom: 20px;
+  background: #f8f8f8;
+  padding: 10px;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05); /* Sombra ligera */
+}
 
-  .summaryTableTh {
-    background: #2c5282;
-    color: white;
-    padding: 8px 12px;
-    text-align: left;
-    border: 1px solid #2c5282; /* Borde del mismo color que el fondo */
-  }
+/* --- Mensajes de estado --- */
+.error {
+  color: red;
+  padding: 10px;
+  background-color: #ffebeb;
+  border: 1px solid #ffcccc;
+  border-radius: 4px;
+  margin-top: 15px;
+}
 
-  .summaryTableTd {
-    border: 1px solid #ddd;
-    padding: 8px 12px;
-    text-align: left;
-  }
+.loading {
+  color: #555;
+  text-align: center;
+  margin-top: 15px;
+}
 
-  .summaryTable .totalRow {
-    font-weight: bold;
-    background: #f7fafc;
-  }
+.noResults {
+  color: #777;
+  text-align: center;
+  margin-top: 15px;
+}
 
-  /* --- Estilos del Contenedor de Estadísticas de Búsqueda --- */
-  .summaryTableWrapper {
-    width: 100%;
-    margin-bottom: 20px;
-    background: #f8f8f8;
-    padding: 10px;
-    border-radius: 4px;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05); /* Sombra ligera */
-  }
+/* --- Tabla de Resultados Detallados (SearchResultsTable) --- */
+.searchResultsContainer {
+  margin-left: -55%; /* Mueve el contenedor a la izquierda */
+  left: 50%; /* Centrado relativo */
+  position: relative;
+  width: 100vw;
+  max-width: none;
+  padding: 0 30px;
+  box-sizing: border-box;
+  margin-top: 30px;
+  margin-bottom: 30px;
+}
 
-  /* --- Estilos para Mensajes de Estado --- */
-  .error {
-    color: red;
-    padding: 10px;
-    background-color: #ffebeb;
-    border: 1px solid #ffcccc;
-    border-radius: 4px;
-    margin-top: 15px;
-  }
+.searchResultsContainer h3 {
+  text-align: left;
+  margin-left: 0;
+  padding-left: 0;
+  margin-bottom: 15px;
+  color: #2c5282;
+}
 
-  .loading {
-    color: #555;
-    text-align: center;
-    margin-top: 15px;
-  }
+.tableResponsive {
+  overflow-x: auto;
+  margin-bottom: 20px;
+}
 
-  .noResults {
-    color: #777;
-    text-align: center;
-    margin-top: 15px;
-  }
+.resultsTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10px;
+  margin-bottom: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+  table-layout: fixed; /* Respeta max-width */
+}
 
-  /* --- Estilos para la Tabla de Resultados Detallados (SearchResultsTable) --- */
+.resultsTableTh {
+  background: #4a719d;
+  color: white;
+  padding: 10px 12px;
+  text-align: left;
+  border: 1px solid #3c618c;
+  white-space: normal;
+  word-wrap: break-word;
+  max-width: 150px;
+  box-sizing: border-box;
+}
 
-  .searchResultsContainer {
-    /* Elimina el padding/margen excesivo a la izquierda */
-    margin-left: -55%; /* Mueve el contenedor a la izquierda (ajusta si es necesario) */
-    left: 50%; /* Ayuda a posicionar en relación al centro de la página */
-    position: relative; /* Necesario para que left/margin-left funcionen */
-    width: 100vw; /* ✅ Ocupa el 100% del ancho del viewport */
-    max-width: none; /* ✅ Anula cualquier max-width de padres */
-    padding: 0 30px; /* Mantén el padding lateral del contenedor para el contenido, si no quieres que el contenido toque los bordes */
-    box-sizing: border-box;
+.resultsTableTd {
+  border: 1px solid #ddd;
+  padding: 8px 12px;
+  vertical-align: top;
+  background-color: #ffffff;
+  max-width: 150px;
+  word-wrap: break-word;
+  box-sizing: border-box;
+}
 
-    /* Resto de tus estilos para searchResultsContainer */
-    margin-top: 30px; /* Espacio superior para separarlo de la sección anterior */
-    margin-bottom: 30px; /* Espacio inferior */
-  }
+/* Zebra striping para filas alternas */
+.resultsTable tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
 
-  /* Ajustes para el título dentro del contenedor de resultados */
-  .searchResultsContainer h3 {
-      text-align: left; /* Asegura que el título se alinee a la izquierda dentro de este contenedor */
-      margin-left: 0;
-      padding-left: 0;
-      margin-bottom: 15px;
-      color: #2c5282;
-  }
+.resultsTable tbody tr:hover {
+  background-color: #eef7ff;
+}
 
-  /* Añade el contenedor para scroll horizontal */
-  .tableResponsive {
-      overflow-x: auto; /* Permite el scroll horizontal si la tabla es demasiado ancha */
-      margin-bottom: 20px; /* Espacio debajo de la tabla */
-  }
+/* --- Resumen Global y Gráfico (GlobalSummaryDisplay) --- */
+.globalSummaryContainer {
+  margin-top: 20px;
+  margin-bottom: 40px;
+  padding: 20px;
+  background: #fdfdfd;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 
-  .resultsTable {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 10px; /* Un poco más pequeño para más información */
-    margin-bottom: 20px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05); /* Sutil sombra */
-    table-layout: fixed; /* IMPORTANTE: Esto hace que el ancho de las columnas sea fijo y respete max-width */
-  }
+.globalSummaryContainer h3 {
+  color: #2c5282;
+  margin-bottom: 10px;
+  font-size: 1.1em;
+  text-align: center;
+}
 
-  .resultsTableTh {
-    background: #4a719d; /* Un tono diferente para diferenciar */
-    color: white;
-    padding: 10px 12px;
-    text-align: left;
-    border: 1px solid #3c618c;
-    white-space: normal; /* Permite que los encabezados largos se ajusten a varias líneas */
-    word-wrap: break-word; /* Asegura que el texto se rompa dentro de la celda */
-    max-width: 150px; /* ANCHO MÁXIMO PARA CADA COLUMNA (ajústalo según necesites) */
-    box-sizing: border-box; /* Incluye padding en el ancho */
-  }
+.globalTotalAndDate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+  color: #333;
+}
 
-  .resultsTableTd {
-    border: 1px solid #ddd;
-    padding: 8px 12px;
-    vertical-align: top; /* Alinea el contenido en la parte superior */
-    background-color: #ffffff;
-    max-width: 150px; /* ANCHO MÁXIMO PARA CADA COLUMNA (igual que el th) */
-    word-wrap: break-word; /* Asegura que el texto se rompa dentro de la celda */
-    box-sizing: border-box; /* Incluye padding en el ancho */
-  }
+.globalTotal {
+  font-size: 1.5em;
+  font-weight: bold;
+  color: #2c5282;
+  margin-bottom: 5px;
+}
 
-  /* Zebra striping para filas alternas */
-  .resultsTable tbody tr:nth-child(even) {
-    background-color: #f9f9f9;
-  }
+.globalTotalLabel {
+  font-size: 0.9em;
+  color: #555;
+  margin-bottom: 5px;
+}
 
-  .resultsTable tbody tr:hover {
-    background-color: #eef7ff; /* Resaltar fila al pasar el mouse */
-  }
+.globalUpdateDate {
+  font-size: 0.9em;
+  color: #777;
+}
 
-  /* --- Estilos para el Resumen Global y el Gráfico (GlobalSummaryDisplay) --- */
-  .globalSummaryContainer {
-    margin-top: 20px;
-    margin-bottom: 40px;
-    padding: 20px;
-    background: #fdfdfd;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    display: flex; /* ✅ Cambiamos a flex para organizar el contenido */
-    flex-direction: column; /* ✅ Organiza en columna (título, total, fecha, gráfico) */
-    align-items: center; /* ✅ Centra los elementos horizontalmente */
-  }
+/* Contenedor Flexbox para gráfico + otros */
+.globalSummaryContent {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 15px;
+  justify-content: flex-start;
+  align-items: flex-start;
+  width: 100%;
+  margin-top: 20px;
+  padding: 0;
+}
 
-  .globalSummaryContainer h3 {
-    color: #2c5282;
-    margin-bottom: 10px; /* ✅ Reducimos el margen inferior */
-    font-size: 1.8em; /* ✅ Hacemos el título un poco más grande */
-    text-align: center;
-  }
+.chartWrapper {
+  flex: 1 1 auto;
+  min-width: 400px;
+  max-width: calc(100% - 200px);
+  position: relative;
+}
 
-  /* Estilos para el total de registros y la fecha de actualización */
-  .globalTotalAndDate {
-    display: flex;
-    flex-direction: column; /* Para que la fecha quede debajo del total */
-    align-items: center;
-    margin-bottom: 20px; /* Espacio debajo de esta sección */
-    color: #333;
-  }
+.chartContainer {
+  position: relative;
+  height: 350px;
+  width: 100%;
+  padding: 0;
+}
 
-  .globalTotal {
-    font-size: 2.2em; /* ✅ Tamaño grande para el total */
-    font-weight: bold;
-    color: #2c5282;
-    margin-bottom: 5px; /* Espacio entre el total y la etiqueta */
-  }
+/* TABLA DE OTROS CÓDIGOS - COMPACTA */
+.othersTableWrapper {
+  flex: 0 0 auto;
+  width: 180px;
+  padding: 12px;
+  background: #f9f9f9;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  height: fit-content;
+  align-self: flex-start;
+}
 
-  .globalTotalLabel {
-      font-size: 0.9em;
-      color: #555;
-      margin-bottom: 5px;
-  }
+.othersTableWrapper h4 {
+  color: #2c5282;
+  font-size: 0.8em;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  padding-bottom: 6px;
+  border-bottom: 1.5px solid #2c5282;
+  text-align: center;
+  line-height: 1.2;
+}
 
-  .globalUpdateDate {
-    font-size: 0.9em;
-    color: #777;
-  }
+.othersTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10px;
+  color: #333;
+  line-height: 1.3;
+}
 
+.othersTable thead tr {
+  background: #4a719d;
+}
 
-  /* Contenedor Flexbox para el gráfico (eliminamos la tabla de aquí) */
+.othersTable th {
+  color: white;
+  padding: 4px 3px;
+  font-weight: 600;
+  text-align: left;
+  border: 0.5px solid #2c5282;
+  font-size: 9px;
+}
+
+.othersTable td {
+  padding: 3px 2px;
+  border: 0.5px solid #ddd;
+  background: white;
+  font-size: 9px;
+  word-break: break-word;
+}
+
+.othersTable tbody tr:hover {
+  background: #f5f5f5;
+}
+
+.othersTable tbody tr:nth-child(even) {
+  background: #fafafa;
+}
+
+.othersTable td.numeric {
+  text-align: right;
+  font-weight: 500;
+}
+
+.othersTable th:nth-child(2),
+.othersTable th:nth-child(3) {
+  text-align: right;
+  width: 50%;
+}
+
+.othersTable th:nth-child(1) {
+  width: 60px;
+}
+
+/* RESPONSIVE - TABLET (1024px) */
+@media (max-width: 1024px) {
   .globalSummaryContent {
-    display: flex;
     flex-wrap: wrap;
-    gap: 20px;
-    justify-content: center;
-    align-items: flex-start;
-    width: 100%; /* Asegura que el contenido flex ocupe todo el ancho disponible */
+    gap: 15px;
   }
 
   .chartWrapper {
-    flex: none; /* ✅ Ya no queremos que crezca flexiblemente si no hay otra columna */
-    width: 80%; /* ✅ Ocupa más ancho ahora que no hay tabla. Ajusta este porcentaje. */
-    max-width: 600px; /* ✅ Un ancho máximo para el gráfico en pantallas grandes */
-    position: relative;
-    /* margin: auto; */ /* ✅ Centra el gráfico dentro de su contenedor si no usa todo el width */
-  }
-
-  .chartContainer {
-    position: relative;
-    height: 350px; /* ✅ Aumentamos la altura para mejor visualización de las barras y etiquetas */
+    flex: 0 1 100%;
     width: 100%;
-  }
-
-  /* ✅ Eliminamos los estilos para .globalSummaryTableWrapper y .globalSummaryTableTitle
-    porque ya no tendremos la tabla al lado */
-
-
-  /* --- Ajustes específicos para el tamaño de fuente de la tabla de resumen GLOBAL --- */
-  /* Ya no son necesarios, ya que eliminaremos la tabla del GlobalSummaryDisplay */
-  /* .globalSummaryTableWrapper .summaryTable {
-    font-size: 8px;
-  }
-
-  .globalSummaryTableWrapper .summaryTableTh {
-    padding: 6px 8px;
-  }
-
-  .globalSummaryTableWrapper .summaryTableTd {
-    padding: 5px 8px;
-  }
-
-  .globalSummaryTableWrapper .totalRow .summaryTableTd {
-      font-weight: bold;
-  } */
-
-
-   /* src/components/SearchPage.module.css */
-
-  /* ... (Todos tus estilos existentes para la vista en pantalla quedan IGUAL arriba de este bloque) ... */
-
-
-  
-  .inactivityWarning {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background-color: #fff3cd;
-    color: #856404;
-    padding: 12px 16px;
-    border: 1px solid #ffeeba;
-    border-radius: 6px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    z-index: 1000;
-    font-size: 0.95em;
-  }
-  .searchTermDisplay {
-    margin-top: 1rem;
-    font-size: 1rem;
-    color: #333;
-  }
-
-  /* Asegura que el criterio se imprima */
-  @media print {
-    .searchTermDisplay {
-      display: block;
-      font-size: 1rem;  
-      color: #000;
-      margin-bottom: 1rem;
-    }
-  }
-
-
-  .logoCliente {
+    min-width: auto;
     max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
   }
-
-  .logoTitleWrapper {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-
-
-  .logoTitleWrapper {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-
-  .logoBox {
-    width: 80px;
-    height: 80px;
-    min-width: 80px;
-    min-height: 80px;
-    /* Sin borde ni fondo */
-    border: none;
-    background-color: transparent;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    margin-right: 1rem;
-    flex-shrink: 0;
-  }
-
-
-  .logoCliente {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-  }
-  /* ============================================
-    TABLA DE OTROS CÓDIGOS - COMPACTA
-    ============================================ */
 
   .othersTableWrapper {
-    flex: 0 0 auto;
-    width: 180px;
-    padding: 12px;
-    background: #f9f9f9;
-    border-radius: 6px;
-    border: 1px solid #ddd;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-    display: flex;
+    flex: 0 1 100%;
+    width: 100%;
+    min-width: auto;
+    height: auto;
+    align-self: auto;
+  }
+}
+
+/* RESPONSIVE - MÓVIL (768px) */
+@media (max-width: 768px) {
+  .globalSummaryContent {
     flex-direction: column;
-    height: fit-content;
-    align-self: flex-start;
+    gap: 15px;
+    padding: 0 5px;
+  }
+
+  .othersTableWrapper {
+    width: 100%;
+    padding: 10px;
   }
 
   .othersTableWrapper h4 {
-    color: #2c5282;
-    font-size: 0.8em;
-    font-weight: 600;
-    margin: 0 0 8px 0;
-    padding-bottom: 6px;
-    border-bottom: 1.5px solid #2c5282;
-    text-align: center;
-    line-height: 1.2;
+    font-size: 0.75em;
+    margin-bottom: 6px;
   }
 
   .othersTable {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 10px;
-    color: #333;
-    line-height: 1.3;
-  }
-
-  .othersTable thead tr {
-    background: #4a719d;
-  }
-
-  .othersTable th {
-    color: white;
-    padding: 4px 3px;
-    font-weight: 600;
-    text-align: left;
-    border: 0.5px solid #2c5282;
     font-size: 9px;
   }
 
+  .othersTable th,
   .othersTable td {
     padding: 3px 2px;
-    border: 0.5px solid #ddd;
-    background: white;
-    font-size: 9px;
-    word-break: break-word;
-  }
-
-  .othersTable tbody tr:hover {
-    background: #f5f5f5;
-  }
-
-  .othersTable tbody tr:nth-child(even) {
-    background: #fafafa;
-  }
-
-  .othersTable td.numeric {
-    text-align: right;
-    font-weight: 500;
-  }
-
-  .othersTable th:nth-child(2),
-  .othersTable th:nth-child(3) {
-    text-align: right;
-    width: 50%;
-  }
-
-  .othersTable th:nth-child(1) {
-    width: 60px;
-  }
-
-  /* ============================================
-    LAYOUT: GRÁFICO IZQUIERDA + TABLA DERECHA
-    ============================================ */
-
-  .globalSummaryContent {
-    display: flex;
-    flex-wrap: nowrap;
-    gap: 15px;
-    justify-content: flex-start;
-    align-items: flex-start;
-    width: 100%;
-    margin-top: 20px;
-    padding: 0;
+    font-size: 8px;
   }
 
   .chartWrapper {
-    flex: 1 1 auto;
-    min-width: 400px;
-    max-width: calc(100% - 200px);
-    position: relative;
+    width: 100%;
+    max-width: 100%;
   }
 
   .chartContainer {
+    height: 250px !important;
+  }
+}
+
+/* RESPONSIVO - MÓVIL PEQUEÑO (480px) */
+@media (max-width: 480px) {
+  .globalSummaryContent {
+    gap: 10px;
     padding: 0;
   }
 
-  /* ============================================
-    RESPONSIVE - TABLET (1024px)
-    ============================================ */
-
-  @media (max-width: 1024px) {
-    .globalSummaryContent {
-      flex-wrap: wrap;
-      gap: 15px;
-    }
-
-    .chartWrapper {
-      flex: 0 1 100%;
-      width: 100%;
-      min-width: auto;
-      max-width: 100%;
-    }
-
-    .othersTableWrapper {
-      flex: 0 1 100%;
-      width: 100%;
-      min-width: auto;
-      height: auto;
-      align-self: auto;
-    }
+  .othersTableWrapper {
+    padding: 8px;
   }
 
-  /* ============================================
-    RESPONSIVE - MÓVIL (768px)
-    ============================================ */
-
-  @media (max-width: 768px) {
-    .globalSummaryContent {
-      flex-direction: column;
-      gap: 15px;
-      padding: 0 5px;
-    }
-
-    .othersTableWrapper {
-      width: 100%;
-      padding: 10px;
-    }
-
-    .othersTableWrapper h4 {
-      font-size: 0.75em;
-      margin-bottom: 6px;
-    }
-
-    .othersTable {
-      font-size: 9px;
-    }
-
-    .othersTable th,
-    .othersTable td {
-      padding: 3px 2px;
-      font-size: 8px;
-    }
-
-    .chartWrapper {
-      width: 100%;
-      max-width: 100%;
-    }
-
-    .chartContainer {
-      height: 250px !important;
-    }
+  .othersTableWrapper h4 {
+    font-size: 0.7em;
+    margin-bottom: 5px;
   }
 
-  /* ============================================
-    RESPONSIVO - MÓVIL PEQUEÑO (480px)
-    ============================================ */
-
-  @media (max-width: 480px) {
-    .globalSummaryContent {
-      gap: 10px;
-      padding: 0;
-    }
-
-    .othersTableWrapper {
-      padding: 8px;
-    }
-
-    .othersTableWrapper h4 {
-      font-size: 0.7em;
-      margin-bottom: 5px;
-    }
-
-    .othersTable {
-      font-size: 8px;
-    }
-
-    .othersTable th,
-    .othersTable td {
-      padding: 2px 1px;
-      font-size: 7px;
-    }
-
-    .chartContainer {
-      height: 200px !important;
-    }
+  .othersTable {
+    font-size: 8px;
   }
 
-  @media print {
-  @page {
-    size: letter;
-    margin: 1cm;
+  .othersTable th,
+  .othersTable td {
+    padding: 2px 1px;
+    font-size: 7px;
+  }
+
+  .chartContainer {
+    height: 200px !important;
+  }
+}
+
+/* Inactividad */
+.inactivityWarning {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: #fff3cd;
+  color: #856404;
+  padding: 12px 16px;
+  border: 1px solid #ffeeba;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  z-index: 1000;
+  font-size: 0.95em;
+}
+
+.searchTermDisplay {
+  margin-top: 1rem;
+  font-size: 1rem;
+  color: #333;
+}
+
+/* Logo cliente */
+.logoCliente {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.logoTitleWrapper {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.logoBox {
+  width: 80px;
+  height: 80px;
+  min-width: 80px;
+  min-height: 80px;
+  border: none;
+  background-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  margin-right: 1rem;
+  flex-shrink: 0;
+}
+
+/* Reporte */
+.reportContainer {
+  margin-top: 20px;
+}
+
+.reportFilters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 15px 0;
+  align-items: flex-end;
+}
+
+.filterGroup {
+  display: flex;
+  flex-direction: column;
+  min-width: 180px;
+}
+
+.filterInput,
+.filterSelect {
+  padding: 6px 8px;
+  border: 1px solid #cbd5e0;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.filterActions {
+  display: flex;
+  gap: 10px;
+}
+
+.exportButton {
+  background-color: #4a5568;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.exportButton:disabled {
+  background-color: #a0aec0;
+  cursor: not-allowed;
+}
+
+.reportButton {
+  margin-right: 10px;
+  background-color: #2b6cb0;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+/* Métricas adicionales */
+.metricsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.metricsColumn {
+  flex: 1 1 60%;
+  min-width: 260px;
+}
+
+.peakCard {
+  flex: 0 0 200px;
+  padding: 8px 10px;
+  border-radius: 4px;
+  background: #f7fafc;
+  border: 1px solid #cbd5e0;
+  font-size: 0.75rem;
+}
+
+/* Visibilidad por modo (pantalla vs impresión) */
+.onlyScreen {
+  display: block;
+}
+
+.onlyPrint {
+  display: none;
+}
+
+/* Texto de resumen para impresión */
+.printSummaryText {
+  font-size: 9px;
+  line-height: 1.3;
+}
+
+/* Celda numérica genérica */
+.numericCell {
+  text-align: right;
+}
+
+
+/* --- ESTILOS DE IMPRESIÓN --- */
+@media print {
+  /* Criterio de búsqueda siempre visible */
+  .searchTermDisplay {
+    display: block;
+    font-size: 1rem;
+    color: #000;
+    margin-bottom: 1rem;
+  }
+
+  .onlyScreen {
+    display: none !important;
+  }
+
+  .onlyPrint {
+    display: block !important;
+  }
+
+  .printSummaryText {
+    font-size: 8px;
+    color: #000;
   }
 
   * {
@@ -620,6 +634,11 @@
     color: #000 !important;
   }
 
+  @page {
+    size: letter;
+    margin: 10mm 10mm 15mm 10mm;
+  }
+
   .header .logoutButton,
   .form,
   button,
@@ -635,9 +654,10 @@
     margin: 0 !important;
   }
 
+  /* Resumen global compacto */
   .globalSummaryContainer {
-    page-break-inside: avoid !important;
-    page-break-before: avoid !important;
+    page-break-inside: auto !important;
+    page-break-before: auto !important;
     padding: 10px !important;
     border: none !important;
     box-shadow: none !important;
@@ -658,7 +678,7 @@
   }
 
   .globalTotal {
-    font-size: 1.5em !important;
+    font-size: 1.1em !important;
     color: #000 !important;
   }
 
@@ -680,8 +700,8 @@
     width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
-    page-break-inside: avoid !important;
-    page-break-before: avoid !important;
+    page-break-inside: auto !important;
+    page-break-before: auto !important;
   }
 
   .chartWrapper {
@@ -752,6 +772,7 @@
     color: #000 !important;
   }
 
+  /* Tabla de resultados compacta */
   .searchResultsContainer {
     margin: 0 !important;
     padding: 0 !important;
@@ -760,30 +781,41 @@
     right: auto !important;
     position: static !important;
     max-width: none !important;
-    page-break-inside: avoid !important;
+    page-break-inside: auto !important;
   }
 
   .searchResultsContainer h3 {
     margin-left: 0 !important;
     padding-left: 0 !important;
     text-align: left !important;
-    font-size: 1.1em !important;
+    font-size: 11px !important;
     color: #000 !important;
     page-break-after: avoid !important;
   }
 
   .tableResponsive {
     overflow-x: visible !important;
-    margin-bottom: 0 !important;
+    margin: 0 !important;
     padding: 0 !important;
   }
 
   .resultsTable {
     width: 100% !important;
+    border-collapse: collapse;
     font-size: 8px !important;
     box-shadow: none !important;
     table-layout: fixed !important;
-    page-break-inside: avoid !important;
+    page-break-inside: auto !important;
+  }
+
+  .resultsTable thead {
+    display: table-header-group;
+    background-color: #eee !important;
+    color: #000 !important;
+  }
+
+  .resultsTable tbody {
+    display: table-row-group;
   }
 
   .resultsTable th,
@@ -792,15 +824,21 @@
     padding: 2px 3px !important;
     white-space: normal !important;
     word-wrap: break-word !important;
-    max-width: 1.5cm !important;
+    max-width: 1.6cm !important;
     border: 1px solid #ccc !important;
     background-color: #fff !important;
     color: #000 !important;
+    box-sizing: border-box !important;
   }
 
   .resultsTable th {
-    background: #eee !important;
-    color: #000 !important;
+    font-weight: bold;
+    text-align: left;
+  }
+
+  .resultsTable tbody tr {
+    page-break-inside: auto !important;
+    page-break-after: auto;
   }
 
   .resultsTable tbody tr:nth-child(even) {
@@ -844,180 +882,10 @@
     page-break-inside: avoid !important;
   }
 
-  .searchTermDisplay {
-    display: block !important;
-    font-size: 1rem !important;
-    color: #000 !important;
-    margin-bottom: 1rem !important;
-  }
-}
-
-.reportContainer {
-  margin-top: 20px;
-}
-
-.reportFilters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin: 15px 0;
-  align-items: flex-end;
-}
-
-.filterGroup {
-  display: flex;
-  flex-direction: column;
-  min-width: 180px;
-}
-
-.filterInput,
-.filterSelect {
-  padding: 6px 8px;
-  border: 1px solid #cbd5e0;
-  border-radius: 4px;
-  font-size: 0.9rem;
-}
-
-.filterActions {
-  display: flex;
-  gap: 10px;
-}
-
-.exportButton {
-  background-color: #4a5568;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  padding: 8px 12px;
-  cursor: pointer;
-  font-size: 0.9rem;
-}
-
-.exportButton:disabled {
-  background-color: #a0aec0;
-  cursor: not-allowed;
-}
-
-.reportButton {
-  margin-right: 10px;
-  background-color: #2b6cb0;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  padding: 8px 12px;
-  cursor: pointer;
-  font-size: 0.9rem;
-}
-
-/* ========================================
-   ESTILOS DE IMPRESIÓN ESPECÍFICOS PARA REPORTE
-   ======================================== */
-
-@media print {
-  /* Contenedor general del reporte */
-  .reportContainer {
-    width: 100%;
-    margin: 0;
-    padding: 0;
-  }
-
-  /* Header compacto en impresión */
-  .header {
-    page-break-after: avoid;
-    margin-bottom: 10px;
-    padding-bottom: 10px;
-    border-bottom: 2px solid #000;
-  }
-
-  .logoTitleWrapper {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .logoTitleWrapper h2 {
-    margin: 0;
-    font-size: 16px;
-  }
-
-  .logoTitleWrapper p {
-    margin: 0;
-    font-size: 11px;
-  }
-
-  /* Filtros no se imprimen */
   .reportFilters {
-    display: none;
+    display: none !important;
   }
 
-  /* Tabla de reporte optimizada para impresión */
-  .resultsTable {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 10px;
-    margin-top: 10px;
-  }
-
-  .resultsTable thead {
-    display: table-header-group;
-    background-color: #2c5282;
-    color: #fff;
-  }
-
-  .resultsTable th {
-    border: 1px solid #000;
-    padding: 4px;
-    text-align: left;
-    font-weight: bold;
-    page-break-after: avoid;
-  }
-
-  .resultsTable td {
-    border: 1px solid #ccc;
-    padding: 3px;
-    word-wrap: break-word;
-  }
-
-  .resultsTable tbody tr {
-    page-break-inside: avoid;
-  }
-
-  .resultsTable tbody tr:nth-child(even) {
-    background-color: #f9f9f9;
-  }
-
-  .resultsTable tbody tr:nth-child(odd) {
-    background-color: #fff;
-  }
-
-  /* Contenedor de tabla */
-  .searchResultsContainer {
-    page-break-inside: avoid;
-    margin-bottom: 30px;
-  }
-
-  /* Pie de página con numeración y fecha/hora */
-  body::after {
-    content: "";
-    display: block;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 60px;
-    border-top: 1px solid #000;
-    padding: 5px 10px;
-    font-size: 9px;
-    text-align: center;
-    background-color: #f5f5f5;
-  }
-
-  /* Espaciado inferior para dejar lugar al pie de página */
-  body {
-    margin-bottom: 80px;
-  }
-
-  /* Ocultar elementos innecesarios */
   .loading,
   .error,
   .logoutButton,
@@ -1025,22 +893,12 @@
     display: none !important;
   }
 
-  /* Numeración de página (requiere soporte del navegador) */
-  @page {
-    margin: 15mm 15mm 25mm 15mm;
-    
-    @bottom-center {
-      content: "Página " counter(page) " de " counter(pages);
-      font-size: 9pt;
-    }
-
-    @bottom-right {
-      content: string(printDate);
-      font-size: 9pt;
-    }
+  .reportContainer {
+    width: 100%;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
-  /* Header compacto para la vista de reporte */
   .reportContainer .header {
     margin-top: 0 !important;
     margin-bottom: 6px !important;
@@ -1063,41 +921,19 @@
     font-size: 9px !important;
   }
 
-  /* Reducir margen superior general de la sección de reporte */
   .reportContainer {
     margin-top: 0 !important;
   }
-}
-.metricsRow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  align-items: flex-start;
-  margin-bottom: 8px;
-}
 
-.metricsColumn {
-  flex: 1 1 60%;
-  min-width: 260px;
-}
+  body {
+    margin-bottom: 40px !important;
+  }
 
-.peakCard {
-  flex: 0 0 200px;
-  padding: 8px 10px;
-  border-radius: 4px;
-  background: #f7fafc;
-  border: 1px solid #cbd5e0;
-  font-size: 0.75rem;
-}
-
-/* Opcional: en impresión, hacer la tarjeta un poco más compacta */
-@media print {
   .peakCard {
     font-size: 9px !important;
     padding: 6px 8px !important;
   }
-}
-@media print {
+
   .noPrint {
     display: none !important;
   }

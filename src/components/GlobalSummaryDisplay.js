@@ -33,162 +33,156 @@ const getRandomColor = () => {
   return color;
 };
 
-function GlobalSummaryDisplay({
-  summary,
-  total,
-  loading,
-  error,
-  lastUpdateDate,
-}) {
+function GlobalSummaryDisplay({ summary, total, loading, error, lastUpdateDate }) {
   if (loading) {
     return (
-      <div className={styles.globalSummaryContainer}>
-        <p className={styles.loading}>Cargando resumen global...</p>
+      <div className={styles.loading}>
+        Cargando resumen global...
       </div>
     );
   }
 
   if (error) {
-    return (
-      <div className={styles.globalSummaryContainer}>
-        <p className={styles.error}>{error}</p>
-      </div>
-    );
+    return <div className={styles.error}>{error}</div>;
   }
 
   if (!summary || summary.length === 0) {
     return (
-      <div className={styles.globalSummaryContainer}>
-        <p className={styles.noResults}>
-          No hay datos de resumen global disponibles.
-        </p>
+      <div className={styles.noResults}>
+        No hay datos de resumen global disponibles.
       </div>
     );
   }
 
-  // ✅ Ordenar y limitar (Top 8 + Otros)
+  // Ordenar por count descendente
   const sorted = [...summary].sort((a, b) => b.count - a.count);
-  const top = sorted.slice(0, 8);
-  const others = sorted.slice(8);
 
-  if (others.length > 0) {
-    top.push({
-      codigo: "OTROS",
-      count: others.reduce((acc, i) => acc + i.count, 0),
-    });
-  }
+  // Top 7 + barra "Otros"
+  const top7 = sorted.slice(0, 7);
+  const others = sorted.slice(7);
 
-  const labels = top.map((item) => item.codigo);
-  const counts = top.map((item) => item.count);
-  const backgroundColors = labels.map(() => getRandomColor());
+  const othersTotal = others.reduce((acc, item) => acc + item.count, 0);
 
-  const chartData = {
+  const labels = [
+    ...top7.map((item) => item.codigo),
+    ...(othersTotal > 0 ? ["Otros"] : []),
+  ];
+
+  const dataValues = [
+    ...top7.map((item) => item.count),
+    ...(othersTotal > 0 ? [othersTotal] : []),
+  ];
+
+  const barColors = labels.map(() => getRandomColor());
+
+  const data = {
     labels,
     datasets: [
       {
-        label: "Total de Registros",
-        data: counts,
-        backgroundColor: backgroundColors,
-        borderWidth: 0,
-        barThickness: 16,
-        categoryPercentage: 0.75,
-        barPercentage: 0.85,
+        label: "Registros por código",
+        data: dataValues,
+        backgroundColor: barColors,
       },
     ],
   };
 
-  const chartOptions = {
+  const options = {
     indexAxis: "y",
     responsive: true,
     maintainAspectRatio: false,
-
     plugins: {
-      legend: { display: false },
-      title: { display: false },
-
-      tooltip: {
-        callbacks: {
-          label: (context) =>
-            new Intl.NumberFormat("es-BO").format(context.parsed.x),
-        },
-        backgroundColor: "rgba(0, 0, 0, 0.8)",
-        padding: 10,
-        titleFont: { size: 11, weight: "bold" },
-        bodyFont: { size: 10 },
+      legend: {
+        display: false,
       },
-
+      title: {
+        display: false,
+      },
       datalabels: {
         anchor: "end",
         align: "right",
-        offset: 6,
-        color: "#555",
-        font: {
-          weight: "bold",
-          size: 10,
-        },
         formatter: (value) =>
           new Intl.NumberFormat("es-BO").format(value),
+        color: "#000",
+        font: {
+          size: 10,
+        },
+      },
+      tooltip: {
+        callbacks: {
+          label: (context) => {
+            const value = context.parsed.x || 0;
+            const pct = total
+              ? ((value * 100) / total).toFixed(1)
+              : "0.0";
+            return `${new Intl.NumberFormat("es-BO").format(
+              value
+            )} registros (${pct}%)`;
+          },
+        },
       },
     },
-
     scales: {
       x: {
-        beginAtZero: true,
         ticks: {
-          font: { size: 10 },
           callback: (value) =>
             new Intl.NumberFormat("es-BO").format(value),
         },
-        max: Math.max(...counts) * 1.15,
-      },
-      y: {
-        ticks: {
-          font: { size: 10 },
-          padding: 6,
-        },
-      },
-    },
-
-    layout: {
-      padding: {
-        left: 8,
-        right: 50,
-        top: 8,
-        bottom: 8,
       },
     },
   };
 
+  // Filas para el resumen de impresión:
+  // usamos TODOS los códigos individuales (sorted),
+  // y la suma total ya está en "total"
+  const allRows = sorted;
+
   return (
     <div className={styles.globalSummaryContainer}>
-      <h3>Resumen Global de Registros</h3>
+      <h3>Resumen global</h3>
 
       <div className={styles.globalTotalAndDate}>
-        <span className={styles.globalTotalLabel}>
-          Total de Registros en la Base:
-        </span>
-        <span className={styles.globalTotal}>
+        <div className={styles.globalTotal}>
           {new Intl.NumberFormat("es-BO").format(total)}
-        </span>
+        </div>
+        <div className={styles.globalTotalLabel}>
+          Total de registros en la base
+        </div>
         {lastUpdateDate && (
-          <span className={styles.globalUpdateDate}>
-            Fecha de actualización: {lastUpdateDate}
-          </span>
+          <div className={styles.globalUpdateDate}>
+            Base de datos actualizada al: {lastUpdateDate}
+          </div>
         )}
       </div>
 
       <div className={styles.globalSummaryContent}>
-        {/* Gráfico de Barras (Top 8 + Otros) - A LA IZQUIERDA */}
-        <div className={styles.chartWrapper}>
-          <div className={styles.chartContainer} style={{ height: 320 }}>
-            <Bar data={chartData} options={chartOptions} />
+        {/* Gráfico SOLO en pantalla */}
+        <div className={`${styles.chartWrapper} ${styles.onlyScreen}`}>
+          <div className={styles.chartContainer}>
+            <Bar data={data} options={options} />
           </div>
         </div>
 
-        {/* Tabla de Otros - A LA DERECHA */}
-        {others.length > 0 && (
+        {/* Tabla de OTROS SOLO en pantalla (detalle de códigos que componen "Otros") */}
+        <div className={`${styles.othersTableWrapper} ${styles.onlyScreen}`}>
+          <h4>Detalle de otros códigos</h4>
           <OthersTable summary={summary} total={total} />
-        )}
+        </div>
+
+        {/* Resumen en texto SOLO en impresión */}
+        <div className={styles.onlyPrint}>
+          <h4>Resumen global por código</h4>
+          <p className={styles.printSummaryText}>
+            {allRows
+              .map((item) => {
+                const formatted = new Intl.NumberFormat("es-BO").format(
+                  item.count
+                );
+                return `${item.codigo} = ${formatted}`;
+              })
+              .join("; ")}
+            {`. TOTAL = ${new Intl.NumberFormat("es-BO").format(total)}`}
+          </p>
+        </div>
       </div>
     </div>
   );
