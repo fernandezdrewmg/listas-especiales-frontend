@@ -758,7 +758,7 @@
     text-align: left !important;
     font-size: 11px !important;
     color: #000 !important;
-    page-break-after: avoid !important;
+    page-break-after: auto !important;
   }
 
   .tableResponsive {
@@ -807,7 +807,7 @@
   }
 
   .resultsTable tbody tr {
-    page-break-inside: avoid !important;
+    page-break-inside: auto !important;
     page-break-after: auto;
   }
 
@@ -822,7 +822,7 @@
   .summaryTable {
     font-size: 8px !important;
     margin-bottom: 10px !important;
-    page-break-inside: avoid !important;
+    page-break-inside: auto !important;
   }
 
   .summaryTableTh {
@@ -849,7 +849,7 @@
     box-shadow: none !important;
     border: 1px solid #ccc !important;
     margin-bottom: 15px !important;
-    page-break-inside: avoid !important;
+    page-break-inside: auto !important;
   }
 
   .reportFilters,
@@ -904,4 +904,19 @@
   .noPrint {
     display: none !important;
   }
-}
+/* Numeración de página */
+  @page {
+    margin: 15mm 15mm 25mm 15mm;
+
+    @bottom-center {
+      content: "Página " counter(page) " de " counter(pages);
+      font-size: 9pt;
+    }
+
+    @bottom-right {
+      content: string(printDate);
+      font-size: 9pt;
+    }
+  }
+} /* cierre de @media print */
+
