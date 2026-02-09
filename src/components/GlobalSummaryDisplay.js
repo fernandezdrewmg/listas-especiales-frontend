@@ -33,7 +33,13 @@ const getRandomColor = () => {
   return color;
 };
 
-function GlobalSummaryDisplay({ summary, total, loading, error, lastUpdateDate }) {
+function GlobalSummaryDisplay({
+  summary,
+  total,
+  loading,
+  error,
+  lastUpdateDate,
+}) {
   if (loading) {
     return (
       <div className={styles.loading}>
@@ -131,57 +137,67 @@ function GlobalSummaryDisplay({ summary, total, loading, error, lastUpdateDate }
     },
   };
 
-  // Filas para el resumen de impresión:
-  // usamos TODOS los códigos individuales (sorted),
-  // y la suma total ya está en "total"
+  // Filas para el resumen de impresión (todos los códigos individuales)
   const allRows = sorted;
 
   return (
     <div className={styles.globalSummaryContainer}>
-      <h3>Resumen global</h3>
+      {/* Bloque superior: resumen global (total + fecha) */}
+      <div className={styles.globalSummaryTop}>
+        <h3>Resumen global</h3>
 
-      <div className={styles.globalTotalAndDate}>
-        <div className={styles.globalTotal}>
-          {new Intl.NumberFormat("es-BO").format(total)}
+        <div className={styles.globalTotalAndDate}>
+          <p className={styles.globalTotalLine}>
+            {new Intl.NumberFormat("es-BO").format(total)}{" "}
+            <span className={styles.globalTotalLabelInline}>
+              Total de registros en la base
+            </span>
+          </p>
+          {lastUpdateDate && (
+            <p className={styles.globalUpdateDate}>
+              Base de datos actualizada al: {lastUpdateDate}
+            </p>
+          )}
         </div>
-        <div className={styles.globalTotalLabel}>
-          Total de registros en la base
-        </div>
-        {lastUpdateDate && (
-          <div className={styles.globalUpdateDate}>
-            Base de datos actualizada al: {lastUpdateDate}
-          </div>
-        )}
       </div>
 
-      <div className={styles.globalSummaryContent}>
-        {/* Gráfico SOLO en pantalla */}
-        <div className={`${styles.chartWrapper} ${styles.onlyScreen}`}>
-          <div className={styles.chartContainer}>
-            <Bar data={data} options={options} />
+      {/* Bloque inferior / derecho: resumen por código */}
+      <div className={styles.globalSummaryBottom}>
+        <h3>Resumen global por código</h3>
+
+        {/* Contenedor común para gráfico + tabla + texto impresión */}
+        <div className={styles.globalSummaryContent}>
+          {/* Gráfico SOLO en pantalla */}
+          <div className={`${styles.chartWrapper} ${styles.onlyScreen}`}>
+            <div className={styles.chartContainer}>
+              <Bar data={data} options={options} />
+            </div>
           </div>
-        </div>
 
-        {/* Tabla de OTROS SOLO en pantalla (detalle de códigos que componen "Otros") */}
-        <div className={`${styles.othersTableWrapper} ${styles.onlyScreen}`}>
-          <h4>Detalle de otros códigos</h4>
-          <OthersTable summary={summary} total={total} />
-        </div>
+          {/* Tabla de OTROS SOLO en pantalla */}
+          <div
+            className={`${styles.othersTableWrapper} ${styles.onlyScreen}`}
+          >
+            <h4>Detalle de otros códigos</h4>
+            <OthersTable summary={summary} total={total} />
+          </div>
 
-        {/* Resumen en texto SOLO en impresión */}
-        <div className={styles.onlyPrint}>
-          <h4>Resumen global por código</h4>
-          <p className={styles.printSummaryText}>
-            {allRows
-              .map((item) => {
-                const formatted = new Intl.NumberFormat("es-BO").format(
-                  item.count
-                );
-                return `${item.codigo} = ${formatted}`;
-              })
-              .join("; ")}
-            {`. TOTAL = ${new Intl.NumberFormat("es-BO").format(total)}`}
-          </p>
+          {/* Resumen en texto SOLO en impresión */}
+          <div className={styles.onlyPrint}>
+            <p className={styles.printSummaryText}>
+              {allRows
+                .map((item) => {
+                  const formatted = new Intl.NumberFormat(
+                    "es-BO"
+                  ).format(item.count);
+                  return `${item.codigo} = ${formatted}`;
+                })
+                .join("; ")}
+              {`. TOTAL = ${new Intl.NumberFormat("es-BO").format(
+                total
+              )}`}
+            </p>
+          </div>
         </div>
       </div>
     </div>

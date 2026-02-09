@@ -136,8 +136,8 @@
   padding: 10px;
   border-radius: 4px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
-    max-width: 300px;     /* ancho máximo de la caja */
-  margin-left: 0;       /* si la quieres a la izquierda */
+  max-width: 300px;
+  margin-left: 0;
 }
 
 /* Mensajes de estado */
@@ -175,7 +175,6 @@
   left: auto;
 }
 
-
 .searchResultsContainer h3 {
   text-align: left;
   margin-left: 0;
@@ -196,7 +195,7 @@
   font-size: 11px;
   margin-bottom: 20px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
-  table-layout: auto; /* antes: fixed */
+  table-layout: auto;
 }
 
 .resultsTableTh {
@@ -205,7 +204,7 @@
   padding: 10px 12px;
   text-align: left;
   border: 1px solid #3c618c;
-  white-space: nowrap;     /* encabezado en una línea */
+  white-space: nowrap;
   word-wrap: normal;
   max-width: none;
   box-sizing: border-box;
@@ -216,7 +215,7 @@
   padding: 8px 12px;
   vertical-align: top;
   background-color: #ffffff;
-  max-width: none;        /* sin límite estrecho */
+  max-width: none;
   word-wrap: break-word;
   box-sizing: border-box;
 }
@@ -249,20 +248,35 @@
   font-size: 1.1em;
   text-align: center;
 }
-.globalTotalBlock {
-  display: inline-flex !important;
-  flex-wrap: nowwrap;
-  align-items: baseline;
-  gap: 6px;
+
+/* Bloques para separar Resumen global / por código */
+.globalSummaryTop {
+  width: 100%;
+  margin-bottom: 10px;
 }
 
+.globalSummaryBottom {
+  width: 100%;
+}
 
 .globalTotalAndDate {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 20px;
   color: #333;
+}
+
+.globalTotalLine {
+  margin: 0 0 4px 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.globalTotalLabelInline {
+  font-size: 0.95rem;
+  font-weight: 400;
+  margin-left: 4px;
 }
 
 .globalTotal {
@@ -283,7 +297,7 @@
   color: #777;
 }
 
-/* contenedor gráfico + tabla otros */
+/* contenedor gráfico + tabla otros (solo pantalla) */
 .globalSummaryContent {
   display: flex;
   flex-wrap: nowrap;
@@ -673,41 +687,27 @@
     margin: 0 !important;
   }
 
-  /* Resumen global compacto en impresión */
-  .globalTotalAndDate {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    margin-bottom: 10px !important;
-    padding: 0 !important;
-  }
-
-  .globalTotal {
-    font-size: 1rem !important;
-    margin-bottom: 0 !important;
-    color: #000 !important;
-  }
-
-  .globalTotalLabel {
-    font-size: 0.75rem !important;
-    margin-bottom: 0 !important;
-    margin-left: 0;
-    color: #333 !important;
-  }
-
-  .globalUpdateDate {
-    font-size: 0.75rem !important;
-    color: #555 !important;
-  }
-
+  /* Resumen global en dos columnas */
   .globalSummaryContainer {
-    page-break-inside: auto !important;
-    page-break-before: auto !important;
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+    gap: 10mm !important;
+    width: 100% !important;
     padding: 10px !important;
     border: none !important;
     box-shadow: none !important;
-    margin-bottom: 20px !important;
+    margin-bottom: 15px !important;
+    page-break-inside: avoid !important;
+  }
+
+  .globalSummaryTop {
+    flex: 0 0 45% !important;
+  }
+
+  .globalSummaryBottom {
+    flex: 0 0 50% !important;
   }
 
   .globalSummaryContainer h3 {
@@ -715,84 +715,30 @@
     margin-bottom: 5px !important;
     color: #000 !important;
     page-break-after: avoid !important;
+    text-align: left !important;
   }
 
-  .globalSummaryContent {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    gap: 10px !important;
-    width: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    page-break-inside: auto !important;
-    page-break-before: auto !important;
-  }
-
-  .chartWrapper {
-    flex: 1 1 70% !important;
-    min-width: 50% !important;
-    max-width: 70% !important;
-    width: 70% !important;
-    page-break-inside: auto !important;
-    page-break-before: auto !important;
-  }
-
-  .chartContainer {
-    height: 280px !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    width: 100% !important;
-  }
-
-  .othersTableWrapper {
-    flex: 0 0 28% !important;
-    width: 28% !important;
-    min-width: 28% !important;
-    max-width: 28% !important;
-    padding: 10px !important;
-    height: fit-content !important;
-    align-self: flex-start !important;
-    background: white !important;
-    border: 1px solid #999 !important;
-    margin: 0 !important;
-  }
-
-  .othersTableWrapper h4 {
-    font-size: 0.75em !important;
-    margin: 0 0 6px 0 !important;
-    padding: 0 0 4px 0 !important;
+  .globalTotalLine {
+    margin: 0 0 3px 0 !important;
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
     color: #000 !important;
   }
 
-  .othersTable {
-    font-size: 9px !important;
-    width: 100% !important;
-    page-break-inside: avoid !important;
-  }
-
-  .othersTable thead,
-  .othersTable tbody {
-    page-break-inside: avoid !important;
-  }
-
-  .othersTable tr {
-    page-break-inside: avoid !important;
-  }
-
-  .othersTable th,
-  .othersTable td {
-    padding: 3px 2px !important;
-    font-size: 8px !important;
-    color: #000 !important;
-    background-color: #fff !important;
-    border: 0.5px solid #ccc !important;
-  }
-
-  .othersTable th {
-    background: #ddd !important;
+  .globalTotalLabelInline {
+    font-size: 0.85rem !important;
+    font-weight: 400 !important;
+    margin-left: 4px !important;
     color: #000 !important;
   }
+
+  .globalUpdateDate {
+    font-size: 0.8rem !important;
+    color: #555 !important;
+    margin: 0 !important;
+  }
+
+  /* (no tocamos globalSummaryContent aquí; gráfico/tabla no se imprimen) */
 
   /* Tabla de resultados en impresión */
   .searchResultsContainer {
