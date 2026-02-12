@@ -67,7 +67,8 @@ export default function ReportPage({
             )
           : 0;
 
-      const { data: userData, error: userError } = await supabase.auth.getUser();
+      const { data: userData, error: userError } =
+        await supabase.auth.getUser();
 
       if (userError) {
         console.error(
@@ -134,7 +135,7 @@ export default function ReportPage({
       let query = supabase
         .from("busquedas")
         .select(
-          "usuario_email, criterio, cantidad_resultados, fecha, fuente",
+          "usuario_email, criterio, cantidad_resultados, fecha, fuente, origen",
           {
             count: "exact",
           }
@@ -198,6 +199,7 @@ export default function ReportPage({
       "cantidad_resultados",
       "fecha",
       "fuente",
+      "origen",
     ];
     const headerLine = headers.join("|");
 
@@ -207,12 +209,18 @@ export default function ReportPage({
       const cantidad_resultados = row.cantidad_resultados ?? 0;
       const fecha = row.fecha ?? "";
       const fuente = (row.fuente ?? "").replace(/\r?\n/g, " ");
+      const origenTexto =
+        row.origen === "ESCRITORIO"
+          ? "Aplicación escritorio"
+          : "Aplicación web";
+
       return [
         usuario_email,
         criterio,
         cantidad_resultados,
         fecha,
         fuente,
+        origenTexto,
       ].join("|");
     });
 
@@ -224,19 +232,18 @@ export default function ReportPage({
 
     const link = document.createElement("a");
     // ajustar a Bolivia (UTC-4) para el nombre de archivo
-const ahora = new Date();
-const fechaBolivia = new Date(ahora.getTime() - 4 * 60 * 60 * 1000);
-const year = fechaBolivia.getFullYear();
-const month = String(fechaBolivia.getMonth() + 1).padStart(2, "0");
-const day = String(fechaBolivia.getDate()).padStart(2, "0");
-const fechaActual = `${year}-${month}-${day}`;
+    const ahora = new Date();
+    const fechaBolivia = new Date(ahora.getTime() - 4 * 60 * 60 * 1000);
+    const year = fechaBolivia.getFullYear();
+    const month = String(fechaBolivia.getMonth() + 1).padStart(2, "0");
+    const day = String(fechaBolivia.getDate()).padStart(2, "0");
+    const fechaActual = `${year}-${month}-${day}`;
 
-link.href = url;
-link.setAttribute(
-  "download",
-  `reporte_busquedas_${cliente}_${fechaActual}.csv`
-);
-
+    link.href = url;
+    link.setAttribute(
+      "download",
+      `reporte_busquedas_${cliente}_${fechaActual}.csv`
+    );
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -281,7 +288,6 @@ link.setAttribute(
       <div className={styles.header}>
         <div className={styles.headerLeft}>
           <div className={styles.logoTitleWrapper}>
-            {/* el logo llega desde SearchPage en el layout general */}
             <div>
               <h2>Reporte de Búsquedas</h2>
               <p className={styles.userEmail}>
@@ -404,6 +410,7 @@ link.setAttribute(
                 <th>Cantidad resultados</th>
                 <th>Fecha</th>
                 <th>Fuente</th>
+                <th>Origen</th>
               </tr>
             </thead>
             <tbody>
@@ -414,6 +421,11 @@ link.setAttribute(
                   <td>{row.cantidad_resultados}</td>
                   <td>{row.fecha}</td>
                   <td>{row.fuente || ""}</td>
+                  <td>
+                    {row.origen === "ESCRITORIO"
+                      ? "Aplicación escritorio"
+                      : "Aplicación web"}
+                  </td>
                 </tr>
               ))}
             </tbody>
