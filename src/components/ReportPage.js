@@ -223,12 +223,20 @@ export default function ReportPage({
     const url = URL.createObjectURL(blob);
 
     const link = document.createElement("a");
-    const fechaActual = new Date().toISOString().slice(0, 10);
-    link.href = url;
-    link.setAttribute(
-      "download",
-      `reporte_busquedas_${cliente}_${fechaActual}.csv`
-    );
+    // ajustar a Bolivia (UTC-4) para el nombre de archivo
+const ahora = new Date();
+const fechaBolivia = new Date(ahora.getTime() - 4 * 60 * 60 * 1000);
+const year = fechaBolivia.getFullYear();
+const month = String(fechaBolivia.getMonth() + 1).padStart(2, "0");
+const day = String(fechaBolivia.getDate()).padStart(2, "0");
+const fechaActual = `${year}-${month}-${day}`;
+
+link.href = url;
+link.setAttribute(
+  "download",
+  `reporte_busquedas_${cliente}_${fechaActual}.csv`
+);
+
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
