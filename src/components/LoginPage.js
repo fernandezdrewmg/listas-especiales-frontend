@@ -30,103 +30,111 @@ export default function LoginPage({ onLogin }) {
       });
 
       if (authError) {
-        console.error("❌ Error de autenticación:", authError);
         setError("Correo o contraseña incorrectos.");
-        setLoading(false);
         return;
       }
 
-      // En la web ya tienes la lógica en App.js que vuelve a leer la sesión
       if (onLogin) onLogin();
     } catch (err) {
-      console.error("Error inesperado en login:", err);
       setError("Ocurrió un error al intentar iniciar sesión.");
     } finally {
       setLoading(false);
     }
   };
 
+  // ===== Estilos reutilizables =====
+
+  const inputStyle = {
+    width: "100%",
+    padding: "11px 12px",
+    borderRadius: 8,
+    border: "1px solid #e2e8f0",
+    fontSize: 14,
+    outline: "none",
+    transition: "all 0.2s ease",
+    backgroundColor: "#f9fafb",
+  };
+
+  const labelStyle = {
+    fontSize: 13,
+    fontWeight: 500,
+    color: "#334155",
+    marginBottom: 6,
+    display: "block",
+  };
+
   return (
     <div
       style={{
         height: "100vh",
-        margin: 0,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         background:
-          "linear-gradient(135deg, #1a365d 0%, #2b6cb0 50%, #2f855a 100%)",
+          "linear-gradient(135deg, #1e293b 0%, #1d4ed8 50%, #0f766e 100%)",
         fontFamily:
           "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
       }}
     >
       <div
         style={{
-          position: "relative",
-          width: 380,
-          backgroundColor: "rgba(255,255,255,0.96)",
-          borderRadius: 12,
-          boxShadow: "0 18px 45px rgba(0,0,0,0.35)",
-          padding: "28px 30px 26px",
-          border: "1px solid rgba(255,255,255,0.4)",
-          backdropFilter: "blur(6px)",
+          width: 400,
+          background: "rgba(255,255,255,0.97)",
+          borderRadius: 16,
+          padding: "40px 36px",
+          boxShadow: "0 20px 40px rgba(0,0,0,0.25)",
+          backdropFilter: "blur(8px)",
         }}
       >
+        {/* Logo centrado */}
         {logoUrl && (
-          <div
-            style={{
-              position: "absolute",
-              top: 10,
-              right: 12,
-            }}
-          >
+          <div style={{ textAlign: "center", marginBottom: 18 }}>
             <img
               src={logoUrl}
               alt="Logo aplicación"
               style={{
-                maxWidth: 72,
-                maxHeight: 72,
+                maxWidth: 90,
                 objectFit: "contain",
-              }}
-              onError={(e) => {
-                e.currentTarget.style.display = "none";
+                opacity: 0.9,
               }}
             />
           </div>
         )}
 
-        <div style={{ marginBottom: 20, textAlign: "center" }}>
+        {/* Título */}
+        <div style={{ textAlign: "center", marginBottom: 28 }}>
           <h1
             style={{
               margin: 0,
               fontSize: 22,
               fontWeight: 600,
-              color: "#1a202c",
+              color: "#0f172a",
             }}
           >
             Listas Especiales
           </h1>
           <p
             style={{
-              margin: "4px 0 0",
+              marginTop: 6,
               fontSize: 13,
-              color: "#4a5568",
+              color: "#64748b",
             }}
           >
-            Accede para consultar listas especiales y reportes.
+            Acceso a consultas y reportes
           </p>
         </div>
 
+        {/* Error */}
         {error && (
           <div
             style={{
-              marginBottom: 12,
-              padding: "8px 10px",
-              borderRadius: 6,
+              marginBottom: 16,
+              padding: "10px 12px",
+              borderRadius: 8,
               fontSize: 13,
-              color: "#742a2a",
-              backgroundColor: "#fed7d7",
-              border: "1px solid #feb2b2",
+              backgroundColor: "#fee2e2",
+              color: "#991b1b",
+              border: "1px solid #fecaca",
             }}
           >
             {error}
@@ -134,17 +142,8 @@ export default function LoginPage({ onLogin }) {
         )}
 
         <form onSubmit={handleLogin}>
-          <div style={{ marginBottom: 14 }}>
-            <label
-              htmlFor="email"
-              style={{
-                display: "block",
-                marginBottom: 4,
-                fontSize: 13,
-                fontWeight: 500,
-                color: "#2d3748",
-              }}
-            >
+          <div style={{ marginBottom: 18 }}>
+            <label htmlFor="email" style={labelStyle}>
               Correo
             </label>
             <input
@@ -154,37 +153,23 @@ export default function LoginPage({ onLogin }) {
               onChange={(e) => setEmail(e.target.value)}
               required
               autoComplete="username"
-              style={{
-                width: "100%",
-                boxSizing: "border-box",
-                padding: "9px 10px",
-                borderRadius: 6,
-                border: "1px solid #cbd5e0",
-                fontSize: 14,
-                outline: "none",
-              }}
+              style={inputStyle}
               onFocus={(e) => {
-                e.target.style.borderColor = "#3182ce";
-                e.target.style.boxShadow = "0 0 0 1px #3182ce33";
+                e.target.style.borderColor = "#2563eb";
+                e.target.style.boxShadow =
+                  "0 0 0 3px rgba(37,99,235,0.15)";
+                e.target.style.backgroundColor = "#ffffff";
               }}
               onBlur={(e) => {
-                e.target.style.borderColor = "#cbd5e0";
+                e.target.style.borderColor = "#e2e8f0";
                 e.target.style.boxShadow = "none";
+                e.target.style.backgroundColor = "#f9fafb";
               }}
             />
           </div>
 
-          <div style={{ marginBottom: 18 }}>
-            <label
-              htmlFor="password"
-              style={{
-                display: "block",
-                marginBottom: 4,
-                fontSize: 13,
-                fontWeight: 500,
-                color: "#2d3748",
-              }}
-            >
+          <div style={{ marginBottom: 24 }}>
+            <label htmlFor="password" style={labelStyle}>
               Contraseña
             </label>
             <input
@@ -194,22 +179,17 @@ export default function LoginPage({ onLogin }) {
               onChange={(e) => setPassword(e.target.value)}
               required
               autoComplete="current-password"
-              style={{
-                width: "100%",
-                boxSizing: "border-box",
-                padding: "9px 10px",
-                borderRadius: 6,
-                border: "1px solid #cbd5e0",
-                fontSize: 14,
-                outline: "none",
-              }}
+              style={inputStyle}
               onFocus={(e) => {
-                e.target.style.borderColor = "#3182ce";
-                e.target.style.boxShadow = "0 0 0 1px #3182ce33";
+                e.target.style.borderColor = "#2563eb";
+                e.target.style.boxShadow =
+                  "0 0 0 3px rgba(37,99,235,0.15)";
+                e.target.style.backgroundColor = "#ffffff";
               }}
               onBlur={(e) => {
-                e.target.style.borderColor = "#cbd5e0";
+                e.target.style.borderColor = "#e2e8f0";
                 e.target.style.boxShadow = "none";
+                e.target.style.backgroundColor = "#f9fafb";
               }}
             />
           </div>
@@ -219,17 +199,31 @@ export default function LoginPage({ onLogin }) {
             disabled={loading}
             style={{
               width: "100%",
-              padding: "9px 10px",
-              borderRadius: 6,
+              padding: "12px",
+              borderRadius: 10,
               border: "none",
               fontSize: 14,
               fontWeight: 600,
+              letterSpacing: 0.4,
               cursor: loading ? "default" : "pointer",
               color: "#fff",
               background:
-                "linear-gradient(135deg, #3182ce 0%, #2b6cb0 40%, #2f855a 100%)",
-              boxShadow: "0 8px 20px rgba(49,130,206,0.45)",
+                "linear-gradient(135deg, #2563eb 0%, #1d4ed8 50%, #0f766e 100%)",
+              boxShadow: "0 8px 20px rgba(37,99,235,0.35)",
+              transition: "all 0.2s ease",
               opacity: loading ? 0.8 : 1,
+            }}
+            onMouseEnter={(e) => {
+              if (!loading) {
+                e.target.style.transform = "translateY(-1px)";
+                e.target.style.boxShadow =
+                  "0 12px 25px rgba(37,99,235,0.4)";
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.transform = "translateY(0)";
+              e.target.style.boxShadow =
+                "0 8px 20px rgba(37,99,235,0.35)";
             }}
           >
             {loading ? "Ingresando..." : "Entrar"}
@@ -238,13 +232,13 @@ export default function LoginPage({ onLogin }) {
 
         <div
           style={{
-            marginTop: 14,
-            fontSize: 11,
-            color: "#a0aec0",
+            marginTop: 18,
+            fontSize: 12,
+            color: "#94a3b8",
             textAlign: "center",
           }}
         >
-          Sesión protegida. Se requiere conexión a internet para validar acceso.
+          🔒 Autenticación segura
         </div>
       </div>
     </div>
