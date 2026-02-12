@@ -423,8 +423,8 @@ export default function ReportPage({
                   <td>{row.fuente || ""}</td>
                   <td>
                     {row.origen === "ESCRITORIO"
-                      ? "Aplicación escritorio"
-                      : "Aplicación web"}
+                      ? "Aplicacion escritorio"
+                      : "Aplicacion web"}
                   </td>
                 </tr>
               ))}
