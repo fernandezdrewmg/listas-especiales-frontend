@@ -23,6 +23,7 @@ export default function ReportPage({
   useEffect(() => {
     const fetchEmailsCliente = async () => {
       setError("");
+
       try {
         const { data, error: usersError } = await supabase
           .from("usuarios")
@@ -34,6 +35,7 @@ export default function ReportPage({
             "Error al obtener usuarios de la entidad:",
             usersError.message
           );
+
           setError("No se pudieron obtener los usuarios de la entidad.");
           return;
         }
@@ -44,7 +46,11 @@ export default function ReportPage({
 
         setEmailsCliente(emails);
       } catch (err) {
-        console.error("Error inesperado al obtener usuarios de la entidad:", err);
+        console.error(
+          "Error inesperado al obtener usuarios de la entidad:",
+          err
+        );
+
         setError("Ocurrió un error al obtener los usuarios de la entidad.");
       }
     };
@@ -119,6 +125,7 @@ export default function ReportPage({
   const fetchReport = async () => {
     setLoading(true);
     setError("");
+
     try {
       if (!cliente) {
         setError("No se ha definido la entidad para el reporte.");
@@ -128,6 +135,12 @@ export default function ReportPage({
 
       if (!emailsCliente || emailsCliente.length === 0) {
         setError("No hay usuarios registrados para esta entidad.");
+        setLoading(false);
+        return;
+      }
+
+      if (fechaDesde && fechaHasta && fechaDesde > fechaHasta) {
+        setError("La fecha desde no puede ser posterior a la fecha hasta.");
         setLoading(false);
         return;
       }
@@ -151,6 +164,7 @@ export default function ReportPage({
         const desdeISO = new Date(fechaDesde + "T00:00:00").toISOString();
         query = query.gte("fecha", desdeISO);
       }
+
       if (fechaHasta) {
         const hastaISO = new Date(fechaHasta + "T23:59:59").toISOString();
         query = query.lte("fecha", hastaISO);
@@ -193,6 +207,12 @@ export default function ReportPage({
   const handleDownloadCsv = () => {
     if (!reportData || reportData.length === 0) return;
 
+    const normalizeCsvText = (value) =>
+      String(value ?? "")
+        .replace(/\r?\n/g, " ")
+        .replace(/\|/g, "/")
+        .trim();
+
     const headers = [
       "usuario_email",
       "criterio",
@@ -201,14 +221,15 @@ export default function ReportPage({
       "fuente",
       "origen",
     ];
+
     const headerLine = headers.join("|");
 
     const lines = reportData.map((row) => {
-      const usuario_email = row.usuario_email ?? "";
-      const criterio = (row.criterio ?? "").replace(/\r?\n/g, " ");
+      const usuario_email = normalizeCsvText(row.usuario_email);
+      const criterio = normalizeCsvText(row.criterio);
       const cantidad_resultados = row.cantidad_resultados ?? 0;
-      const fecha = row.fecha ?? "";
-      const fuente = (row.fuente ?? "").replace(/\r?\n/g, " ");
+      const fecha = normalizeCsvText(row.fecha);
+      const fuente = normalizeCsvText(row.fuente);
       const origenTexto =
         row.origen === "ESCRITORIO"
           ? "Aplicación escritorio"
@@ -225,13 +246,15 @@ export default function ReportPage({
     });
 
     const csvContent = [headerLine, ...lines].join("\n");
+
     const blob = new Blob([csvContent], {
       type: "text/csv;charset=utf-8;",
     });
-    const url = URL.createObjectURL(blob);
 
+    const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
-    // ajustar a Bolivia (UTC-4) para el nombre de archivo
+
+    // Ajustar a Bolivia (UTC-4) para el nombre de archivo
     const ahora = new Date();
     const fechaBolivia = new Date(ahora.getTime() - 4 * 60 * 60 * 1000);
     const year = fechaBolivia.getFullYear();
@@ -244,6 +267,7 @@ export default function ReportPage({
       "download",
       `reporte_busquedas_${cliente}_${fechaActual}.csv`
     );
+
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -258,7 +282,28 @@ export default function ReportPage({
   // 7) Fecha/hora mostrada
   const getPrintDateTime = () => {
     const now = new Date();
+
     return now.toLocaleString("es-BO", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      timeZone: "America/La_Paz",
+    });
+  };
+
+  const formatDateTime = (value) => {
+    if (!value) return "";
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+      return value;
+    }
+
+    return date.toLocaleString("es-BO", {
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
@@ -271,13 +316,23 @@ export default function ReportPage({
 
   // 8) Resumen de filtros
   const getFiltersSummary = () => {
-    const emailText = selectedEmail ? selectedEmail : "Todos";
+    const emailText = selectedEmail ? selectedEmail : "Todos los usuarios";
     const desdeText = fechaDesde || "Sin límite inferior";
     const hastaText = fechaHasta || "Sin límite superior";
+
     return `Usuario: ${emailText} | Rango de fechas: ${desdeText} - ${hastaText}`;
   };
 
   const totalRegistros = reportData ? reportData.length : 0;
+
+  const totalCoincidencias = reportData
+    ? reportData.reduce(
+        (acc, row) => acc + (row.cantidad_resultados || 0),
+        0
+      )
+    : 0;
+
+  const puedeExportar = reportData && reportData.length > 0;
 
   return (
     <div
@@ -288,11 +343,27 @@ export default function ReportPage({
       <div className={styles.header}>
         <div className={styles.headerLeft}>
           <div className={styles.logoTitleWrapper}>
+            {logoUrl && (
+              <div className={styles.logoBox}>
+                <img
+                  src={logoUrl}
+                  alt={`Logo de ${clienteNombre || "la entidad"}`}
+                  className={styles.logoCliente}
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                  }}
+                />
+              </div>
+            )}
+
             <div>
-              <h2>Reporte de Búsquedas</h2>
+              <h2>Reporte de consultas</h2>
+
               <p className={styles.userEmail}>
-                Entidad: <strong>{clienteNombre}</strong>
+                Entidad:{" "}
+                <strong>{clienteNombre || "No identificada"}</strong>
               </p>
+
               <p className={styles.userEmail}>
                 Fecha/hora de generación:{" "}
                 <strong>{getPrintDateTime()}</strong>
@@ -305,8 +376,14 @@ export default function ReportPage({
           <p className={styles.userEmail}>
             <strong>Filtros aplicados:</strong> {getFiltersSummary()}
           </p>
+
           <p className={styles.userEmail}>
-            <strong>Total registros:</strong> {totalRegistros}
+            <strong>Total de consultas:</strong> {totalRegistros}
+          </p>
+
+          <p className={styles.userEmail}>
+            <strong>Total de coincidencias reportadas:</strong>{" "}
+            {totalCoincidencias}
           </p>
 
           {puedeVerReporte && typeof onOpenAnalytics === "function" && (
@@ -315,7 +392,7 @@ export default function ReportPage({
               onClick={onOpenAnalytics}
               className={styles.reportButton}
             >
-              Ver análisis histórico de la Entidad
+              Ver análisis histórico
             </button>
           )}
         </div>
@@ -324,13 +401,16 @@ export default function ReportPage({
       {/* Filtros */}
       <div className={styles.reportFilters}>
         <div className={styles.filterGroup}>
-          <label>Usuario (email):</label>
+          <label htmlFor="usuarioReporte">Usuario</label>
+
           <select
+            id="usuarioReporte"
             value={selectedEmail}
             onChange={(e) => setSelectedEmail(e.target.value.toLowerCase())}
             className={styles.filterSelect}
           >
-            <option value="">Todos</option>
+            <option value="">Todos los usuarios</option>
+
             {emailsCliente.map((email) => (
               <option key={email} value={email}>
                 {email}
@@ -340,8 +420,10 @@ export default function ReportPage({
         </div>
 
         <div className={styles.filterGroup}>
-          <label>Fecha desde:</label>
+          <label htmlFor="fechaDesde">Fecha desde</label>
+
           <input
+            id="fechaDesde"
             type="date"
             value={fechaDesde}
             onChange={(e) => setFechaDesde(e.target.value)}
@@ -350,8 +432,10 @@ export default function ReportPage({
         </div>
 
         <div className={styles.filterGroup}>
-          <label>Fecha hasta:</label>
+          <label htmlFor="fechaHasta">Fecha hasta</label>
+
           <input
+            id="fechaHasta"
             type="date"
             value={fechaHasta}
             onChange={(e) => setFechaHasta(e.target.value)}
@@ -366,29 +450,32 @@ export default function ReportPage({
             className={styles.searchButton}
             disabled={loading}
           >
-            Aplicar filtros
+            {loading ? "Generando..." : "Generar reporte"}
           </button>
+
           <button
             type="button"
             onClick={handleClearFilters}
             className={styles.exportButton}
-            disabled={loading && !reportData.length}
+            disabled={loading}
           >
             Limpiar filtros
           </button>
+
           <button
             type="button"
             onClick={handleDownloadCsv}
             className={styles.exportButton}
-            disabled={!reportData || reportData.length === 0}
+            disabled={!puedeExportar}
           >
-            Descargar CSV (|)
+            Descargar CSV
           </button>
+
           <button
             type="button"
             onClick={handlePrintPdf}
             className={styles.exportButton}
-            disabled={!reportData || reportData.length === 0}
+            disabled={!puedeExportar}
           >
             Imprimir / PDF
           </button>
@@ -396,7 +483,12 @@ export default function ReportPage({
       </div>
 
       {/* Mensajes */}
-      {loading && <p className={styles.loading}>Cargando reporte…</p>}
+      {loading && (
+        <p className={styles.loading}>
+          Generando reporte de consultas. Espere un momento...
+        </p>
+      )}
+
       {error && <p className={styles.error}>{error}</p>}
 
       {/* Tabla */}
@@ -405,26 +497,27 @@ export default function ReportPage({
           <table className={styles.resultsTable}>
             <thead>
               <tr>
-                <th>Usuario (email)</th>
-                <th>Criterio</th>
-                <th>Cantidad resultados</th>
-                <th>Fecha</th>
-                <th>Fuente</th>
+                <th>Usuario</th>
+                <th>Criterio consultado</th>
+                <th>Resultados</th>
+                <th>Fecha/hora</th>
+                <th>Fuente / código</th>
                 <th>Origen</th>
               </tr>
             </thead>
+
             <tbody>
               {reportData.map((row, idx) => (
                 <tr key={`${row.usuario_email}-${row.fecha}-${idx}`}>
                   <td>{row.usuario_email}</td>
                   <td>{row.criterio}</td>
                   <td>{row.cantidad_resultados}</td>
-                  <td>{row.fecha}</td>
+                  <td>{formatDateTime(row.fecha)}</td>
                   <td>{row.fuente || ""}</td>
                   <td>
                     {row.origen === "ESCRITORIO"
-                      ? "Aplicacion escritorio"
-                      : "Aplicacion web"}
+                      ? "Aplicación escritorio"
+                      : "Aplicación web"}
                   </td>
                 </tr>
               ))}
@@ -434,7 +527,8 @@ export default function ReportPage({
           !loading &&
           !error && (
             <p className={styles.noResults}>
-              No hay datos para los filtros seleccionados.
+              Seleccione los filtros y presione “Generar reporte” para consultar
+              el historial de búsquedas de la entidad.
             </p>
           )
         )}

@@ -42,9 +42,13 @@ export default function ClientAnalyticsPage({
   const [fechaDesdeGraf, setFechaDesdeGraf] = useState("");
   const [fechaHastaGraf, setFechaHastaGraf] = useState("");
 
+  const rangoMesInvalido =
+    fechaDesdeGraf && fechaHastaGraf && fechaDesdeGraf > fechaHastaGraf;
+
   useEffect(() => {
     const fetchHistorico = async () => {
       if (!cliente) return;
+
       setLoading(true);
       setError("");
 
@@ -59,6 +63,7 @@ export default function ClientAnalyticsPage({
             "Error al obtener usuarios de la entidad:",
             usersError.message
           );
+
           setError("No se pudieron obtener los usuarios de la entidad.");
           setLoading(false);
           return;
@@ -95,7 +100,8 @@ export default function ClientAnalyticsPage({
               .map((r) => (r.usuario_email || "").toLowerCase())
               .filter(Boolean)
           ),
-        ];
+        ].sort();
+
         setUsuarios(usuariosUnicos);
       } catch (err) {
         console.error("Error inesperado al obtener histórico:", err);
@@ -108,13 +114,38 @@ export default function ClientAnalyticsPage({
     fetchHistorico();
   }, [cliente]);
 
-  // helper de rango
+  const formatDate = (date) =>
+    date.toLocaleDateString("es-BO", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+
+  const formatMonth = (ym) => {
+    if (!ym) return "";
+
+    const [year, month] = ym.split("-");
+    const d = new Date(Number(year), Number(month) - 1, 1);
+
+    if (Number.isNaN(d.getTime())) return ym;
+
+    return d.toLocaleDateString("es-BO", {
+      year: "numeric",
+      month: "2-digit",
+    });
+  };
+
+  // Helper de rango
   const dentroDeRango = (fecha) => {
+    if (rangoMesInvalido) return false;
+
     const ym = `${fecha.getFullYear()}-${String(
       fecha.getMonth() + 1
     ).padStart(2, "0")}`;
+
     if (fechaDesdeGraf && ym < fechaDesdeGraf) return false;
     if (fechaHastaGraf && ym > fechaHastaGraf) return false;
+
     return true;
   };
 
@@ -136,6 +167,7 @@ export default function ClientAnalyticsPage({
     });
 
     const grupos = {};
+
     filtrados.forEach((row) => {
       const fecha = new Date(row.fecha);
       if (Number.isNaN(fecha.getTime())) return;
@@ -149,6 +181,7 @@ export default function ClientAnalyticsPage({
       }
 
       grupos[key].total += 1;
+
       if ((row.cantidad_resultados || 0) > 0) {
         grupos[key].conMatch += 1;
       }
@@ -173,6 +206,7 @@ export default function ClientAnalyticsPage({
     });
 
     const grupos = {};
+
     filtrados.forEach((row) => {
       const fecha = new Date(row.fecha);
       if (Number.isNaN(fecha.getTime())) return;
@@ -196,101 +230,15 @@ export default function ClientAnalyticsPage({
       }));
   };
 
-  const serie = getSerie();
-  const serieGlobal = getSerieGlobal();
-
-  const totalActual = serie.reduce((acc, p) => acc + p.total, 0);
-  const totalConMatch = serie.reduce((acc, p) => acc + p.conMatch, 0);
-  const mesesConDatos = serie.length || 1;
-  const promedioPorMes = totalActual / mesesConDatos;
-
-  const labels = serie.map((p) => p.periodo);
-
-  let shareTexto = "No aplica (sin filtro de usuario)";
-  if (selectedUser && labels.length > 0) {
-    const ultimoPeriodo = labels[labels.length - 1];
-    const filaUsuario = serie.find((p) => p.periodo === ultimoPeriodo);
-    const filaGlobal = serieGlobal.find((g) => g.periodo === ultimoPeriodo);
-    const totalUsr = filaUsuario ? filaUsuario.total : 0;
-    const totalEnt = filaGlobal ? filaGlobal.total : 0;
-    const share =
-      totalEnt > 0 ? ((totalUsr * 100) / totalEnt).toFixed(1) : "0.0";
-    shareTexto = `${share} % del total de consultas de la entidad en ${ultimoPeriodo}`;
-  }
-
-  let tendenciaTexto = "Sin datos suficientes para tendencia";
-  if (serie.length >= 4) {
-    const valores = serie.map((p) => p.total);
-    const n = valores.length;
-    const ultimos3 = valores.slice(Math.max(n - 3, 0));
-    const previos3 = valores.slice(Math.max(n - 6, 0), n - 3);
-
-    const suma = (arr) => arr.reduce((a, b) => a + b, 0);
-    const sUlt = suma(ultimos3);
-    const sPrev = suma(previos3);
-
-    if (sPrev === 0 && sUlt === 0) {
-      tendenciaTexto = "Tendencia: sin movimiento en los últimos meses";
-    } else if (sPrev === 0 && sUlt > 0) {
-      tendenciaTexto = "Tendencia: en aumento fuerte (sin actividad previa)";
-    } else {
-      const cambio = ((sUlt - sPrev) * 100) / sPrev;
-      if (cambio > 10) {
-        tendenciaTexto = `Tendencia: en aumento (+${cambio.toFixed(
-          1
-        )} % vs 3 meses previos)`;
-      } else if (cambio < -10) {
-        tendenciaTexto = `Tendencia: en descenso (${cambio.toFixed(
-          1
-        )} % vs 3 meses previos)`;
-      } else {
-        tendenciaTexto = "Tendencia: relativamente estable (±10 %)";
-      }
-    }
-  }
-
-  const dataLine = {
-    labels,
-    datasets: [
-      {
-        label: "Total de consultas",
-        data: serie.map((p) => p.total),
-        borderColor: "#007bff",
-        backgroundColor: "rgba(0, 123, 255, 0.2)",
-        tension: 0.2,
-      },
-      {
-        label: "Consultas con coincidencias",
-        data: serie.map((p) => p.conMatch),
-        borderColor: "#ff0000",
-        backgroundColor: "rgba(255, 0, 0, 0.2)",
-        tension: 0.2,
-      },
-      ...(selectedUser
-        ? [
-            {
-              label: "Total entidad (todas las consultas)",
-              data: labels.map((periodo) => {
-                const row = serieGlobal.find((g) => g.periodo === periodo);
-                return row ? row.total : 0;
-              }),
-              borderColor: "#28a745",
-              backgroundColor: "rgba(40, 167, 69, 0.2)",
-              borderDash: [6, 4],
-              tension: 0.2,
-            },
-          ]
-        : []),
-    ],
-  };
-
   const getTopUsuarios = () => {
     if (!historico.length) return [];
 
     const conteo = {};
+
     historico.forEach((row) => {
       const email = (row.usuario_email || "").toLowerCase();
       if (!email) return;
+
       conteo[email] = (conteo[email] || 0) + 1;
     });
 
@@ -308,8 +256,6 @@ export default function ClientAnalyticsPage({
         pct: totalGlobal ? (count * 100) / totalGlobal : 0,
       }));
   };
-
-  const topUsuarios = getTopUsuarios();
 
   const getFechasActividad = () => {
     if (!historico.length) return { first: null, last: null };
@@ -331,46 +277,219 @@ export default function ClientAnalyticsPage({
 
     if (!fechas.length) return { first: null, last: null };
 
-    const format = (d) =>
-      d.toLocaleDateString("es-BO", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-      });
-
     return {
-      first: format(fechas[0]),
-      last: format(fechas[fechas.length - 1]),
+      first: formatDate(fechas[0]),
+      last: formatDate(fechas[fechas.length - 1]),
     };
   };
 
-  const fechasActividad = getFechasActividad();
-
   const getTextoRangoGrafico = () => {
+    if (rangoMesInvalido) {
+      return "Rango de fechas del gráfico: rango inválido";
+    }
+
     if (!fechaDesdeGraf && !fechaHastaGraf) {
       return "Rango de fechas del gráfico: todos los meses disponibles";
     }
 
-    const formatYM = (ym) => {
-      const [year, month] = ym.split("-");
-      const d = new Date(Number(year), Number(month) - 1, 1);
-      return d.toLocaleDateString("es-BO", {
-        year: "numeric",
-        month: "2-digit",
-      });
-    };
-
     if (fechaDesdeGraf && !fechaHastaGraf) {
-      return `Rango de fechas del gráfico: desde ${formatYM(fechaDesdeGraf)}`;
+      return `Rango de fechas del gráfico: desde ${formatMonth(
+        fechaDesdeGraf
+      )}`;
     }
 
     if (!fechaDesdeGraf && fechaHastaGraf) {
-      return `Rango de fechas del gráfico: hasta ${formatYM(fechaHastaGraf)}`;
+      return `Rango de fechas del gráfico: hasta ${formatMonth(
+        fechaHastaGraf
+      )}`;
     }
 
-    return `Rango de fechas del gráfico: ${formatYM(
+    return `Rango de fechas del gráfico: ${formatMonth(
       fechaDesdeGraf
-    )} a ${formatYM(fechaHastaGraf)}`;
+    )} a ${formatMonth(fechaHastaGraf)}`;
+  };
+
+  const serie = getSerie();
+  const serieGlobal = getSerieGlobal();
+  const topUsuarios = getTopUsuarios();
+  const fechasActividad = getFechasActividad();
+
+  const totalActual = serie.reduce((acc, p) => acc + p.total, 0);
+  const totalConMatch = serie.reduce((acc, p) => acc + p.conMatch, 0);
+  const mesesConDatos = serie.length || 1;
+  const promedioPorMes = totalActual / mesesConDatos;
+
+  const labels = serie.map((p) => p.periodo);
+
+  let shareTexto = "No aplica sin filtro de usuario";
+
+  if (selectedUser && labels.length > 0) {
+    const ultimoPeriodo = labels[labels.length - 1];
+    const filaUsuario = serie.find((p) => p.periodo === ultimoPeriodo);
+    const filaGlobal = serieGlobal.find((g) => g.periodo === ultimoPeriodo);
+    const totalUsr = filaUsuario ? filaUsuario.total : 0;
+    const totalEnt = filaGlobal ? filaGlobal.total : 0;
+
+    const share =
+      totalEnt > 0 ? ((totalUsr * 100) / totalEnt).toFixed(1) : "0.0";
+
+    shareTexto = `${share}% del total de consultas de la entidad en ${ultimoPeriodo}`;
+  }
+
+  let tendenciaTexto = "Sin datos suficientes para calcular tendencia";
+
+  if (serie.length >= 4) {
+    const valores = serie.map((p) => p.total);
+    const n = valores.length;
+    const ultimos3 = valores.slice(Math.max(n - 3, 0));
+    const previos3 = valores.slice(Math.max(n - 6, 0), n - 3);
+
+    const suma = (arr) => arr.reduce((a, b) => a + b, 0);
+    const sUlt = suma(ultimos3);
+    const sPrev = suma(previos3);
+
+    if (sPrev === 0 && sUlt === 0) {
+      tendenciaTexto = "Tendencia: sin movimiento en los últimos meses";
+    } else if (sPrev === 0 && sUlt > 0) {
+      tendenciaTexto = "Tendencia: en aumento fuerte, sin actividad previa";
+    } else {
+      const cambio = ((sUlt - sPrev) * 100) / sPrev;
+
+      if (cambio > 10) {
+        tendenciaTexto = `Tendencia: en aumento (+${cambio.toFixed(
+          1
+        )}% vs. 3 meses previos)`;
+      } else if (cambio < -10) {
+        tendenciaTexto = `Tendencia: en descenso (${cambio.toFixed(
+          1
+        )}% vs. 3 meses previos)`;
+      } else {
+        tendenciaTexto = "Tendencia: relativamente estable (±10%)";
+      }
+    }
+  }
+
+  const dataLine = {
+    labels,
+    datasets: [
+      {
+        label: "Total de consultas",
+        data: serie.map((p) => p.total),
+        borderColor: "#1e3a5f",
+        backgroundColor: "rgba(30, 58, 95, 0.16)",
+        tension: 0.25,
+      },
+      {
+        label: "Consultas con coincidencias",
+        data: serie.map((p) => p.conMatch),
+        borderColor: "#9f1239",
+        backgroundColor: "rgba(159, 18, 57, 0.14)",
+        tension: 0.25,
+      },
+      ...(selectedUser
+        ? [
+            {
+              label: "Total entidad",
+              data: labels.map((periodo) => {
+                const row = serieGlobal.find((g) => g.periodo === periodo);
+                return row ? row.total : 0;
+              }),
+              borderColor: "#0f766e",
+              backgroundColor: "rgba(15, 118, 110, 0.14)",
+              borderDash: [6, 4],
+              tension: 0.25,
+            },
+          ]
+        : []),
+    ],
+  };
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: "top",
+        labels: {
+          usePointStyle: true,
+          boxWidth: 8,
+          font: {
+            size: 12,
+            weight: "600",
+          },
+        },
+      },
+      tooltip: {
+        mode: "index",
+        intersect: false,
+        callbacks: {
+          label: function (context) {
+            const label = context.dataset.label || "";
+            const value = context.parsed.y ?? 0;
+            return `${label}: ${value}`;
+          },
+        },
+      },
+      datalabels: {
+        anchor: (ctx) => {
+          if (ctx.datasetIndex === 1) return "start";
+          if (ctx.datasetIndex === 2) return "center";
+          return "end";
+        },
+        align: (ctx) => {
+          if (ctx.datasetIndex === 1) return "bottom";
+          if (ctx.datasetIndex === 2) return "right";
+          return "top";
+        },
+        offset: 4,
+        color: "#0f172a",
+        font: {
+          size: 10,
+          weight: "bold",
+        },
+        formatter: (value) => value,
+      },
+    },
+    interaction: {
+      mode: "nearest",
+      intersect: false,
+    },
+    elements: {
+      point: {
+        radius: 5,
+        hoverRadius: 7,
+        hitRadius: 7,
+        borderWidth: 2,
+        borderColor: "#ffffff",
+        backgroundColor: (ctx) => ctx.dataset.borderColor,
+      },
+      line: {
+        borderWidth: 2,
+      },
+    },
+    scales: {
+      x: {
+        grid: {
+          display: false,
+        },
+        ticks: {
+          autoSkip: true,
+          maxRotation: 0,
+        },
+      },
+      y: {
+        beginAtZero: true,
+        ticks: {
+          precision: 0,
+        },
+      },
+    },
+  };
+
+  const limpiarFiltrosGrafico = () => {
+    setSelectedUser("");
+    setFechaDesdeGraf("");
+    setFechaHastaGraf("");
   };
 
   return (
@@ -378,11 +497,24 @@ export default function ClientAnalyticsPage({
       <div className={styles.header}>
         <div className={styles.headerLeft}>
           <h2>Análisis histórico de consultas</h2>
+
           <p className={styles.userEmail}>
-            Entidad: <strong>{clienteNombre}</strong>
+            Entidad:{" "}
+            <strong>{clienteNombre || "No identificada"}</strong>
+          </p>
+
+          <p className={styles.userEmail}>
+            Registros históricos cargados:{" "}
+            <strong>{historico.length}</strong>
           </p>
         </div>
+
         <div className={styles.headerRight}>
+          <p className={styles.userEmail}>
+            Vista de comportamiento mensual, coincidencias y actividad por
+            usuario.
+          </p>
+
           <button
             type="button"
             onClick={onBackToReport}
@@ -393,20 +525,28 @@ export default function ClientAnalyticsPage({
         </div>
       </div>
 
-      {loading && <p className={styles.loading}>Cargando histórico…</p>}
+      {loading && (
+        <p className={styles.loading}>
+          Cargando histórico de consultas. Espere un momento...
+        </p>
+      )}
+
       {error && <p className={styles.error}>{error}</p>}
 
       {!loading && !error && (
         <>
           <div className={styles.reportFilters}>
             <div className={styles.filterGroup}>
-              <label>Usuario (email):</label>
+              <label htmlFor="usuarioHistorico">Usuario</label>
+
               <select
+                id="usuarioHistorico"
                 value={selectedUser}
                 onChange={(e) => setSelectedUser(e.target.value)}
                 className={styles.filterSelect}
               >
-                <option value="">Todos</option>
+                <option value="">Todos los usuarios</option>
+
                 {usuarios.map((u) => (
                   <option key={u} value={u}>
                     {u}
@@ -416,93 +556,135 @@ export default function ClientAnalyticsPage({
             </div>
 
             <div className={styles.filterGroup}>
-              <label>Rango para el gráfico (mes):</label>
-              <div style={{ display: "flex", alignItems: "center" }}>
+              <label>Rango mensual del gráfico</label>
+
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  flexWrap: "wrap",
+                }}
+              >
                 <input
                   type="month"
                   value={fechaDesdeGraf}
                   onChange={(e) => setFechaDesdeGraf(e.target.value)}
                   className={styles.filterInput}
+                  aria-label="Mes inicial del gráfico"
                 />
-                <span style={{ margin: "0 4px" }}>a</span>
+
+                <span style={{ color: "#64748b", fontSize: 13 }}>a</span>
+
                 <input
                   type="month"
                   value={fechaHastaGraf}
                   onChange={(e) => setFechaHastaGraf(e.target.value)}
                   className={styles.filterInput}
+                  aria-label="Mes final del gráfico"
                 />
               </div>
             </div>
+
+            <div className={styles.filterActions}>
+              <button
+                type="button"
+                onClick={limpiarFiltrosGrafico}
+                className={styles.exportButton}
+              >
+                Limpiar filtros
+              </button>
+            </div>
           </div>
 
+          {rangoMesInvalido && (
+            <p className={styles.error}>
+              El mes inicial no puede ser posterior al mes final.
+            </p>
+          )}
+
           {serie.length > 0 ? (
-            <div className={styles.historicoContent}>
-              <div className={styles.metricsRow}>
-                <div className={styles.metricsColumn}>
-                  <p
-                    className={styles.userEmail}
-                    style={{ marginBottom: "4px" }}
-                  >
+            <div className={styles.globalSummaryContainer}>
+              <div
+                className={styles.chartWrapper}
+                style={{
+                  width: "100%",
+                  maxWidth: "100%",
+                  minWidth: 0,
+                }}
+              >
+                <div className={styles.chartContainer}>
+                  <Line data={dataLine} options={chartOptions} />
+                </div>
+              </div>
+
+              <div
+                className={styles.metricsRow}
+                style={{
+                  width: "100%",
+                  marginTop: 18,
+                  alignItems: "stretch",
+                }}
+              >
+                <div
+                  className={styles.metricsColumn}
+                  style={{
+                    flex: "1 1 620px",
+                  }}
+                >
+                  <p className={styles.userEmail}>
                     Usuario seleccionado:{" "}
                     <strong>
                       {selectedUser
                         ? selectedUser
-                        : `Todos (Entidad: ${clienteNombre})`}
+                        : `Todos los usuarios de ${
+                            clienteNombre || "la entidad"
+                          }`}
                     </strong>
                   </p>
 
-                  <p
-                    className={styles.userEmail}
-                    style={{ marginBottom: "4px", whiteSpace: "nowrap" }}
-                  >
-                    Consultas en la serie mostrada: Total:{" "}
+                  <p className={styles.userEmail}>
+                    Consultas en la serie mostrada:{" "}
                     <strong>{totalActual}</strong> | Con coincidencias:{" "}
                     <strong>{totalConMatch}</strong> | Promedio mensual:{" "}
                     <strong>{promedioPorMes.toFixed(1)}</strong>
                   </p>
 
-                  <p
-                    className={styles.userEmail}
-                    style={{ marginBottom: "4px", whiteSpace: "nowrap" }}
-                  >
-                    Actividad en el histórico: Primera:{" "}
-                    <strong>{fechasActividad.first || "N/D"}</strong> | Última:{" "}
-                    <strong>{fechasActividad.last || "N/D"}</strong>
+                  <p className={styles.userEmail}>
+                    Actividad histórica: Primera consulta{" "}
+                    <strong>{fechasActividad.first || "N/D"}</strong> | Última
+                    consulta <strong>{fechasActividad.last || "N/D"}</strong>
                   </p>
 
-                  <p
-                    className={styles.userEmail}
-                    style={{ marginBottom: "4px", whiteSpace: "nowrap" }}
-                  >
+                  <p className={styles.userEmail}>
                     Participación en el último mes:{" "}
                     <strong>{shareTexto}</strong>
                   </p>
 
-                  <p
-                    className={styles.userEmail}
-                    style={{ marginBottom: "4px", whiteSpace: "nowrap" }}
-                  >
-                    {tendenciaTexto}
+                  <p className={styles.userEmail}>
+                    <strong>{tendenciaTexto}</strong>
                   </p>
 
-                  <p
-                    className={styles.userEmail}
-                    style={{ marginBottom: "4px", whiteSpace: "nowrap" }}
-                  >
-                    {getTextoRangoGrafico()}
-                  </p>
+                  <p className={styles.userEmail}>{getTextoRangoGrafico()}</p>
                 </div>
 
-                <div className={styles.peakCard}>
+                <div
+                  className={styles.peakCard}
+                  style={{
+                    flex: "1 1 280px",
+                  }}
+                >
                   {(() => {
                     if (!serieGlobal.length) {
                       return <p>Mes de mayor actividad: N/D</p>;
                     }
+
                     const picoEntidad = serieGlobal.reduce(
                       (best, curr) =>
                         !best || curr.total > best.total ? curr : best,
                       null
                     );
+
                     const picoUsuario =
                       selectedUser && serie.length
                         ? serie.reduce(
@@ -520,12 +702,14 @@ export default function ClientAnalyticsPage({
                             marginBottom: "4px",
                           }}
                         >
-                          Mes de mayor actividad (entidad)
+                          Mes de mayor actividad de la entidad
                         </p>
-                        <p style={{ marginBottom: "4px" }}>
+
+                        <p style={{ marginBottom: "10px" }}>
                           {picoEntidad.periodo}:{" "}
                           <strong>{picoEntidad.total}</strong> consultas
                         </p>
+
                         {picoUsuario && (
                           <>
                             <p
@@ -534,8 +718,9 @@ export default function ClientAnalyticsPage({
                                 marginBottom: "4px",
                               }}
                             >
-                              Pico del usuario
+                              Pico del usuario seleccionado
                             </p>
+
                             <p>
                               {picoUsuario.periodo}:{" "}
                               <strong>{picoUsuario.total}</strong> consultas
@@ -547,102 +732,34 @@ export default function ClientAnalyticsPage({
                   })()}
                 </div>
               </div>
-
-              <Line
-                data={dataLine}
-                options={{
-                  responsive: true,
-                  plugins: {
-                    legend: {
-                      position: "top",
-                    },
-                    tooltip: {
-                      mode: "index",
-                      intersect: false,
-                      callbacks: {
-                        label: function (context) {
-                          const label = context.dataset.label || "";
-                          const value = context.parsed.y ?? 0;
-                          return `${label}: ${value}`;
-                        },
-                      },
-                    },
-                    datalabels: {
-                      anchor: (ctx) => {
-                        if (ctx.datasetIndex === 1) return "start"; // coincidencias abajo
-                        if (ctx.datasetIndex === 2) return "center"; // entidad centrada
-                        return "end"; // total arriba
-                      },
-                      align: (ctx) => {
-                        if (ctx.datasetIndex === 1) return "bottom"; // abajo del punto
-                        if (ctx.datasetIndex === 2) return "right"; // entidad a la derecha
-                        return "top"; // total arriba
-                      },
-                      offset: 4,
-                      color: "#000",
-                      font: {
-                        size: 10,
-                        weight: "bold",
-                      },
-                      formatter: (value) => value,
-                    },
-                  },
-                  interaction: {
-                    mode: "nearest",
-                    intersect: false,
-                  },
-                  elements: {
-                    point: {
-                      radius: 5,
-                      hoverRadius: 7,
-                      hitRadius: 7,
-                      borderWidth: 2,
-                      borderColor: "#ffffff",
-                      backgroundColor: (ctx) => ctx.dataset.borderColor,
-                    },
-                    line: {
-                      borderWidth: 2,
-                    },
-                  },
-                  scales: {
-                    x: {
-                      ticks: {
-                        autoSkip: true,
-                        maxRotation: 0,
-                      },
-                    },
-                    y: {
-                      beginAtZero: true,
-                    },
-                  },
-                }}
-              />
             </div>
           ) : (
             <p className={styles.noResults}>
-              No hay datos históricos para este cliente.
+              No hay datos históricos para los filtros seleccionados.
             </p>
           )}
 
           {topUsuarios.length > 0 && (
-            <div className={styles.summaryTableWrapper}>
-              <h3>Top 5 usuarios por número de consultas (histórico completo)</h3>
-              <table className={styles.summaryTable}>
+            <div className={styles.searchResultsContainer}>
+              <h3 className={styles.sectionTitle}>
+                Top 5 usuarios por número de consultas
+              </h3>
+
+              <table className={styles.resultsTable}>
                 <thead>
                   <tr>
-                    <th className={styles.summaryTableTh}>Usuario (email)</th>
-                    <th className={styles.summaryTableTh}>Consultas</th>
-                    <th className={styles.summaryTableTh}>% del total</th>
+                    <th>Usuario</th>
+                    <th>Consultas</th>
+                    <th>% del total</th>
                   </tr>
                 </thead>
+
                 <tbody>
                   {topUsuarios.map((u) => (
                     <tr key={u.email}>
-                      <td className={styles.summaryTableTd}>{u.email}</td>
-                      <td className={styles.summaryTableTd}>{u.count}</td>
-                      <td className={styles.summaryTableTd}>
-                        {u.pct.toFixed(1)}%
-                      </td>
+                      <td>{u.email}</td>
+                      <td>{u.count}</td>
+                      <td>{u.pct.toFixed(1)}%</td>
                     </tr>
                   ))}
                 </tbody>

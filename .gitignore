@@ -1,29 +1,44 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
+# Dependencias
 /node_modules
 /.pnp
 .pnp.js
 
-# testing
+# Pruebas
 /coverage
 
-# production
+# Producción
 /build
 
-# misc
-.DS_Store
+# Variables de entorno
+.env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
-.env # Añadir si usas un archivo .env genérico
 
+# Permitir archivo de ejemplo sin credenciales reales
+!.env.example
+
+# Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
 
-# Archivos de datos y credenciales sensibles
-data.csv # Tu archivo de datos principal
-usuarios.csv # Tu archivo de usuarios
-serviceAccountKey.json # Credenciales de servicio de Google/Firebase (¡muy sensibles!)
+# Sistema operativo / editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Archivos sensibles o de datos locales
+data.csv
+usuarios.csv
+serviceAccountKey.json
+*.db
+*.sqlite
+*.sqlite3
+
+# Archivos temporales
+*.tmp
+*.temp

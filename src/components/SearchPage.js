@@ -12,14 +12,16 @@ import ClientAnalyticsPage from "./ClientAnalyticsPage";
 function SummaryTable({ summary, total }) {
   return (
     <div className={styles.summaryTableWrapper}>
-      <h3 className={styles.sectionTitle}>Coincidencias encontradas</h3>
+      <h3 className={styles.sectionTitle}>Resumen de coincidencias</h3>
+
       <table className={styles.summaryTable}>
         <thead>
           <tr>
-            <th className={styles.summaryTableTh}>Código</th>
+            <th className={styles.summaryTableTh}>Código / Lista</th>
             <th className={styles.summaryTableTh}>Registros</th>
           </tr>
         </thead>
+
         <tbody>
           {Object.entries(summary).map(([codigo, count]) => (
             <tr key={codigo}>
@@ -32,13 +34,16 @@ function SummaryTable({ summary, total }) {
             </tr>
           ))}
         </tbody>
+
         <tfoot>
-          <tr className="totalRow">
-            <td className={styles.summaryTableTd}>Total</td>
+          <tr>
+            <td className={styles.summaryTableTd}>
+              <strong>Total</strong>
+            </td>
             <td
               className={`${styles.summaryTableTd} ${styles.numericCell}`}
             >
-              {total}
+              <strong>{total}</strong>
             </td>
           </tr>
         </tfoot>
@@ -65,6 +70,7 @@ export default function SearchPage({ onLogout }) {
   const [ultimaConsulta, setUltimaConsulta] = useState(null);
 
   const { results, loading, error, summaryData, executeSearch } = useSearch();
+
   const {
     globalSummary,
     globalTotal,
@@ -73,6 +79,39 @@ export default function SearchPage({ onLogout }) {
     globalLastUpdateDate,
   } = useGlobalSummary();
 
+  const criterioActual = term.trim();
+
+  const totalCoincidencias = Object.values(summaryData || {}).reduce(
+    (acc, val) => acc + val,
+    0
+  );
+
+  const getTituloVista = () => {
+    if (view === "report") return "Reporte de consultas";
+    if (view === "analytics") return "Análisis histórico";
+    return "Consulta en Listas Especiales";
+  };
+
+  const getTextoBotonReporte = () => {
+    if (view === "report") return "Volver a búsqueda";
+    if (view === "analytics") return "Volver al reporte";
+    return "Ver reporte";
+  };
+
+  const handleToggleReporte = () => {
+    if (view === "report") {
+      setView("search");
+      return;
+    }
+
+    if (view === "analytics") {
+      setView("report");
+      return;
+    }
+
+    setView("report");
+  };
+
   // Fecha actual
   useEffect(() => {
     const hoy = new Date().toLocaleDateString("es-BO", {
@@ -80,6 +119,7 @@ export default function SearchPage({ onLogout }) {
       month: "long",
       day: "numeric",
     });
+
     setFechaActual(hoy);
   }, []);
 
@@ -89,6 +129,7 @@ export default function SearchPage({ onLogout }) {
       const {
         data: { user },
       } = await supabase.auth.getUser();
+
       if (!user?.email) return;
 
       setUsuarioEmail(user.email);
@@ -110,10 +151,12 @@ export default function SearchPage({ onLogout }) {
       setClienteCodigo(data.cliente || "");
 
       const nombreLogo = (data.logo_cliente || "").trim();
+
       if (nombreLogo) {
         const { data: urlData } = supabase.storage
           .from("logos_clientes")
           .getPublicUrl(nombreLogo);
+
         setLogoUrl(urlData?.publicUrl || "");
       } else {
         setLogoUrl("");
@@ -121,13 +164,14 @@ export default function SearchPage({ onLogout }) {
 
       const valorReporte = (data.Reporte || "").toLowerCase();
       const puede = valorReporte === "si" || valorReporte === "sí";
+
       setPuedeVerReporte(puede);
     };
 
     obtenerUsuario();
   }, []);
 
-  // Estadísticas de búsquedas del usuario (mes actual + última consulta)
+  // Estadísticas de búsquedas del usuario: mes actual + última consulta
   useEffect(() => {
     const fetchStatsBusqueda = async () => {
       if (!usuarioEmail) return;
@@ -164,6 +208,7 @@ export default function SearchPage({ onLogout }) {
 
       if (registros.length > 0) {
         const ultima = new Date(registros[0].fecha);
+
         setUltimaConsulta(
           ultima.toLocaleString("es-BO", {
             year: "numeric",
@@ -204,6 +249,7 @@ export default function SearchPage({ onLogout }) {
     };
 
     const eventos = ["mousemove", "keydown", "scroll", "click"];
+
     eventos.forEach((evento) =>
       window.addEventListener(evento, resetTimers)
     );
@@ -214,6 +260,7 @@ export default function SearchPage({ onLogout }) {
       eventos.forEach((evento) =>
         window.removeEventListener(evento, resetTimers)
       );
+
       clearTimeout(warningTimeoutId);
       clearTimeout(logoutTimeoutId);
     };
@@ -222,17 +269,17 @@ export default function SearchPage({ onLogout }) {
   // Ejecutar búsqueda
   const handleSearch = async (e) => {
     e.preventDefault();
-    const criterio = term.trim();
-    if (criterio === "" || !usuarioEmail) return;
 
-    await executeSearch(criterio);
+    if (criterioActual === "" || !usuarioEmail || loading) return;
+
+    await executeSearch(criterioActual);
     setPendingRegister(true);
   };
 
   // Registrar búsqueda
   useEffect(() => {
     if (pendingRegister && summaryData && usuarioEmail) {
-      const totalCoincidencias = Object.values(summaryData).reduce(
+      const totalCoincidenciasLocal = Object.values(summaryData).reduce(
         (acc, val) => acc + val,
         0
       );
@@ -243,7 +290,7 @@ export default function SearchPage({ onLogout }) {
 
       let fuenteResumen = null;
 
-      if (totalCoincidencias > 0 && results.length > 0) {
+      if (totalCoincidenciasLocal > 0 && results.length > 0) {
         const codigosUnicos = [
           ...new Set(results.map((r) => r.codigo).filter(Boolean)),
         ];
@@ -261,7 +308,7 @@ export default function SearchPage({ onLogout }) {
               {
                 usuario_email: usuarioEmail.toLowerCase(),
                 criterio: term.trim(),
-                cantidad_resultados: totalCoincidencias,
+                cantidad_resultados: totalCoincidenciasLocal,
                 fuente: fuenteResumen,
                 fecha: fechaBolivia,
               },
@@ -298,8 +345,13 @@ export default function SearchPage({ onLogout }) {
     <div className={styles.container}>
       {showInactivityWarning && (
         <div className={styles.inactivityWarning}>
-          <p>Tu sesión se cerrará en 30 segundos por inactividad.</p>
-          <p>Mueve el mouse o presiona una tecla para continuar.</p>
+          <p>
+            <strong>Sesión por cerrarse.</strong>
+          </p>
+          <p>
+            Por seguridad, la sesión se cerrará en 30 segundos por inactividad.
+          </p>
+          <p>Mueva el mouse o presione una tecla para continuar.</p>
         </div>
       )}
 
@@ -310,7 +362,7 @@ export default function SearchPage({ onLogout }) {
               {logoUrl && (
                 <img
                   src={logoUrl}
-                  alt={`Logo de ${clienteNombre}`}
+                  alt={`Logo de ${clienteNombre || "la entidad"}`}
                   className={styles.logoCliente}
                   onError={(e) => {
                     e.currentTarget.style.display = "none";
@@ -318,23 +370,31 @@ export default function SearchPage({ onLogout }) {
                 />
               )}
             </div>
+
             <div>
-              <h2>Buscar en Listas Especiales</h2>
+              <h2>{getTituloVista()}</h2>
+
               <p className={styles.updateDateText}>
                 Base de datos actualizada al:{" "}
-                <strong>
-                  {globalLastUpdateDate || "Cargando..."}
-                </strong>
+                <strong>{globalLastUpdateDate || "Cargando..."}</strong>
               </p>
+
               <p className={styles.userEmail}>
-                Usuario: <strong>{usuarioEmail}</strong>
+                Entidad:{" "}
+                <strong>{clienteNombre || "No identificada"}</strong>
               </p>
+
+              <p className={styles.userEmail}>
+                Usuario: <strong>{usuarioEmail || "Validando..."}</strong>
+              </p>
+
               {/* Métricas visibles solo en pantalla */}
               <div className={styles.noPrint}>
                 <p className={styles.userEmail}>
                   Consultas realizadas en el mes actual:{" "}
                   <strong>{consultasMesActual}</strong>
                 </p>
+
                 <p className={styles.userEmail}>
                   Última consulta registrada:{" "}
                   <strong>{ultimaConsulta || "N/D"}</strong>
@@ -352,18 +412,15 @@ export default function SearchPage({ onLogout }) {
           {puedeVerReporte && (
             <button
               type="button"
-              onClick={() =>
-                setView((prev) =>
-                  prev === "report" ? "search" : "report"
-                )
-              }
+              onClick={handleToggleReporte}
               className={styles.reportButton}
             >
-              {view === "report" ? "Volver a búsqueda" : "Ver reporte"}
+              {getTextoBotonReporte()}
             </button>
           )}
 
           <button
+            type="button"
             onClick={handleLogout}
             className={styles.logoutButton}
           >
@@ -394,18 +451,23 @@ export default function SearchPage({ onLogout }) {
               type="text"
               value={term}
               onChange={(e) => setTerm(e.target.value)}
-              placeholder="Escribe un nombre o apellido..."
+              placeholder="Ingrese nombre, apellido o denominación a consultar..."
               className={styles.searchInput}
-              aria-label="Introduce un nombre o apellido para buscar"
+              aria-label="Ingrese nombre, apellido o denominación para consultar en listas especiales"
             />
-            <button type="submit" className={styles.searchButton}>
-              Buscar
+
+            <button
+              type="submit"
+              className={styles.searchButton}
+              disabled={loading || criterioActual === "" || !usuarioEmail}
+            >
+              {loading ? "Consultando..." : "Buscar"}
             </button>
           </form>
 
-          {term.trim() !== "" && (
+          {criterioActual !== "" && (
             <p className={styles.searchTermDisplay}>
-              <strong>Criterio de búsqueda:</strong> {term}
+              <strong>Criterio de búsqueda:</strong> {criterioActual}
             </p>
           )}
 
@@ -414,48 +476,49 @@ export default function SearchPage({ onLogout }) {
             total={globalTotal}
             loading={globalLoading}
             error={globalError}
+            lastUpdateDate={globalLastUpdateDate}
           />
 
           {results.length > 0 && (
             <SummaryTable
               summary={summaryData}
-              total={Object.values(summaryData).reduce(
-                (acc, val) => acc + val,
-                0
-              )}
+              total={totalCoincidencias}
             />
           )}
 
           {loading && (
             <p className={styles.loading}>
-              Buscando coincidencias…
+              Consultando listas especiales. Espere un momento...
             </p>
           )}
+
           {error && <p className={styles.error}>{error}</p>}
 
           {results.length > 0 && (
             <>
               <h3 className={styles.sectionTitle}>
-                Detalle de Coincidencias (Ordenadas por Relevancia)
+                Detalle de coincidencias ordenadas por relevancia
               </h3>
+
               <SearchResultsTable results={results} />
             </>
           )}
 
           {results.length === 0 &&
-            term.trim() !== "" &&
+            criterioActual !== "" &&
             !loading && (
               <p className={styles.noResults}>
-                No se encontraron coincidencias.
+                No se encontraron coincidencias para el criterio consultado.
               </p>
             )}
 
           {results.length === 0 &&
-            term.trim() === "" &&
+            criterioActual === "" &&
             !loading &&
             !error && (
               <p className={styles.noResults}>
-                Ingresa un término de búsqueda para comenzar.
+                Ingrese un nombre, apellido o denominación para iniciar la
+                consulta en listas especiales.
               </p>
             )}
         </>

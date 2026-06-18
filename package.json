@@ -1,7 +1,8 @@
 {
-  "name": "listas-especiales-frontend",
-  "version": "0.1.0",
+  "name": "listas-especiales-web",
+  "version": "1.0.0",
   "private": true,
+  "description": "Plataforma web para consulta en listas especiales, generación de reportes y análisis histórico de búsquedas.",
   "dependencies": {
     "@supabase/supabase-js": "^2.52.0",
     "@testing-library/dom": "^10.4.0",
@@ -23,6 +24,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "test:ci": "react-scripts test --watchAll=false",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
