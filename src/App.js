@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "./supabaseClient";
 import LoginPage from "./components/LoginPage";
-import SearchPage from "./components/SearchPage";
+import WorkspaceGate from "./components/WorkspaceGate";
 import styles from "./components/SearchPage.module.css";
 
 function LoadingScreen() {
@@ -21,6 +21,12 @@ function LoadingScreen() {
 
 function App() {
   const [session, setSession] = useState(null);
+  const [recovery, setRecovery] = useState(
+    () =>
+      window.sessionStorage.getItem("listas-recovery") === "true" ||
+      new URLSearchParams(window.location.hash.slice(1)).get("type") ===
+        "recovery",
+  );
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -54,7 +60,15 @@ function App() {
     checkSession();
 
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      (_event, currentSession) => {
+      (event, currentSession) => {
+        if (event === "PASSWORD_RECOVERY") {
+          window.sessionStorage.setItem("listas-recovery", "true");
+          setRecovery(true);
+        }
+        if (event === "SIGNED_OUT") {
+          window.sessionStorage.removeItem("listas-recovery");
+          setRecovery(false);
+        }
         if (isActive) {
           setSession(currentSession || null);
         }
@@ -74,6 +88,8 @@ function App() {
       console.error("Error al cerrar sesión:", err);
     } finally {
       setSession(null);
+      setRecovery(false);
+      window.sessionStorage.removeItem("listas-recovery");
     }
   };
 
@@ -96,8 +112,10 @@ function App() {
     return <LoadingScreen />;
   }
 
-  return session ? (
-    <SearchPage onLogout={handleLogout} />
+  return recovery ? (
+    <LoginPage recoveryMode onPasswordChanged={handleLogout} />
+  ) : session ? (
+    <WorkspaceGate key={session.user?.id} onLogout={handleLogout} />
   ) : (
     <LoginPage onLogin={handleLogin} />
   );

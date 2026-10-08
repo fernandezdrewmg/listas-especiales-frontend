@@ -11,6 +11,7 @@ import ClientAnalyticsPage from "./ClientAnalyticsPage";
 import Icon from "./Icon";
 import BrandLogo from "./BrandLogo";
 import PrintSearchSummary from "./PrintSearchSummary";
+import ChangePassword from "./ChangePassword";
 
 export default function SearchPage({ onLogout }) {
   const [term, setTerm] = useState("");
@@ -50,6 +51,10 @@ export default function SearchPage({ onLogout }) {
   );
 
   const views = {
+    account: {
+      title: "Mi cuenta",
+      description: "Administre la contraseña de su acceso.",
+    },
     search: {
       title: "Consultas",
       description: "Información relevante para decisiones con respaldo.",
@@ -385,6 +390,16 @@ export default function SearchPage({ onLogout }) {
                 </button>
               </>
             )}
+            <button
+              className={
+                activeView === "account" ? styles.navActive : styles.navItem
+              }
+              onClick={() => navigate("account")}
+              aria-current={activeView === "account" ? "page" : undefined}
+            >
+              <Icon name="lock" />
+              Mi cuenta
+            </button>
           </nav>
           <div className={styles.sidebarNote}>
             <Icon name="shield" size={22} />
@@ -457,7 +472,9 @@ export default function SearchPage({ onLogout }) {
               {fechaActual}
             </span>
           </div>
-          {activeView === "report" && puedeVerReporte ? (
+          {activeView === "account" ? (
+            <ChangePassword />
+          ) : activeView === "report" && puedeVerReporte ? (
             <ReportPage
               cliente={clienteCodigo}
               logoUrl={logoUrl}

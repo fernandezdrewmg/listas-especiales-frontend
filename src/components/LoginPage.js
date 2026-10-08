@@ -2,14 +2,15 @@ import { useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
 import Icon from "./Icon";
 import BrandLogo from "./BrandLogo";
+import AccessForm from "./AccessForm";
+import RecoveryPasswordForm from "./RecoveryPasswordForm";
 import styles from "./LoginPage.module.css";
 
-export default function LoginPage({ onLogin }) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+export default function LoginPage({
+  onLogin,
+  recoveryMode,
+  onPasswordChanged,
+}) {
   const [logoUrl, setLogoUrl] = useState("");
 
   useEffect(() => {
@@ -18,27 +19,6 @@ export default function LoginPage({ onLogin }) {
       .getPublicUrl("ris3.jpg");
     if (data?.publicUrl) setLogoUrl(data.publicUrl);
   }, []);
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-    try {
-      const { error: authError } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password,
-      });
-      if (authError) {
-        setError("Correo o contraseña incorrectos.");
-        return;
-      }
-      if (onLogin) await onLogin();
-    } catch (err) {
-      setError("Ocurrió un error al intentar iniciar sesión.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className={styles.root}>
@@ -124,53 +104,11 @@ export default function LoginPage({ onLogin }) {
             <BrandLogo src={logoUrl} alt="Logo institucional" />
           </div>
           <p className={styles.accessEyebrow}>ACCESO INSTITUCIONAL</p>
-          <h2>Bienvenido de nuevo</h2>
-          <p className={styles.accessIntro}>Ingrese a su espacio de trabajo.</p>
-          {error && (
-            <div className={styles.error} role="alert">
-              {error}
-            </div>
+          {recoveryMode ? (
+            <RecoveryPasswordForm onComplete={onPasswordChanged} />
+          ) : (
+            <AccessForm onLogin={onLogin} />
           )}
-          <form onSubmit={handleLogin}>
-            <label htmlFor="email">Correo electrónico</label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoComplete="username"
-              placeholder="usuario@entidad.com"
-              disabled={loading}
-            />
-            <label htmlFor="password">Contraseña</label>
-            <div className={styles.passwordField}>
-              <input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                autoComplete="current-password"
-                placeholder="Ingrese su contraseña"
-                disabled={loading}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                aria-label={
-                  showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
-                }
-                aria-pressed={showPassword}
-              >
-                <Icon name="eye" size={19} />
-              </button>
-            </div>
-            <button type="submit" disabled={loading} className={styles.submit}>
-              {loading ? "Validando acceso…" : "Ingresar a la plataforma"}
-              <Icon name="arrow" size={18} />
-            </button>
-          </form>
           <div className={styles.securityNote}>
             <Icon name="lock" size={17} />
             <p>

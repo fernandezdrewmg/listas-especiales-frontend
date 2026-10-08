@@ -1863,3 +1863,46 @@ button:disabled {
     padding: 2px 3px;
   }
 }
+
+/* Impresión compacta: el resumen pasa de 6,75 pt a 5,75 pt. */
+@media print {
+  .printCoverageTable {
+    font-size: 5.75pt;
+  }
+  .printCoverageTable th,
+  .printCoverageTable td {
+    padding: 3px 6px;
+    line-height: 1.25;
+    border-color: #aaa;
+  }
+  .printCoverage {
+    margin: 10px 0 12px;
+  }
+  .printCoverageTable thead th,
+  .resultsTable thead th,
+  .summaryTable thead th {
+    background-color: #c9c9c9 !important;
+    color: #111 !important;
+    font-weight: 700;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .printCoverageTable tbody tr:nth-child(odd) > *,
+  .resultsTable tbody tr:nth-child(odd) > *,
+  .summaryTable tbody tr:nth-child(odd) > * {
+    background-color: #fff !important;
+  }
+  .printCoverageTable tbody tr:nth-child(even) > *,
+  .resultsTable tbody tr:nth-child(even) > *,
+  .summaryTable tbody tr:nth-child(even) > * {
+    background-color: #ededed !important;
+    color: #111 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .printCoverageTable tfoot > tr > * {
+    background-color: #ddd !important;
+    color: #111 !important;
+    font-weight: 700;
+  }
+}

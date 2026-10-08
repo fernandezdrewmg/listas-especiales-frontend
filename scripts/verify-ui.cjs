@@ -131,7 +131,12 @@ async function fixture(page, permission) {
           ),
         ),
       });
-    if (url.pathname.endsWith("/token"))
+    if (url.pathname.endsWith("/listas_auth_configuration"))
+      return send({ activationEnabled: true, recoveryEnabled: true });
+    if (url.pathname.endsWith("/signup")) return send({ user, session: null });
+    if (url.pathname.endsWith("/recover") || url.pathname.endsWith("/resend"))
+      return send({});
+    if (url.pathname.endsWith("/token") || url.pathname.endsWith("/verify"))
       return send({
         access_token: jwt,
         token_type: "bearer",
@@ -265,7 +270,84 @@ async function assertLayout(page, label) {
         .evaluate((img) => img.complete && img.naturalWidth > 0),
       true,
     );
+    await page.getByRole("button", { name: "Primer acceso" }).click();
+    await page
+      .getByLabel("Correo electrónico", { exact: true })
+      .fill(user.email);
+    await page
+      .getByLabel("Nueva contraseña", { exact: true })
+      .fill("Frase privada de prueba");
+    await page
+      .getByLabel("Confirmar nueva contraseña", { exact: true })
+      .fill("Frase privada de prueba");
+    await page.screenshot({
+      path: path.join(output, "primer-acceso.png"),
+      fullPage: true,
+    });
+    await page
+      .getByRole("button", { name: "Crear cuenta y enviar código" })
+      .click();
+    await page.getByLabel("Código de verificación").fill("123456");
+    assert.equal(await page.getByRole("searchbox").count(), 0);
+    await page
+      .getByRole("button", { name: "Activar cuenta", exact: true })
+      .click();
+    await page
+      .getByText(
+        "Su cuenta está activada. Ingrese con la contraseña que eligió.",
+      )
+      .waitFor();
+    await page.getByRole("button", { name: "Olvidé mi contraseña" }).click();
+    await page
+      .getByLabel("Correo electrónico", { exact: true })
+      .fill(user.email);
+    await page
+      .getByRole("button", { name: "Enviar código de recuperación" })
+      .click();
+    await page.getByLabel("Código de verificación").fill("123456");
+    await page.getByRole("button", { name: "Verificar código" }).click();
+    await page
+      .getByLabel("Nueva contraseña", { exact: true })
+      .fill("Frase recuperada de prueba");
+    await page
+      .getByLabel("Confirmar nueva contraseña", { exact: true })
+      .fill("Frase recuperada de prueba");
+    assert.equal(await page.getByRole("searchbox").count(), 0);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await assertLayout(page, "recuperación móvil");
+    await page.screenshot({
+      path: path.join(output, "recuperacion-movil.png"),
+      fullPage: true,
+    });
+    await page
+      .getByRole("button", { name: "Guardar nueva contraseña", exact: true })
+      .click();
+    await page
+      .getByText("Contraseña actualizada. Ingrese con su nueva contraseña.")
+      .waitFor();
+    await page.setViewportSize({ width: 1440, height: 1000 });
     await login(page);
+    await page.getByRole("button", { name: "Mi cuenta", exact: true }).click();
+    await page
+      .getByLabel("Contraseña actual", { exact: true })
+      .fill("password-for-local-fixture");
+    await page
+      .getByLabel("Nueva contraseña", { exact: true })
+      .fill("Frase cambiada de prueba");
+    await page
+      .getByLabel("Confirmar nueva contraseña", { exact: true })
+      .fill("Frase cambiada de prueba");
+    await page
+      .getByRole("button", { name: "Actualizar contraseña", exact: true })
+      .click();
+    await page
+      .getByText("Su contraseña fue actualizada correctamente.")
+      .waitFor();
+    await page.screenshot({
+      path: path.join(output, "mi-cuenta.png"),
+      fullPage: true,
+    });
+    await page.getByRole("button", { name: "Consultas", exact: true }).click();
     await page.getByRole("button", { name: "Reportes", exact: true }).waitFor();
     await page
       .getByAltText("Logo de Entidad de demostración", { exact: true })
@@ -336,6 +418,30 @@ async function assertLayout(page, label) {
       "69.570",
       "3",
     ]);
+    assert.equal(
+      await printSummary
+        .locator("tbody tr")
+        .nth(1)
+        .locator("td")
+        .first()
+        .evaluate((el) => getComputedStyle(el).backgroundColor),
+      "rgb(237, 237, 237)",
+    );
+    assert.equal(
+      await printSummary
+        .locator("thead th")
+        .first()
+        .evaluate((el) => getComputedStyle(el).backgroundColor),
+      "rgb(201, 201, 201)",
+    );
+    assert.ok(
+      Math.abs(
+        (await printSummary
+          .locator("table")
+          .evaluate((el) => parseFloat(getComputedStyle(el).fontSize))) -
+          7.6667,
+      ) < 0.1,
+    );
     await assertLayout(page, "consulta impresa en ancho de papel carta");
     await page.screenshot({
       path: path.join(output, "consulta-impresion.png"),
