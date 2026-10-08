@@ -27,14 +27,14 @@ ChartJS.register(
 const numberFormatter = new Intl.NumberFormat("es-BO");
 
 const executivePalette = [
-  "#1e3a5f",
-  "#2563eb",
-  "#0f766e",
-  "#334155",
-  "#7c3aed",
-  "#0369a1",
-  "#9f1239",
-  "#64748b",
+  "#285c4d",
+  "#497c63",
+  "#779777",
+  "#a8bb96",
+  "#44696b",
+  "#799699",
+  "#a2b6ae",
+  "#c7d3c8",
 ];
 
 const getColorByIndex = (index) =>
@@ -118,13 +118,14 @@ function GlobalSummaryDisplay({
         backgroundColor: barColors,
         borderColor: barColors,
         borderWidth: 1,
-        borderRadius: 8,
-        barThickness: 26,
+        borderRadius: 4,
+        barThickness: 19,
       },
     ],
   };
 
   const options = {
+    animation: false,
     indexAxis: "y",
     responsive: true,
     maintainAspectRatio: false,

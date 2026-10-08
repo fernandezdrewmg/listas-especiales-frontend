@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../supabaseClient";
 import styles from "./SearchPage.module.css";
+import Icon from "./Icon";
 
 export default function ReportPage({
   cliente,
@@ -33,7 +34,7 @@ export default function ReportPage({
         if (usersError) {
           console.error(
             "Error al obtener usuarios de la entidad:",
-            usersError.message
+            usersError.message,
           );
 
           setError("No se pudieron obtener los usuarios de la entidad.");
@@ -48,7 +49,7 @@ export default function ReportPage({
       } catch (err) {
         console.error(
           "Error inesperado al obtener usuarios de la entidad:",
-          err
+          err,
         );
 
         setError("Ocurrió un error al obtener los usuarios de la entidad.");
@@ -69,7 +70,7 @@ export default function ReportPage({
         dataLocal && dataLocal.length
           ? dataLocal.reduce(
               (acc, row) => acc + (row.cantidad_resultados || 0),
-              0
+              0,
             )
           : 0;
 
@@ -79,7 +80,7 @@ export default function ReportPage({
       if (userError) {
         console.error(
           "Error al obtener usuario autenticado:",
-          userError.message
+          userError.message,
         );
       }
 
@@ -113,7 +114,7 @@ export default function ReportPage({
       if (insertError) {
         console.error(
           "Error al registrar uso de reporte:",
-          insertError.message
+          insertError.message,
         );
       }
     } catch (err) {
@@ -151,7 +152,7 @@ export default function ReportPage({
           "usuario_email, criterio, cantidad_resultados, fecha, fuente, origen",
           {
             count: "exact",
-          }
+          },
         );
 
       if (selectedEmail) {
@@ -265,7 +266,7 @@ export default function ReportPage({
     link.href = url;
     link.setAttribute(
       "download",
-      `reporte_busquedas_${cliente}_${fechaActual}.csv`
+      `reporte_busquedas_${cliente}_${fechaActual}.csv`,
     );
 
     document.body.appendChild(link);
@@ -326,10 +327,7 @@ export default function ReportPage({
   const totalRegistros = reportData ? reportData.length : 0;
 
   const totalCoincidencias = reportData
-    ? reportData.reduce(
-        (acc, row) => acc + (row.cantidad_resultados || 0),
-        0
-      )
+    ? reportData.reduce((acc, row) => acc + (row.cantidad_resultados || 0), 0)
     : 0;
 
   const puedeExportar = reportData && reportData.length > 0;
@@ -339,65 +337,39 @@ export default function ReportPage({
       className={styles.reportContainer}
       data-print-date={getPrintDateTime()}
     >
-      {/* Encabezado */}
       <div className={styles.header}>
         <div className={styles.headerLeft}>
-          <div className={styles.logoTitleWrapper}>
-            {logoUrl && (
-              <div className={styles.logoBox}>
-                <img
-                  src={logoUrl}
-                  alt={`Logo de ${clienteNombre || "la entidad"}`}
-                  className={styles.logoCliente}
-                  onError={(e) => {
-                    e.currentTarget.style.display = "none";
-                  }}
-                />
-              </div>
-            )}
-
-            <div>
-              <h2>Reporte de consultas</h2>
-
-              <p className={styles.userEmail}>
-                Entidad:{" "}
-                <strong>{clienteNombre || "No identificada"}</strong>
-              </p>
-
-              <p className={styles.userEmail}>
-                Fecha/hora de generación:{" "}
-                <strong>{getPrintDateTime()}</strong>
-              </p>
+          {logoUrl && (
+            <div className={styles.onlyPrint}>
+              <img
+                src={logoUrl}
+                alt={clienteNombre || "Logo de la entidad"}
+                width="50"
+                height="50"
+                style={{ objectFit: "contain" }}
+              />
             </div>
-          </div>
-        </div>
-
-        <div className={styles.headerRight}>
-          <p className={styles.userEmail}>
-            <strong>Filtros aplicados:</strong> {getFiltersSummary()}
-          </p>
-
-          <p className={styles.userEmail}>
-            <strong>Total de consultas:</strong> {totalRegistros}
-          </p>
-
-          <p className={styles.userEmail}>
-            <strong>Total de coincidencias reportadas:</strong>{" "}
-            {totalCoincidencias}
-          </p>
-
-          {puedeVerReporte && typeof onOpenAnalytics === "function" && (
-            <button
-              type="button"
-              onClick={onOpenAnalytics}
-              className={styles.reportButton}
-            >
-              Ver análisis histórico
-            </button>
           )}
+          <h2>Historial de consultas</h2>
+          <p className={styles.userEmail}>
+            Actividad registrada de{" "}
+            <strong>{clienteNombre || "su entidad"}</strong>
+          </p>
+          <p className={styles.onlyPrint}>
+            Fecha de impresión: {getPrintDateTime()} · {getFiltersSummary()}
+          </p>
         </div>
+        {puedeVerReporte && typeof onOpenAnalytics === "function" && (
+          <button
+            type="button"
+            onClick={onOpenAnalytics}
+            className={styles.exportButton}
+          >
+            <Icon name="chart" size={16} />
+            Ver análisis histórico
+          </button>
+        )}
       </div>
-
       {/* Filtros */}
       <div className={styles.reportFilters}>
         <div className={styles.filterGroup}>
@@ -482,6 +454,22 @@ export default function ReportPage({
         </div>
       </div>
 
+      <div className={styles.analyticsStats}>
+        <div>
+          <span>Consultas en el reporte</span>
+          <strong>{totalRegistros.toLocaleString("es-BO")}</strong>
+        </div>
+        <div>
+          <span>Coincidencias reportadas</span>
+          <strong>{totalCoincidencias.toLocaleString("es-BO")}</strong>
+        </div>
+        <div>
+          <span>Usuarios en el reporte</span>
+          <strong>
+            {new Set(reportData.map((row) => row.usuario_email)).size}
+          </strong>
+        </div>
+      </div>
       {/* Mensajes */}
       {loading && (
         <p className={styles.loading}>
@@ -492,7 +480,13 @@ export default function ReportPage({
       {error && <p className={styles.error}>{error}</p>}
 
       {/* Tabla */}
-      <div className={styles.searchResultsContainer} ref={tableRef}>
+      <div
+        className={styles.searchResultsContainer}
+        ref={tableRef}
+        tabIndex={0}
+        role="region"
+        aria-label="Tabla del reporte de consultas"
+      >
         {reportData && reportData.length > 0 ? (
           <table className={styles.resultsTable}>
             <thead>

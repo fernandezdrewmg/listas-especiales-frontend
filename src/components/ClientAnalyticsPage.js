@@ -24,7 +24,7 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  ChartDataLabels
+  ChartDataLabels,
 );
 
 export default function ClientAnalyticsPage({
@@ -61,7 +61,7 @@ export default function ClientAnalyticsPage({
         if (usersError) {
           console.error(
             "Error al obtener usuarios de la entidad:",
-            usersError.message
+            usersError.message,
           );
 
           setError("No se pudieron obtener los usuarios de la entidad.");
@@ -98,7 +98,7 @@ export default function ClientAnalyticsPage({
           ...new Set(
             registros
               .map((r) => (r.usuario_email || "").toLowerCase())
-              .filter(Boolean)
+              .filter(Boolean),
           ),
         ].sort();
 
@@ -139,9 +139,10 @@ export default function ClientAnalyticsPage({
   const dentroDeRango = (fecha) => {
     if (rangoMesInvalido) return false;
 
-    const ym = `${fecha.getFullYear()}-${String(
-      fecha.getMonth() + 1
-    ).padStart(2, "0")}`;
+    const ym = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(
+      2,
+      "0",
+    )}`;
 
     if (fechaDesdeGraf && ym < fechaDesdeGraf) return false;
     if (fechaHastaGraf && ym > fechaHastaGraf) return false;
@@ -156,7 +157,7 @@ export default function ClientAnalyticsPage({
       ? historico.filter(
           (r) =>
             (r.usuario_email || "").toLowerCase() ===
-            selectedUser.toLowerCase()
+            selectedUser.toLowerCase(),
         )
       : historico;
 
@@ -173,7 +174,7 @@ export default function ClientAnalyticsPage({
       if (Number.isNaN(fecha.getTime())) return;
 
       const key = `${fecha.getFullYear()}-${String(
-        fecha.getMonth() + 1
+        fecha.getMonth() + 1,
       ).padStart(2, "0")}`;
 
       if (!grupos[key]) {
@@ -212,7 +213,7 @@ export default function ClientAnalyticsPage({
       if (Number.isNaN(fecha.getTime())) return;
 
       const key = `${fecha.getFullYear()}-${String(
-        fecha.getMonth() + 1
+        fecha.getMonth() + 1,
       ).padStart(2, "0")}`;
 
       if (!grupos[key]) {
@@ -242,10 +243,7 @@ export default function ClientAnalyticsPage({
       conteo[email] = (conteo[email] || 0) + 1;
     });
 
-    const totalGlobal = Object.values(conteo).reduce(
-      (acc, v) => acc + v,
-      0
-    );
+    const totalGlobal = Object.values(conteo).reduce((acc, v) => acc + v, 0);
 
     return Object.entries(conteo)
       .sort(([, a], [, b]) => b - a)
@@ -264,7 +262,7 @@ export default function ClientAnalyticsPage({
       ? historico.filter(
           (r) =>
             (r.usuario_email || "").toLowerCase() ===
-            selectedUser.toLowerCase()
+            selectedUser.toLowerCase(),
         )
       : historico;
 
@@ -294,18 +292,18 @@ export default function ClientAnalyticsPage({
 
     if (fechaDesdeGraf && !fechaHastaGraf) {
       return `Rango de fechas del gráfico: desde ${formatMonth(
-        fechaDesdeGraf
+        fechaDesdeGraf,
       )}`;
     }
 
     if (!fechaDesdeGraf && fechaHastaGraf) {
       return `Rango de fechas del gráfico: hasta ${formatMonth(
-        fechaHastaGraf
+        fechaHastaGraf,
       )}`;
     }
 
     return `Rango de fechas del gráfico: ${formatMonth(
-      fechaDesdeGraf
+      fechaDesdeGraf,
     )} a ${formatMonth(fechaHastaGraf)}`;
   };
 
@@ -357,11 +355,11 @@ export default function ClientAnalyticsPage({
 
       if (cambio > 10) {
         tendenciaTexto = `Tendencia: en aumento (+${cambio.toFixed(
-          1
+          1,
         )}% vs. 3 meses previos)`;
       } else if (cambio < -10) {
         tendenciaTexto = `Tendencia: en descenso (${cambio.toFixed(
-          1
+          1,
         )}% vs. 3 meses previos)`;
       } else {
         tendenciaTexto = "Tendencia: relativamente estable (±10%)";
@@ -375,15 +373,15 @@ export default function ClientAnalyticsPage({
       {
         label: "Total de consultas",
         data: serie.map((p) => p.total),
-        borderColor: "#1e3a5f",
+        borderColor: "#285c4d",
         backgroundColor: "rgba(30, 58, 95, 0.16)",
         tension: 0.25,
       },
       {
         label: "Consultas con coincidencias",
         data: serie.map((p) => p.conMatch),
-        borderColor: "#9f1239",
-        backgroundColor: "rgba(159, 18, 57, 0.14)",
+        borderColor: "#7d9461",
+        backgroundColor: "rgba(125, 148, 97, 0.14)",
         tension: 0.25,
       },
       ...(selectedUser
@@ -405,6 +403,7 @@ export default function ClientAnalyticsPage({
   };
 
   const chartOptions = {
+    animation: false,
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -499,13 +498,11 @@ export default function ClientAnalyticsPage({
           <h2>Análisis histórico de consultas</h2>
 
           <p className={styles.userEmail}>
-            Entidad:{" "}
-            <strong>{clienteNombre || "No identificada"}</strong>
+            Entidad: <strong>{clienteNombre || "No identificada"}</strong>
           </p>
 
           <p className={styles.userEmail}>
-            Registros históricos cargados:{" "}
-            <strong>{historico.length}</strong>
+            Registros históricos cargados: <strong>{historico.length}</strong>
           </p>
         </div>
 
@@ -535,6 +532,20 @@ export default function ClientAnalyticsPage({
 
       {!loading && !error && (
         <>
+          <div className={styles.analyticsStats}>
+            <div>
+              <span>Consultas del período</span>
+              <strong>{totalActual.toLocaleString("es-BO")}</strong>
+            </div>
+            <div>
+              <span>Con coincidencias</span>
+              <strong>{totalConMatch.toLocaleString("es-BO")}</strong>
+            </div>
+            <div>
+              <span>Promedio por mes activo</span>
+              <strong>{promedioPorMes.toFixed(1)}</strong>
+            </div>
+          </div>
           <div className={styles.reportFilters}>
             <div className={styles.filterGroup}>
               <label htmlFor="usuarioHistorico">Usuario</label>
@@ -556,36 +567,25 @@ export default function ClientAnalyticsPage({
             </div>
 
             <div className={styles.filterGroup}>
-              <label>Rango mensual del gráfico</label>
-
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  flexWrap: "wrap",
-                }}
-              >
-                <input
-                  type="month"
-                  value={fechaDesdeGraf}
-                  onChange={(e) => setFechaDesdeGraf(e.target.value)}
-                  className={styles.filterInput}
-                  aria-label="Mes inicial del gráfico"
-                />
-
-                <span style={{ color: "#64748b", fontSize: 13 }}>a</span>
-
-                <input
-                  type="month"
-                  value={fechaHastaGraf}
-                  onChange={(e) => setFechaHastaGraf(e.target.value)}
-                  className={styles.filterInput}
-                  aria-label="Mes final del gráfico"
-                />
-              </div>
+              <label htmlFor="month-from">Mes desde</label>
+              <input
+                id="month-from"
+                type="month"
+                value={fechaDesdeGraf}
+                onChange={(e) => setFechaDesdeGraf(e.target.value)}
+                className={styles.filterInput}
+              />
             </div>
-
+            <div className={styles.filterGroup}>
+              <label htmlFor="month-to">Mes hasta</label>
+              <input
+                id="month-to"
+                type="month"
+                value={fechaHastaGraf}
+                onChange={(e) => setFechaHastaGraf(e.target.value)}
+                className={styles.filterInput}
+              />
+            </div>
             <div className={styles.filterActions}>
               <button
                 type="button"
@@ -682,7 +682,7 @@ export default function ClientAnalyticsPage({
                     const picoEntidad = serieGlobal.reduce(
                       (best, curr) =>
                         !best || curr.total > best.total ? curr : best,
-                      null
+                      null,
                     );
 
                     const picoUsuario =
@@ -690,7 +690,7 @@ export default function ClientAnalyticsPage({
                         ? serie.reduce(
                             (best, curr) =>
                               !best || curr.total > best.total ? curr : best,
-                            null
+                            null,
                           )
                         : null;
 

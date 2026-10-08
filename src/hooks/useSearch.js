@@ -82,6 +82,7 @@ export function useSearch() {
       }
 
       setResults(safeData);
+      return true;
     } catch (err) {
       console.error("Error en la búsqueda:", err);
 
@@ -90,6 +91,7 @@ export function useSearch() {
       );
 
       resetSearchState();
+      return false;
     } finally {
       setLoading(false);
     }

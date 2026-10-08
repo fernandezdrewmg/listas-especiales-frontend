@@ -1,0 +1,370 @@
+.root {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  background: #fff;
+}
+.brandPanel {
+  background: #102b31;
+  color: #fff;
+  padding: 42px 10%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.brand > span {
+  border: 1px solid #476267;
+  border-radius: 12px;
+  width: 45px;
+  height: 45px;
+  display: grid;
+  place-items: center;
+  color: #a8d2c4;
+}
+.brand strong {
+  display: block;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+}
+.brand small {
+  display: block;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  color: #95b2b5;
+  margin-top: 5px;
+}
+.brandContent {
+  margin: auto 0;
+  padding: 58px 0;
+  max-width: 480px;
+}
+.eyebrow {
+  color: #a3cabc;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  margin: 0 0 20px;
+}
+.brandContent h1 {
+  font-size: clamp(32px, 3.4vw, 51px);
+  font-weight: 500;
+  line-height: 1.16;
+  letter-spacing: -0.045em;
+  margin: 0 0 24px;
+}
+.brandContent em {
+  color: #a3cabc;
+  font-style: normal;
+}
+.intro {
+  font-size: 14px;
+  line-height: 1.8;
+  color: #b4c7c8;
+  max-width: 400px;
+}
+.illustration {
+  margin: 38px 0 28px;
+  padding: 20px;
+  background: #1b373d;
+  border: 1px solid #3b555a;
+  border-radius: 14px;
+  transform: rotate(-1.5deg);
+  box-shadow: 0 20px 60px #061c2525;
+}
+.illustrationTop {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #a7bfc1;
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  margin-bottom: 19px;
+}
+.illustrationTop > svg {
+  margin-left: auto;
+}
+.miniDots {
+  display: flex;
+  gap: 4px;
+}
+.miniDots i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #748f93;
+}
+.mockSearch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background: #27434a;
+  border: 1px solid #456168;
+  color: #ccdedc;
+  border-radius: 7px;
+  font-size: 11px;
+  margin-bottom: 9px;
+}
+.mockSearch > svg:last-child {
+  margin-left: auto;
+}
+.mockRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 3px 7px;
+}
+.mockRow > svg {
+  margin-left: auto;
+  color: #a3cabc;
+}
+.mockRow strong {
+  font-size: 11px;
+  font-weight: 500;
+}
+.mockRow div span {
+  display: block;
+  font-size: 10px;
+  color: #a0b8b9;
+  margin-top: 5px;
+}
+.mockIcon {
+  display: grid;
+  place-items: center;
+  width: 33px;
+  height: 33px;
+  background: #29474c;
+  border-radius: 8px;
+  color: #a8cfc2;
+}
+.features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  font-size: 10px;
+  color: #c3d7d2;
+}
+.features span {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+}
+.brandFooter {
+  font-size: 10px;
+  color: #90aeb0;
+  letter-spacing: 0.06em;
+  margin: 0;
+}
+.accessPanel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 48px;
+  position: relative;
+}
+.accessCard {
+  width: 100%;
+  max-width: 365px;
+  padding: 35px 0;
+}
+.accessBrand {
+  width: 144px;
+  height: 96px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #dfe6e5;
+  border-radius: 12px;
+  color: #285b50;
+  margin-bottom: 36px;
+}
+.accessBrand img {
+  width: 100%;
+  height: 100%;
+  max-width: 120px;
+  max-height: 78px;
+  object-fit: contain;
+}
+.accessEyebrow {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  color: #59756c;
+  margin: 0 0 12px;
+}
+.accessCard h2 {
+  font-size: 29px;
+  font-weight: 600;
+  letter-spacing: -1px;
+  color: #193238;
+  margin: 0 0 10px;
+}
+.accessIntro {
+  color: #6b7c81;
+  font-size: 14px;
+  margin-bottom: 34px;
+}
+.accessCard label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #334b51;
+  margin: 22px 0 9px;
+}
+.accessCard input {
+  width: 100%;
+  height: 47px;
+  border: 1px solid #d7dfdf;
+  border-radius: 7px;
+  background: #fff;
+  font-size: 13px;
+  padding: 12px 14px;
+  color: #193238;
+  transition: border-color 0.15s;
+}
+.accessCard input:focus {
+  border-color: #3c7969;
+  outline: 3px solid #3c796918;
+}
+.accessCard input::placeholder {
+  color: #89969b;
+}
+.passwordField {
+  position: relative;
+}
+.passwordField input {
+  padding-right: 48px;
+}
+.passwordField button {
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  width: 40px;
+  height: 39px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 5px;
+  color: #738489;
+  background: transparent;
+}
+.passwordField button:hover {
+  color: #244d44;
+  background: #f1f5f3;
+}
+.submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  width: 100%;
+  border: 0;
+  border-radius: 7px;
+  background: #214f46;
+  color: #fff;
+  height: 47px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: 28px;
+}
+.submit:hover {
+  background: #183f36;
+}
+.submit:disabled {
+  opacity: 0.65;
+}
+.securityNote {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  border-top: 1px solid #e7eceb;
+  margin-top: 28px;
+  padding-top: 20px;
+  color: #7a8b8c;
+}
+.securityNote p {
+  font-size: 11px;
+  line-height: 1.7;
+  margin: 0;
+}
+.securityNote svg {
+  flex-shrink: 0;
+}
+.accessFooter {
+  position: absolute;
+  bottom: 24px;
+  font-size: 10px;
+  color: #8a989c;
+}
+.error {
+  border: 1px solid #ebcdc7;
+  color: #a14735;
+  background: #fff7f5;
+  border-radius: 7px;
+  padding: 12px;
+  font-size: 12px;
+}
+@media (max-width: 850px) {
+  .brandPanel {
+    padding: 30px 7%;
+  }
+  .brandContent {
+    padding: 40px 0;
+  }
+  .features {
+    gap: 10px;
+  }
+  .accessPanel {
+    padding: 32px;
+  }
+  .illustration {
+    padding: 14px;
+  }
+}
+@media (max-width: 680px) {
+  .root {
+    grid-template-columns: 1fr;
+  }
+  .brandPanel {
+    padding: 24px;
+  }
+  .brandContent,
+  .brandFooter {
+    display: none;
+  }
+  .brand strong {
+    font-size: 15px;
+  }
+  .accessPanel {
+    padding: 24px 28px 65px;
+  }
+  .accessCard {
+    padding: 12px 0 25px;
+  }
+  .accessBrand {
+    margin: 8px 0 24px;
+  }
+  .accessCard h2 {
+    font-size: 27px;
+  }
+  .accessFooter {
+    bottom: 20px;
+  }
+}
+
+.brand > span {
+  padding: 3px;
+  background: #fff;
+}
+.brand > span img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}

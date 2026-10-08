@@ -1,5 +1,5 @@
 // src/components/SearchPage.js
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "../supabaseClient";
 import styles from "./SearchPage.module.css";
 import { useSearch } from "../hooks/useSearch";
@@ -8,52 +8,14 @@ import SearchResultsTable from "./SearchResultsTable";
 import GlobalSummaryDisplay from "./GlobalSummaryDisplay";
 import ReportPage from "./ReportPage";
 import ClientAnalyticsPage from "./ClientAnalyticsPage";
-
-function SummaryTable({ summary, total }) {
-  return (
-    <div className={styles.summaryTableWrapper}>
-      <h3 className={styles.sectionTitle}>Resumen de coincidencias</h3>
-
-      <table className={styles.summaryTable}>
-        <thead>
-          <tr>
-            <th className={styles.summaryTableTh}>Código / Lista</th>
-            <th className={styles.summaryTableTh}>Registros</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {Object.entries(summary).map(([codigo, count]) => (
-            <tr key={codigo}>
-              <td className={styles.summaryTableTd}>{codigo}</td>
-              <td
-                className={`${styles.summaryTableTd} ${styles.numericCell}`}
-              >
-                {count}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-
-        <tfoot>
-          <tr>
-            <td className={styles.summaryTableTd}>
-              <strong>Total</strong>
-            </td>
-            <td
-              className={`${styles.summaryTableTd} ${styles.numericCell}`}
-            >
-              <strong>{total}</strong>
-            </td>
-          </tr>
-        </tfoot>
-      </table>
-    </div>
-  );
-}
+import Icon from "./Icon";
+import BrandLogo from "./BrandLogo";
 
 export default function SearchPage({ onLogout }) {
   const [term, setTerm] = useState("");
+  const [submittedTerm, setSubmittedTerm] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const searchRef = useRef(null);
   const [fechaActual, setFechaActual] = useState("");
   const [usuarioEmail, setUsuarioEmail] = useState("");
   const [clienteNombre, setClienteNombre] = useState("");
@@ -83,34 +45,37 @@ export default function SearchPage({ onLogout }) {
 
   const totalCoincidencias = Object.values(summaryData || {}).reduce(
     (acc, val) => acc + val,
-    0
+    0,
   );
 
-  const getTituloVista = () => {
-    if (view === "report") return "Reporte de consultas";
-    if (view === "analytics") return "Análisis histórico";
-    return "Consulta en Listas Especiales";
+  const views = {
+    search: {
+      title: "Consultas",
+      description: "Información relevante para decisiones con respaldo.",
+    },
+    coverage: {
+      title: "Cobertura de listas",
+      description:
+        "Conozca la composición y actualización de su base de consulta.",
+    },
+    report: {
+      title: "Reportes",
+      description: "Consulte, filtre y exporte la actividad de su entidad.",
+    },
+    analytics: {
+      title: "Análisis histórico",
+      description: "Una visión de la actividad y las tendencias de su entidad.",
+    },
   };
-
-  const getTextoBotonReporte = () => {
-    if (view === "report") return "Volver a búsqueda";
-    if (view === "analytics") return "Volver al reporte";
-    return "Ver reporte";
+  const activeView =
+    !puedeVerReporte && ["report", "analytics"].includes(view)
+      ? "search"
+      : view;
+  const navigate = (next) => {
+    setView(next);
+    setMenuOpen(false);
   };
-
-  const handleToggleReporte = () => {
-    if (view === "report") {
-      setView("search");
-      return;
-    }
-
-    if (view === "analytics") {
-      setView("report");
-      return;
-    }
-
-    setView("report");
-  };
+  const number = (value) => new Intl.NumberFormat("es-BO").format(value);
 
   // Fecha actual
   useEffect(() => {
@@ -184,7 +149,7 @@ export default function SearchPage({ onLogout }) {
         0,
         23,
         59,
-        59
+        59,
       );
 
       const inicioISO = inicioMes.toISOString();
@@ -217,7 +182,7 @@ export default function SearchPage({ onLogout }) {
             hour: "2-digit",
             minute: "2-digit",
             second: "2-digit",
-          })
+          }),
         );
       } else {
         setUltimaConsulta(null);
@@ -241,24 +206,25 @@ export default function SearchPage({ onLogout }) {
         setShowInactivityWarning(true);
       }, 90 * 1000);
 
-      logoutTimeoutId = setTimeout(() => {
-        supabase.auth.signOut().then(() => {
-          onLogout();
-        });
-      }, 2 * 60 * 1000);
+      logoutTimeoutId = setTimeout(
+        () => {
+          supabase.auth.signOut().then(() => {
+            onLogout();
+          });
+        },
+        2 * 60 * 1000,
+      );
     };
 
     const eventos = ["mousemove", "keydown", "scroll", "click"];
 
-    eventos.forEach((evento) =>
-      window.addEventListener(evento, resetTimers)
-    );
+    eventos.forEach((evento) => window.addEventListener(evento, resetTimers));
 
     resetTimers();
 
     return () => {
       eventos.forEach((evento) =>
-        window.removeEventListener(evento, resetTimers)
+        window.removeEventListener(evento, resetTimers),
       );
 
       clearTimeout(warningTimeoutId);
@@ -270,10 +236,12 @@ export default function SearchPage({ onLogout }) {
   const handleSearch = async (e) => {
     e.preventDefault();
 
-    if (criterioActual === "" || !usuarioEmail || loading) return;
+    if (criterioActual === "" || !usuarioEmail || loading || pendingRegister)
+      return;
 
-    await executeSearch(criterioActual);
-    setPendingRegister(true);
+    setSubmittedTerm(criterioActual);
+    const succeeded = await executeSearch(criterioActual);
+    if (succeeded) setPendingRegister(true);
   };
 
   // Registrar búsqueda
@@ -281,11 +249,11 @@ export default function SearchPage({ onLogout }) {
     if (pendingRegister && summaryData && usuarioEmail) {
       const totalCoincidenciasLocal = Object.values(summaryData).reduce(
         (acc, val) => acc + val,
-        0
+        0,
       );
 
       const fechaBolivia = new Date(
-        Date.now() - 4 * 60 * 60 * 1000
+        Date.now() - 4 * 60 * 60 * 1000,
       ).toISOString();
 
       let fuenteResumen = null;
@@ -307,7 +275,7 @@ export default function SearchPage({ onLogout }) {
             .insert([
               {
                 usuario_email: usuarioEmail.toLowerCase(),
-                criterio: term.trim(),
+                criterio: submittedTerm,
                 cantidad_resultados: totalCoincidenciasLocal,
                 fuente: fuenteResumen,
                 fecha: fechaBolivia,
@@ -317,16 +285,13 @@ export default function SearchPage({ onLogout }) {
           if (insertError) {
             console.error(
               "❌ Error al registrar búsqueda:",
-              insertError.message
+              insertError.message,
             );
           } else {
             console.log("✅ Búsqueda registrada en Supabase");
           }
         } catch (err) {
-          console.error(
-            "⚠️ Error inesperado al registrar búsqueda:",
-            err
-          );
+          console.error("⚠️ Error inesperado al registrar búsqueda:", err);
         }
 
         setPendingRegister(false);
@@ -334,7 +299,7 @@ export default function SearchPage({ onLogout }) {
 
       registrarBusqueda();
     }
-  }, [summaryData, pendingRegister, usuarioEmail, term, results]);
+  }, [summaryData, pendingRegister, usuarioEmail, submittedTerm, results]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -342,187 +307,365 @@ export default function SearchPage({ onLogout }) {
   };
 
   return (
-    <div className={styles.container}>
-      {showInactivityWarning && (
-        <div className={styles.inactivityWarning}>
-          <p>
-            <strong>Sesión por cerrarse.</strong>
-          </p>
-          <p>
-            Por seguridad, la sesión se cerrará en 30 segundos por inactividad.
-          </p>
-          <p>Mueva el mouse o presione una tecla para continuar.</p>
+    <div className={styles.appShell}>
+      <a href="#main-content" className={styles.skipLink}>
+        Ir al contenido
+      </a>
+      <aside className={styles.sidebar} aria-label="Navegación principal">
+        <div className={styles.brand}>
+          <span className={styles.brandMark}>
+            <BrandLogo />
+          </span>
+          <div>
+            <strong>Listas Especiales</strong>
+            <span>INTELIGENCIA Y CONTROL</span>
+          </div>
+          <button
+            className={styles.menuToggle}
+            aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"}
+            aria-expanded={menuOpen}
+            aria-controls="workspace-navigation"
+            onClick={() => setMenuOpen(!menuOpen)}
+          >
+            <Icon name={menuOpen ? "close" : "menu"} />
+          </button>
         </div>
-      )}
-
-      <div className={styles.header}>
-        <div className={styles.headerLeft}>
-          <div className={styles.logoTitleWrapper}>
-            <div className={styles.logoBox}>
-              {logoUrl && (
-                <img
-                  src={logoUrl}
-                  alt={`Logo de ${clienteNombre || "la entidad"}`}
-                  className={styles.logoCliente}
-                  onError={(e) => {
-                    e.currentTarget.style.display = "none";
-                  }}
-                />
-              )}
-            </div>
-
+        <div
+          id="workspace-navigation"
+          className={menuOpen ? styles.navigationOpen : styles.navigation}
+        >
+          <p className={styles.navLabel}>ESPACIO DE TRABAJO</p>
+          <nav className={styles.navList}>
+            <button
+              className={
+                activeView === "search" ? styles.navActive : styles.navItem
+              }
+              aria-current={activeView === "search" ? "page" : undefined}
+              onClick={() => navigate("search")}
+            >
+              <Icon name="search" />
+              Consultas
+              <Icon name="chevron" size={14} />
+            </button>
+            <button
+              className={
+                activeView === "coverage" ? styles.navActive : styles.navItem
+              }
+              aria-current={activeView === "coverage" ? "page" : undefined}
+              onClick={() => navigate("coverage")}
+            >
+              <Icon name="database" />
+              Cobertura de listas
+            </button>
+            {puedeVerReporte && (
+              <>
+                <p className={styles.navLabel}>GESTIÓN Y SEGUIMIENTO</p>
+                <button
+                  className={
+                    activeView === "report" ? styles.navActive : styles.navItem
+                  }
+                  aria-current={activeView === "report" ? "page" : undefined}
+                  onClick={() => navigate("report")}
+                >
+                  <Icon name="report" />
+                  Reportes
+                </button>
+                <button
+                  className={
+                    activeView === "analytics"
+                      ? styles.navActive
+                      : styles.navItem
+                  }
+                  aria-current={activeView === "analytics" ? "page" : undefined}
+                  onClick={() => navigate("analytics")}
+                >
+                  <Icon name="chart" />
+                  Análisis histórico
+                </button>
+              </>
+            )}
+          </nav>
+          <div className={styles.sidebarNote}>
+            <Icon name="shield" size={22} />
+            <strong>Su espacio de consulta</strong>
+            <p>
+              Información centralizada para apoyar la debida diligencia de su
+              entidad.
+            </p>
+          </div>
+          <div className={styles.profile}>
+            <span className={styles.avatar}>
+              {usuarioEmail ? usuarioEmail.slice(0, 2).toUpperCase() : "…"}
+            </span>
             <div>
-              <h2>{getTituloVista()}</h2>
-
-              <p className={styles.updateDateText}>
-                Base de datos actualizada al:{" "}
-                <strong>{globalLastUpdateDate || "Cargando..."}</strong>
-              </p>
-
-              <p className={styles.userEmail}>
-                Entidad:{" "}
-                <strong>{clienteNombre || "No identificada"}</strong>
-              </p>
-
-              <p className={styles.userEmail}>
-                Usuario: <strong>{usuarioEmail || "Validando..."}</strong>
-              </p>
-
-              {/* Métricas visibles solo en pantalla */}
-              <div className={styles.noPrint}>
-                <p className={styles.userEmail}>
-                  Consultas realizadas en el mes actual:{" "}
-                  <strong>{consultasMesActual}</strong>
-                </p>
-
-                <p className={styles.userEmail}>
-                  Última consulta registrada:{" "}
-                  <strong>{ultimaConsulta || "N/D"}</strong>
-                </p>
-              </div>
+              <strong>{clienteNombre || "Cargando entidad…"}</strong>
+              <span title={usuarioEmail}>
+                {usuarioEmail || "Validando usuario…"}
+              </span>
+              <small>
+                {puedeVerReporte ? "Consultas y reportes" : "Consultas"}
+              </small>
             </div>
           </div>
-        </div>
-
-        <div className={styles.headerRight}>
-          <p className={styles.currentDateText}>
-            Fecha actual: <strong>{fechaActual}</strong>
-          </p>
-
-          {puedeVerReporte && (
-            <button
-              type="button"
-              onClick={handleToggleReporte}
-              className={styles.reportButton}
-            >
-              {getTextoBotonReporte()}
-            </button>
-          )}
-
-          <button
-            type="button"
-            onClick={handleLogout}
-            className={styles.logoutButton}
-          >
+          <button className={styles.signOut} onClick={handleLogout}>
+            <Icon name="logout" size={18} />
             Cerrar sesión
           </button>
         </div>
-      </div>
-
-      {view === "report" ? (
-        <ReportPage
-          cliente={clienteCodigo}
-          logoUrl={logoUrl}
-          clienteNombre={clienteNombre}
-          puedeVerReporte={puedeVerReporte}
-          onOpenAnalytics={() => setView("analytics")}
-        />
-      ) : view === "analytics" ? (
-        <ClientAnalyticsPage
-          cliente={clienteCodigo}
-          clienteNombre={clienteNombre}
-          onBackToReport={() => setView("report")}
-        />
-      ) : (
-        <>
-          <form onSubmit={handleSearch} className={styles.form}>
-            <input
-              id="searchTerm"
-              type="text"
-              value={term}
-              onChange={(e) => setTerm(e.target.value)}
-              placeholder="Ingrese nombre, apellido o denominación a consultar..."
-              className={styles.searchInput}
-              aria-label="Ingrese nombre, apellido o denominación para consultar en listas especiales"
+      </aside>
+      <div className={styles.workspace}>
+        <header className={styles.topbar}>
+          <div className={styles.breadcrumb}>
+            Espacio de trabajo <Icon name="chevron" size={13} />
+            <strong>{views[activeView].title}</strong>
+          </div>
+          <div className={styles.topbarEntity}>
+            <BrandLogo
+              src={logoUrl}
+              alt={`Logo de ${clienteNombre || "la entidad"}`}
+              className={styles.entityLogo}
             />
-
-            <button
-              type="submit"
-              className={styles.searchButton}
-              disabled={loading || criterioActual === "" || !usuarioEmail}
-            >
-              {loading ? "Consultando..." : "Buscar"}
-            </button>
-          </form>
-
-          {criterioActual !== "" && (
-            <p className={styles.searchTermDisplay}>
-              <strong>Criterio de búsqueda:</strong> {criterioActual}
-            </p>
+            <span>{clienteNombre || "Listas Especiales"}</span>
+            <span className={styles.sessionBadge}>
+              <i />
+              Sesión activa
+            </span>
+          </div>
+        </header>
+        <main id="main-content" className={styles.container} tabIndex={-1}>
+          {showInactivityWarning && (
+            <div className={styles.inactivityWarning} role="alert">
+              <Icon name="clock" />
+              <div>
+                <strong>Su sesión está por cerrarse</strong>
+                <p>
+                  Quedan 30 segundos por inactividad. Mueva el mouse o presione
+                  una tecla para continuar.
+                </p>
+              </div>
+            </div>
           )}
-
-          <GlobalSummaryDisplay
-            summary={globalSummary}
-            total={globalTotal}
-            loading={globalLoading}
-            error={globalError}
-            lastUpdateDate={globalLastUpdateDate}
-          />
-
-          {results.length > 0 && (
-            <SummaryTable
-              summary={summaryData}
-              total={totalCoincidencias}
+          <div className={styles.pageHeading}>
+            <div>
+              <p className={styles.eyebrow}>PLATAFORMA DE DEBIDA DILIGENCIA</p>
+              <h1>{views[activeView].title}</h1>
+              <p>{views[activeView].description}</p>
+            </div>
+            <span className={styles.dateLabel}>
+              <Icon name="clock" size={16} />
+              {fechaActual}
+            </span>
+          </div>
+          {activeView === "report" && puedeVerReporte ? (
+            <ReportPage
+              cliente={clienteCodigo}
+              logoUrl={logoUrl}
+              clienteNombre={clienteNombre}
+              puedeVerReporte={puedeVerReporte}
+              onOpenAnalytics={() => navigate("analytics")}
             />
-          )}
-
-          {loading && (
-            <p className={styles.loading}>
-              Consultando listas especiales. Espere un momento...
-            </p>
-          )}
-
-          {error && <p className={styles.error}>{error}</p>}
-
-          {results.length > 0 && (
+          ) : activeView === "analytics" && puedeVerReporte ? (
+            <ClientAnalyticsPage
+              cliente={clienteCodigo}
+              clienteNombre={clienteNombre}
+              onBackToReport={() => navigate("report")}
+            />
+          ) : activeView === "coverage" ? (
+            <GlobalSummaryDisplay
+              summary={globalSummary}
+              total={globalTotal}
+              loading={globalLoading}
+              error={globalError}
+              lastUpdateDate={globalLastUpdateDate}
+            />
+          ) : (
             <>
-              <h3 className={styles.sectionTitle}>
-                Detalle de coincidencias ordenadas por relevancia
-              </h3>
-
-              <SearchResultsTable results={results} />
+              <div className={styles.statGrid}>
+                <div className={styles.statCard}>
+                  <span className={styles.statIcon}>
+                    <Icon name="database" />
+                  </span>
+                  <span>Registros en la base</span>
+                  <strong>
+                    {globalLoading
+                      ? "—"
+                      : globalError
+                        ? "N/D"
+                        : number(globalTotal)}
+                  </strong>
+                  <small>
+                    {globalLoading
+                      ? "Cargando cobertura"
+                      : globalError
+                        ? "Base no disponible"
+                        : number(globalSummary.length) + " listas disponibles"}
+                  </small>
+                </div>
+                <div className={styles.statCard}>
+                  <span className={styles.statIcon}>
+                    <Icon name="search" />
+                  </span>
+                  <span>Mis consultas del mes</span>
+                  <strong>{number(consultasMesActual)}</strong>
+                  <small>Actividad de su usuario</small>
+                </div>
+                <div className={styles.statCard}>
+                  <span className={styles.statIcon}>
+                    <Icon name="clock" />
+                  </span>
+                  <span>Última consulta registrada</span>
+                  <strong className={styles.statDate}>
+                    {ultimaConsulta || "Sin actividad"}
+                  </strong>
+                  <small>Registro de su usuario</small>
+                </div>
+              </div>
+              <section
+                className={styles.searchPanel}
+                aria-labelledby="search-heading"
+              >
+                <div className={styles.panelHeading}>
+                  <div>
+                    <span className={styles.eyebrow}>CONSULTA INDIVIDUAL</span>
+                    <h2 id="search-heading">¿A quién desea consultar?</h2>
+                    <p>
+                      Ingrese un nombre, apellido o denominación para buscar
+                      coincidencias.
+                    </p>
+                  </div>
+                  <span className={styles.panelEmblem}>
+                    <Icon name="search" size={28} />
+                  </span>
+                </div>
+                <form onSubmit={handleSearch} className={styles.form}>
+                  <label className={styles.searchField} htmlFor="searchTerm">
+                    <Icon name="search" />
+                    <span className={styles.srOnly}>
+                      Nombre, apellido o denominación
+                    </span>
+                    <input
+                      ref={searchRef}
+                      id="searchTerm"
+                      type="search"
+                      value={term}
+                      onChange={(e) => setTerm(e.target.value)}
+                      placeholder="Escriba un nombre o denominación…"
+                      autoComplete="off"
+                      disabled={loading || pendingRegister}
+                    />
+                  </label>
+                  <button
+                    type="submit"
+                    className={styles.searchButton}
+                    disabled={
+                      loading ||
+                      pendingRegister ||
+                      criterioActual === "" ||
+                      !usuarioEmail
+                    }
+                  >
+                    {loading ? "Consultando…" : "Buscar coincidencias"}
+                    <Icon name="arrow" size={17} />
+                  </button>
+                </form>
+                <div className={styles.searchMeta}>
+                  <span>
+                    <Icon name="clock" size={14} />
+                    Actualización de la base:{" "}
+                    <strong>{globalLastUpdateDate || "Cargando…"}</strong>
+                  </span>
+                  <button
+                    type="button"
+                    className={styles.textButton}
+                    onClick={() => navigate("coverage")}
+                  >
+                    Ver cobertura
+                    <Icon name="arrow" size={14} />
+                  </button>
+                </div>
+              </section>
+              {loading ? (
+                <div className={styles.emptyState} role="status">
+                  <span className={styles.spinner} />
+                  <h3>Consultando listas especiales</h3>
+                  <p>Estamos buscando coincidencias para “{submittedTerm}”.</p>
+                </div>
+              ) : error ? (
+                <div className={styles.error} role="alert">
+                  {error}
+                </div>
+              ) : submittedTerm ? (
+                <section
+                  className={styles.resultsSection}
+                  aria-label="Resultados de la consulta"
+                >
+                  <div className={styles.resultHeading}>
+                    <div>
+                      <p className={styles.eyebrow}>RESULTADO DE LA CONSULTA</p>
+                      <h2>
+                        {number(totalCoincidencias)}{" "}
+                        {totalCoincidencias === 1
+                          ? "coincidencia"
+                          : "coincidencias"}
+                      </h2>
+                      <p>
+                        Criterio consultado: <strong>{submittedTerm}</strong>
+                      </p>
+                    </div>
+                    <span className={styles.resultBadge}>
+                      {Object.keys(summaryData).length} listas con resultados
+                    </span>
+                  </div>
+                  {results.length > 0 ? (
+                    <SearchResultsTable results={results} />
+                  ) : (
+                    <div className={styles.emptyState}>
+                      <span className={styles.emptyIcon}>
+                        <Icon name="check" size={28} />
+                      </span>
+                      <h3>Sin coincidencias</h3>
+                      <p>
+                        No se encontraron registros para el criterio consultado.
+                      </p>
+                      <button
+                        className={styles.textButton}
+                        onClick={() => searchRef.current?.focus()}
+                      >
+                        Consultar otro nombre
+                        <Icon name="arrow" size={15} />
+                      </button>
+                    </div>
+                  )}
+                </section>
+              ) : (
+                <section className={styles.emptyState}>
+                  <span className={styles.emptyIcon}>
+                    <Icon name="search" size={29} />
+                  </span>
+                  <h3>Su próxima consulta empieza aquí</h3>
+                  <p>
+                    Los resultados mostrarán las listas relacionadas,
+                    <br />
+                    el detalle de cada registro y su relevancia.
+                  </p>
+                  <div className={styles.emptySteps}>
+                    <span>01 · Ingrese un criterio</span>
+                    <span>02 · Revise coincidencias</span>
+                    <span>03 · Consulte el detalle</span>
+                  </div>
+                </section>
+              )}
             </>
           )}
-
-          {results.length === 0 &&
-            criterioActual !== "" &&
-            !loading && (
-              <p className={styles.noResults}>
-                No se encontraron coincidencias para el criterio consultado.
-              </p>
-            )}
-
-          {results.length === 0 &&
-            criterioActual === "" &&
-            !loading &&
-            !error && (
-              <p className={styles.noResults}>
-                Ingrese un nombre, apellido o denominación para iniciar la
-                consulta en listas especiales.
-              </p>
-            )}
-        </>
-      )}
+          <footer className={styles.workspaceFooter}>
+            <span>Listas Especiales · Información para decidir</span>
+            <span>
+              <Icon name="lock" size={13} />
+              Acceso institucional
+            </span>
+          </footer>
+        </main>
+      </div>
     </div>
   );
 }

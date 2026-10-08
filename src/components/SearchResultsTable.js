@@ -1,5 +1,5 @@
 // src/components/SearchResultsTable.js
-import React from "react";
+import React, { useState, useEffect } from "react";
 import styles from "./SearchPage.module.css";
 
 const formatHeader = (key) => {
@@ -100,6 +100,23 @@ const formatCellValue = (field, value) => {
 };
 
 function SearchResultsTable({ results }) {
+  const [selectedList, setSelectedList] = useState("");
+  const [selectedRelevance, setSelectedRelevance] = useState("");
+  const [compact, setCompact] = useState(false);
+  useEffect(() => {
+    setSelectedList("");
+    setSelectedRelevance("");
+  }, [results]);
+  const listCode = (row) => String(row.codigo || "Sin Código").trim();
+  const lists = [...new Set((results || []).map(listCode))].sort((a, b) =>
+    a.localeCompare(b, "es"),
+  );
+  const visibleResults = (results || []).filter(
+    (row) =>
+      (!selectedList || listCode(row) === selectedList) &&
+      (!selectedRelevance ||
+        Number(row.relevancia) === Number(selectedRelevance)),
+  );
   if (!results || results.length === 0) {
     return null;
   }
@@ -123,83 +140,127 @@ function SearchResultsTable({ results }) {
   const headers = fieldsToShow.map(formatHeader);
 
   return (
-    <div className={styles.tableResponsive}>
-      <table className={styles.resultsTable}>
-        <thead>
-          <tr>
-            {headers.map((header) => (
-              <th key={header} className={styles.resultsTableTh}>
-                {header}
-              </th>
-            ))}
-          </tr>
-        </thead>
+    <div className={compact ? styles.compact : undefined}>
+      <div className={styles.resultToolbar}>
+        <div className={styles.resultFilters}>
+          <label htmlFor="result-list">
+            Código / Lista
+            <select
+              id="result-list"
+              aria-label="Código / Lista"
+              value={selectedList}
+              onChange={(e) => setSelectedList(e.target.value)}
+            >
+              <option value="">Todas las listas</option>
+              {lists.map((code) => (
+                <option key={code} value={code}>
+                  {code}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label htmlFor="result-relevance">
+            Relevancia
+            <select
+              id="result-relevance"
+              aria-label="Relevancia"
+              value={selectedRelevance}
+              onChange={(e) => setSelectedRelevance(e.target.value)}
+            >
+              <option value="">Todas</option>
+              <option value="3">Alta · Nombre y alias</option>
+              <option value="2">Media · Nombre</option>
+              <option value="1">Referencial · Alias</option>
+            </select>
+          </label>
+          <button
+            type="button"
+            className={styles.densityButton}
+            aria-pressed={compact}
+            onClick={() => setCompact(!compact)}
+          >
+            Vista compacta
+          </button>
+          {(selectedList || selectedRelevance) && (
+            <button
+              type="button"
+              className={styles.textButton}
+              onClick={() => {
+                setSelectedList("");
+                setSelectedRelevance("");
+              }}
+            >
+              Restablecer
+            </button>
+          )}
+        </div>
+        <span role="status">
+          {visibleResults.length} de {results.length} registros
+        </span>
+      </div>
+      <div
+        className={styles.tableResponsive}
+        tabIndex={0}
+        role="region"
+        aria-label="Detalle de coincidencias; desplace horizontalmente para ver todas las columnas"
+      >
+        <table className={styles.resultsTable}>
+          <thead>
+            <tr>
+              {headers.map((header) => (
+                <th key={header} className={styles.resultsTableTh}>
+                  {header}
+                </th>
+              ))}
+            </tr>
+          </thead>
 
-        <tbody>
-          {results.map((row, index) => (
-            <tr key={`${row.nombre_completo || "resultado"}-${index}`}>
-              {fieldsToShow.map((field) => {
-                const value = row[field];
+          <tbody>
+            {visibleResults.map((row, index) => (
+              <tr key={`${row.nombre_completo || "resultado"}-${index}`}>
+                {fieldsToShow.map((field) => {
+                  const value = row[field];
 
-                if (field === "relevancia") {
-                  const relevancia = mostrarRelevancia(value);
+                  if (field === "relevancia") {
+                    const relevancia = mostrarRelevancia(value);
+
+                    return (
+                      <td key={field} className={styles.resultsTableTd}>
+                        <span
+                          className={styles.relevanceBadge}
+                          title={relevancia.detail}
+                          style={{
+                            color: relevancia.color,
+                            background: relevancia.background,
+                            borderColor: relevancia.border,
+                          }}
+                        >
+                          <span aria-hidden="true">●</span>
+                          {relevancia.label}
+                        </span>
+                      </td>
+                    );
+                  }
 
                   return (
                     <td key={field} className={styles.resultsTableTd}>
-                      <span
-                        title={relevancia.detail}
-                        style={{
-                          display: "inline-flex",
-                          flexDirection: "column",
-                          gap: 2,
-                          minWidth: 82,
-                          padding: "6px 8px",
-                          borderRadius: 10,
-                          border: `1px solid ${relevancia.border}`,
-                          background: relevancia.background,
-                          color: relevancia.color,
-                          fontWeight: 800,
-                          lineHeight: 1.15,
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        <span
-                          style={{
-                            fontSize: 11,
-                            letterSpacing: "0.04em",
-                          }}
-                        >
-                          {relevancia.stars}
-                        </span>
-
-                        <span style={{ fontSize: 12 }}>
-                          {relevancia.label}
-                        </span>
-
-                        <span
-                          style={{
-                            fontSize: 10,
-                            fontWeight: 600,
-                            opacity: 0.85,
-                          }}
-                        >
-                          {relevancia.detail}
-                        </span>
-                      </span>
+                      {formatCellValue(field, value)}
                     </td>
                   );
-                }
-
-                return (
-                  <td key={field} className={styles.resultsTableTd}>
-                    {formatCellValue(field, value)}
-                  </td>
-                );
-              })}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+                })}
+              </tr>
+            ))}
+            {visibleResults.length === 0 && (
+              <tr>
+                <td colSpan={fieldsToShow.length}>
+                  No hay coincidencias para estos filtros. Puede restablecerlos
+                  para ver todos los registros.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
