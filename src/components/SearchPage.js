@@ -10,6 +10,7 @@ import ReportPage from "./ReportPage";
 import ClientAnalyticsPage from "./ClientAnalyticsPage";
 import Icon from "./Icon";
 import BrandLogo from "./BrandLogo";
+import PrintSearchSummary from "./PrintSearchSummary";
 
 export default function SearchPage({ onLogout }) {
   const [term, setTerm] = useState("");
@@ -616,6 +617,16 @@ export default function SearchPage({ onLogout }) {
                       {Object.keys(summaryData).length} listas con resultados
                     </span>
                   </div>
+                  <PrintSearchSummary
+                    summary={globalSummary}
+                    matches={summaryData}
+                    loading={globalLoading}
+                    error={globalError}
+                    lastUpdateDate={globalLastUpdateDate}
+                    clienteNombre={clienteNombre}
+                    usuarioEmail={usuarioEmail}
+                    logoUrl={logoUrl}
+                  />
                   {results.length > 0 ? (
                     <SearchResultsTable results={results} />
                   ) : (

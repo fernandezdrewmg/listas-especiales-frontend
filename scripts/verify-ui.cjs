@@ -144,7 +144,12 @@ async function fixture(page, permission) {
     if (url.pathname.endsWith("/logout")) return send({});
     if (url.pathname.endsWith("/buscar_nombres")) {
       searchCount++;
-      return send(records);
+      return send(
+        route.request().postDataJSON()?.termino_busqueda ===
+          "Sin coincidencias de prueba"
+          ? []
+          : records,
+      );
     }
     if (url.pathname.endsWith("/obtener_resumen_global_por_codigo"))
       return send(summary);
@@ -244,6 +249,12 @@ async function assertLayout(page, label) {
     const api = await fixture(page, "sí");
     await page.goto(url);
     await page.getByRole("heading", { name: "Bienvenido de nuevo" }).waitFor();
+    assert.equal(
+      await page
+        .locator('div[class*="LoginPage_illustration__"]')
+        .evaluate((el) => getComputedStyle(el).transform),
+      "none",
+    );
     await page.screenshot({
       path: path.join(output, "login-desktop.png"),
       fullPage: true,
@@ -291,6 +302,75 @@ async function assertLayout(page, label) {
       path: path.join(output, "resultados-desktop.png"),
       fullPage: true,
     });
+    await page.setViewportSize({ width: 704, height: 1000 });
+    const printSummary = page.getByRole("region", {
+      name: "Resumen impreso de listas consultadas",
+    });
+    await page.emulateMedia({ media: "print" });
+    await printSummary.waitFor({ state: "visible" });
+    assert.equal(
+      await printSummary.locator("tbody tr").count(),
+      summary.length,
+    );
+    assert.deepEqual(
+      await printSummary
+        .getByRole("row")
+        .filter({
+          has: page.getByRole("rowheader", { name: "PEP", exact: true }),
+        })
+        .locator("td")
+        .allTextContents(),
+      ["24.580", "1"],
+    );
+    assert.deepEqual(
+      await printSummary
+        .getByRole("row")
+        .filter({
+          has: page.getByRole("rowheader", { name: "SANCIONES", exact: true }),
+        })
+        .locator("td")
+        .allTextContents(),
+      ["410", "0"],
+    );
+    assert.deepEqual(await printSummary.locator("tfoot td").allTextContents(), [
+      "69.570",
+      "3",
+    ]);
+    await assertLayout(page, "consulta impresa en ancho de papel carta");
+    await page.screenshot({
+      path: path.join(output, "consulta-impresion.png"),
+      fullPage: true,
+    });
+    await page.pdf({
+      path: path.join(output, "consulta-impresion.pdf"),
+      format: "Letter",
+    });
+    await page.emulateMedia({ media: "screen" });
+    assert.equal(await printSummary.isVisible(), false);
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await page.getByRole("searchbox").fill("Sin coincidencias de prueba");
+    await page.getByRole("button", { name: "Buscar coincidencias" }).click();
+    await page
+      .getByRole("heading", { name: "Sin coincidencias", exact: true })
+      .waitFor();
+    await page.emulateMedia({ media: "print" });
+    await printSummary.waitFor({ state: "visible" });
+    assert.equal(
+      await printSummary.locator("tbody tr").count(),
+      summary.length,
+    );
+    assert.deepEqual(await printSummary.locator("tfoot td").allTextContents(), [
+      "69.570",
+      "0",
+    ]);
+    await page.pdf({
+      path: path.join(output, "consulta-sin-coincidencias.pdf"),
+      format: "Letter",
+    });
+    await page.emulateMedia({ media: "screen" });
+    await page.getByRole("searchbox").fill("Persona de demostración");
+    await page.getByRole("button", { name: "Buscar coincidencias" }).click();
+    await page.getByText(records[0].nombre_completo, { exact: true }).waitFor();
     await page
       .getByRole("button", { name: "Cobertura de listas", exact: true })
       .click();

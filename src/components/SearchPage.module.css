@@ -1785,3 +1785,81 @@ button:disabled {
     margin-left: auto;
   }
 }
+
+/* Cobertura completa adjunta a la impresión de cada consulta. */
+@media print {
+  .printCoverage {
+    margin: 14px 0 18px;
+    font-size: 10px;
+    color: #222;
+  }
+  .printIdentity {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .printIdentity img {
+    width: 70px;
+    height: 42px;
+    object-fit: contain;
+  }
+  .printIdentity p {
+    margin: 3px 0 0;
+  }
+  .printCoverage h3 {
+    margin: 0 0 7px;
+    font-size: 12px;
+    break-after: avoid;
+  }
+  .printCoverage > p {
+    margin: 6px 0;
+    line-height: 1.5;
+  }
+  .printCoverageTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9px;
+  }
+  .printCoverageTable thead {
+    display: table-header-group;
+  }
+  .printCoverageTable tr {
+    break-inside: avoid;
+  }
+  .printCoverageTable th,
+  .printCoverageTable td {
+    padding: 5px 8px;
+    border: 1px solid #ccc;
+    text-align: right;
+    color: #222;
+  }
+  .printCoverageTable th:first-child {
+    text-align: left;
+  }
+  .printCoverageTable tbody th {
+    font-weight: normal;
+  }
+  .printCoverageTable thead,
+  .printCoverageTable tfoot {
+    background: #f3f5f3;
+    font-weight: bold;
+  }
+  .printCoverageNote {
+    font-size: 8px;
+    color: #555;
+  }
+}
+/* Evita que los anchos mínimos de pantalla recorten columnas en papel carta. */
+@media print {
+  .resultsTable th,
+  .resultsTable td {
+    min-width: 0 !important;
+    overflow-wrap: anywhere !important;
+  }
+  .relevanceBadge {
+    white-space: normal;
+    font-size: 7px;
+    padding: 2px 3px;
+  }
+}
